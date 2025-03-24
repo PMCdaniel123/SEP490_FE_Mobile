@@ -1,6 +1,7 @@
 {
     "conventionalCommits.scopes": [
         "initialProject",
-        "highRateSpace"
+        "highRateSpace",
+        "homePage"
     ]
 }

@@ -1,36 +1,130 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
+import React from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import axios from 'axios';
+
+const highRatedSpaces = [
+  {
+    id: 1,
+    name: 'Workaholic Bàn cá nhân',
+    address: '21A1 Đ Làng Tăng Phú, Tăng Nhơn Phú A, Thủ Đức, Hồ Chí Minh, Việt Nam',
+    googleMapUrl: 'https://www.google.com/maps/place/WORKAHOLIC+CAFE+24%2F7/',
+    description: 'Coffee and workspace Workaholic',
+    capacity: 5,
+    category: 'Bàn cá nhân',
+    status: 'Active',
+    createdAt: '2025-03-24T16:38:43.984Z',
+    updatedAt: '2025-03-24T16:38:43.984Z',
+    cleanTime: 15,
+    rate: 4.6,
+    area: 10,
+    openTime: '00:00:00',
+    closeTime: '23:59:00',
+    is24h: 1,
+    prices: [
+      {
+        id: 1,
+        price: 100,
+        category: 'Giờ',
+      },
+      {
+        id: 2,
+        price: 500,
+        category: 'Ngày',
+      },
+    ],
+    images: [
+      {
+        id: 1,
+        imgUrl: 'https://res.cloudinary.com/dcq99dv8p/image/upload/v1741894818/IMAGES/djgfdgh9elztkr0svfwi.jpg',
+      },
+      {
+        id: 2,
+        imgUrl: 'https://res.cloudinary.com/dcq99dv8p/image/upload/v1741894872/IMAGES/jxr6ekgv5gvlgygbtlly.jpg',
+      },
+    ],
+    facilities: [
+      {
+        id: 1,
+        facilityName: 'Quầy tự phục vụ',
+      },
+      {
+        id: 2,
+        facilityName: 'Tivi 65 inch',
+      },
+    ],
+    policies: [
+      {
+        id: 1,
+        policyName: 'Không mang thức ăn từ bên ngoài vào',
+      },
+      {
+        id: 2,
+        policyName: 'Không mang theo động vật',
+      },
+    ],
+  },
+  {
+    id: 2,
+    name: 'Opal Grove Inn',
+    address: 'Le Van Viet, Thu Duc',
+    googleMapUrl: 'https://www.google.com/maps/place/OPAL+GROVE+INN/',
+    description: 'A cozy workspace with modern amenities',
+    capacity: 10,
+    category: 'Phòng họp',
+    status: 'Active',
+    createdAt: '2025-03-24T16:38:43.984Z',
+    updatedAt: '2025-03-24T16:38:43.984Z',
+    cleanTime: 20,
+    rate: 4.5,
+    area: 20,
+    openTime: '08:00:00',
+    closeTime: '20:00:00',
+    is24h: 0,
+    prices: [
+      {
+        id: 1,
+        price: 200,
+        category: 'Giờ',
+      },
+      {
+        id: 2,
+        price: 1000,
+        category: 'Ngày',
+      },
+    ],
+    images: [
+      {
+        id: 1,
+        imgUrl: 'https://res.cloudinary.com/dcq99dv8p/image/upload/v1741894920/IMAGES/ul4gto2ywr0vwpbgamhy.jpg',
+      },
+    ],
+    facilities: [
+      {
+        id: 1,
+        facilityName: 'Máy lạnh',
+      },
+      {
+        id: 2,
+        facilityName: 'Wifi tốc độ cao',
+      },
+    ],
+    policies: [
+      {
+        id: 1,
+        policyName: 'Không hút thuốc',
+      },
+    ],
+  },
+];
+
+const formatCurrency = (value) => {
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+  }).format(value);
+};
 
 const HighRatedSpaces = () => {
-  const [workspaces, setWorkspaces] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  // Fetch data from the API using Axios
-  useEffect(() => {
-    const fetchWorkspaces = async () => {
-      try {
-        const response = await axios.get('https://localhost:5050/users/searchbyrate');
-        setWorkspaces(response.data.workspaces);
-      } catch (error) {
-        console.error('Error fetching workspaces:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchWorkspaces();
-  }, []);
-
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#470101" />
-      </View>
-    );
-  }
-
   return (
     <View style={styles.sectionContainer}>
       <View style={styles.sectionHeader}>
@@ -40,22 +134,28 @@ const HighRatedSpaces = () => {
         </TouchableOpacity>
       </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        {workspaces.map((workspace) => (
-          <TouchableOpacity key={workspace.id} style={styles.spaceCard}>
-            <Image source={{ uri: workspace.images[0]?.imgUrl }} style={styles.spaceImage} />
+        {highRatedSpaces.map((space) => (
+          <TouchableOpacity key={space.id} style={styles.spaceCard}>
+            <Image source={{ uri: space.images[0]?.imgUrl }} style={styles.spaceImage} />
             <TouchableOpacity style={styles.favoriteButton}>
               <Icon name="favorite-border" size={20} color="#FF5A5F" />
             </TouchableOpacity>
             <View style={styles.spaceInfo}>
-              <Text style={styles.spaceName}>{workspace.name}</Text>
-              <Text style={styles.spaceLocation}>{workspace.address}</Text>
+              <Text style={styles.spaceName}>{space.name}</Text>
+              <Text style={styles.spaceLocation} numberOfLines={1}>
+                {space.address}
+              </Text>
               <View style={styles.priceRatingContainer}>
                 <Text style={styles.spacePrice}>
-                  {workspace.prices[0]?.price}k/{workspace.prices[0]?.category}
+                  {space.prices.length > 1
+                    ? `${formatCurrency(Math.min(...space.prices.map((p) => p.price)))} - ${formatCurrency(
+                        Math.max(...space.prices.map((p) => p.price))
+                      )}`
+                    : `${formatCurrency(space.prices[0]?.price)}`}
                 </Text>
                 <View style={styles.ratingContainer}>
                   <Icon name="star" size={16} color="#FFD700" />
-                  <Text style={styles.ratingText}>{workspace.rate}</Text>
+                  <Text style={styles.ratingText}>{space.rate}</Text>
                 </View>
               </View>
             </View>
@@ -139,11 +239,6 @@ const styles = StyleSheet.create({
   ratingText: {
     marginLeft: 4,
     fontWeight: 'bold',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
 });
 

@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import HighRatedSpaces from '../components/HighRatedSpaces';
 import Recommendations from '../components/Recommendations';
+import SpaceNearYou from '../components/SpaceNearYou';
 
 const HomeScreen = () => {
   return (
@@ -58,6 +59,7 @@ const HomeScreen = () => {
 
         {/* Recommendations */}
         <Recommendations />
+        <SpaceNearYou />
       </ScrollView>
           
     </SafeAreaView>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useNavigation } from '@react-navigation/native';
 
 const spacesNearYou = [
   {
@@ -113,6 +114,8 @@ const formatCurrency = (value) => {
 };
 
 const SpaceNearYou = () => {
+  const navigation = useNavigation();
+
   return (
     <View style={styles.sectionContainer}>
       <View style={styles.sectionHeader}>
@@ -123,7 +126,11 @@ const SpaceNearYou = () => {
       </View>
       <ScrollView>
         {spacesNearYou.map((space) => (
-          <TouchableOpacity key={space.id} style={styles.listItemCard}>
+          <TouchableOpacity
+            key={space.id}
+            style={styles.listItemCard}
+            onPress={() => navigation.navigate('WorkspaceDetail', { workspace: space })}
+          >
             <Image source={{ uri: space.images[0]?.imgUrl }} style={styles.listItemImage} />
             <View style={styles.listItemInfo}>
               <Text style={styles.listItemName}>{space.name}</Text>
@@ -154,7 +161,7 @@ const SpaceNearYou = () => {
 
 const styles = StyleSheet.create({
   sectionContainer: {
-    marginBottom: 24,
+    marginBottom: 50,
   },
   sectionHeader: {
     flexDirection: 'row',

@@ -1,18 +1,18 @@
 /* eslint-disable import/no-unresolved */
-import React from 'react';
-import { 
-  View, 
-  Text, 
-  Image, 
-  TouchableOpacity, 
-  ScrollView, 
-  StyleSheet
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import HighRatedSpaces from '../components/HighRatedSpaces';
-import Recommendations from '../components/Recommendations';
-import SpaceNearYou from '../components/SpaceNearYou';
+import React from "react";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import Icon from "react-native-vector-icons/MaterialIcons";
+import HighRatedSpaces from "../components/HighRatedSpaces";
+import Recommendations from "../components/Recommendations";
+import SpaceNearYou from "../components/SpaceNearYou";
 
 const HomeScreen = () => {
   return (
@@ -20,9 +20,9 @@ const HomeScreen = () => {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.userInfo}>
-          <Image 
-            source={require('../../assets/images/workspace2.jpg')} 
-            style={styles.avatar} 
+          <Image
+            source={require("../../assets/images/workspace2.jpg")}
+            style={styles.avatar}
           />
           <View>
             <Text style={styles.userName}>Khanh Quang</Text>
@@ -41,27 +41,28 @@ const HomeScreen = () => {
           </TouchableOpacity>
         </View>
       </View>
-  
+
       {/* Location Banner */}
       <TouchableOpacity style={styles.locationBanner}>
-        <Icon name="location-on" size={24} color="#000" style={styles.locationIcon} />
+        <Icon
+          name="location-on"
+          size={24}
+          color="#000"
+          style={styles.locationIcon}
+        />
         <Text style={styles.locationText}>
           Bạn có thể thay đổi vị trí của mình để hiển thị các Workspace gần đây
         </Text>
         <Icon name="chevron-right" size={24} color="#000" />
       </TouchableOpacity>
-  
-     
-       {/* Main Content */}
-       <ScrollView showsVerticalScrollIndicator={false}>
+      {/* Main Content */}
+      <ScrollView showsVerticalScrollIndicator={false}>
         {/* High Rated Spaces */}
         <HighRatedSpaces />
-
         {/* Recommendations */}
         <Recommendations />
         <SpaceNearYou />
       </ScrollView>
-          
     </SafeAreaView>
   );
 };
@@ -69,18 +70,18 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
   userInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   avatar: {
     width: 40,
@@ -90,32 +91,32 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   locationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   location: {
-    color: '#666',
+    color: "#666",
     marginLeft: 4,
   },
   headerIcons: {
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   iconButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#f5f5f5',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#f5f5f5",
+    justifyContent: "center",
+    alignItems: "center",
     marginLeft: 8,
   },
   locationBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#E6D5B8',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#E6D5B8",
     padding: 16,
     marginHorizontal: 16,
     borderRadius: 12,
@@ -129,7 +130,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginRight: 8,
   },
- 
+
   // bottomNav: {
   //   flexDirection: 'row',
   //   justifyContent: 'space-around',

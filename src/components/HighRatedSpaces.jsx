@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useNavigation } from '@react-navigation/native';
 
 const highRatedSpaces = [
   {
@@ -118,13 +119,15 @@ const highRatedSpaces = [
 ];
 
 const formatCurrency = (value) => {
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
   }).format(value);
 };
 
 const HighRatedSpaces = () => {
+  const navigation = useNavigation();
+
   return (
     <View style={styles.sectionContainer}>
       <View style={styles.sectionHeader}>
@@ -135,7 +138,11 @@ const HighRatedSpaces = () => {
       </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         {highRatedSpaces.map((space) => (
-          <TouchableOpacity key={space.id} style={styles.spaceCard}>
+          <TouchableOpacity
+            key={space.id}
+            style={styles.spaceCard}
+            onPress={() => navigation.navigate('WorkspaceDetail', { workspace: space })}
+          >
             <Image source={{ uri: space.images[0]?.imgUrl }} style={styles.spaceImage} />
             <TouchableOpacity style={styles.favoriteButton}>
               <Icon name="favorite-border" size={20} color="#FF5A5F" />

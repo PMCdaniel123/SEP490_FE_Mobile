@@ -1,93 +1,98 @@
-/* eslint-disable react-native/no-unused-styles */
-/* eslint-disable no-unused-vars */
-import { StyleSheet, View, Text, Image, TouchableOpacity } from "react-native";
+import { StyleSheet, View, Dimensions } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { createStackNavigator } from "@react-navigation/stack";
-import { useContext } from "react";
-import {
-  FavoritesContext,
-  FavoritesProvider,
-} from "./src/contexts/favoritesContext";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Icon from "react-native-vector-icons/FontAwesome";
 import Home from "./src/screens/Home";
-// import Favorite from "./src/screens/Favorite";
-// import Detail from "./src/screens/Detail";
-// import TopOfWeek from "./src/screens/TopOfWeek";
+import WorkspaceDetail from "./src/screens/WorkspaceDetail";
 
 const Tab = createBottomTabNavigator();
-const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
+const { width } = Dimensions.get("window");
+
+const HomeStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="Home" component={Home} />
+    <Stack.Screen name="WorkspaceDetail" component={WorkspaceDetail} />
+  </Stack.Navigator>
+);
 
 export default function App() {
-  // const { favorites } = useContext(FavoritesContext);
-
   return (
-    <FavoritesProvider>
-      <NavigationContainer>
-        <Tab.Navigator
-          screenOptions={{
-            tabBarStyle: {
-              backgroundColor: "#fff",
-              borderTopWidth: 1,
-              borderTopColor: "#eee",
-            },
-            tabBarActiveTintColor: "#470101",
-            tabBarInactiveTintColor: "#ccc",
-            tabBarLabelStyle: { fontSize: 12 },
+    <NavigationContainer>
+      <Tab.Navigator
+        screenOptions={{
+          tabBarStyle: {
+            position: "absolute",
+            left: 20,
+            right: 20,
+            elevation: 5,
+            backgroundColor: "#ffffff",
+            height: 60,
+            ...styles.shadow,
+          },
+          tabBarActiveTintColor: "#F9A825",
+          tabBarInactiveTintColor: "#999",
+          tabBarLabelStyle: {
+            fontSize: 12,
+            marginBottom: 5,
+          },
+          tabBarIconStyle: {
+            marginTop: 5,
+          },
+          headerShown: false,
+        }}
+      >
+        <Tab.Screen
+          name="Trang chủ"
+          component={HomeStack}
+          options={{
+            tabBarIcon: ({ color }) => (
+              <Icon name="home" size={22} color={color} />
+            ),
           }}
-        >
-          {/* Home Screen */}
-          <Tab.Screen
-            name="Home"
-            component={Home}
-            options={{
-              tabBarIcon: ({ color }) => (
-                <Icon name="home" size={26} color={color} />
-              ),
-              headerShown: false,
-            }}
-          />
-
-          {/* Favorite Screen */}
-          {/* <Tab.Screen
-            name="Favorite"
-            component={Favorite}
-            options={{
-              tabBarIcon: ({ color }) => (
-                <Icon name="heart" size={26} color={color} />
-              ),
-              headerShown: true,
-              headerTitleAlign: "center",
-              headerStyle: { backgroundColor: "#470101" },
-              headerTintColor: "#fff",
-              tabBarBadge: favorites.length,
-              tabBarBadgeStyle: { backgroundColor: "red", fontSize: 10 },
-            }}
-          /> */}
-
-          {/* Top Of Week Screen */}
-          {/* <Tab.Screen
-            name="Top Of Week"
-            component={TopOfWeek}
-            options={{
-              tabBarIcon: ({ color }) => (
-                <Icon name="list" size={26} color={color} />
-              ),
-              headerShown: true,
-              headerTitleAlign: "center",
-              headerStyle: { backgroundColor: "#470101" },
-              headerTintColor: "#fff",
-            }}
-          /> */}
-        </Tab.Navigator>
-      </NavigationContainer>
-    </FavoritesProvider>
+        />
+        <Tab.Screen
+          name="Đặt chỗ của tôi"
+          component={Home} // Replace with the actual component
+          options={{
+            tabBarIcon: ({ color }) => (
+              <Icon name="calendar" size={22} color={color} />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="Message"
+          component={Home} // Replace with the actual component
+          options={{
+            tabBarIcon: ({ color }) => (
+              <Icon name="comment" size={22} color={color} />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="Tài khoản"
+          component={Home} // Replace with the actual component
+          options={{
+            tabBarIcon: ({ color }) => (
+              <Icon name="user" size={22} color={color} />
+            ),
+          }}
+        />
+      </Tab.Navigator>
+    </NavigationContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
+  shadow: {
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 5,
   },
 });

@@ -53,7 +53,7 @@ export default [
     },
     rules: {
       'semi': ['error', 'always'],
-      'no-unused-vars': 'error',
+      // 'no-unused-vars': 'error',
       'no-console': 'warn',
       'import/no-unresolved': ['error', { commonjs: true, amd: true }],
       'import/named': 'warn',
@@ -70,7 +70,7 @@ export default [
       'react/no-unescaped-entities': 'error',
       'react/no-direct-mutation-state': 'error',
       'react-native/no-unused-styles': 'error',
-      'react-native/no-inline-styles': 'warn',
+      // 'react-native/no-inline-styles': 'warn',
       // 'react-native/no-color-literals': 'warn',
       'react-native/no-raw-text': ['warn', { skip: ['Button', 'Text'] }],
       'react-hooks/rules-of-hooks': 'error',

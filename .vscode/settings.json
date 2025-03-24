@@ -2,6 +2,7 @@
     "conventionalCommits.scopes": [
         "initialProject",
         "highRateSpace",
-        "homePage"
+        "homePage",
+        "bottomTab"
     ]
 }

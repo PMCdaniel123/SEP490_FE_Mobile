@@ -1,312 +1,218 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useContext } from "react";
 import {
   View,
   Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-  Alert,
   Image,
-  KeyboardAvoidingView,
-  Platform,
+  StyleSheet,
+  TouchableOpacity,
   ScrollView,
-  StatusBar,
-  Dimensions,
-  Keyboard,
-} from 'react-native';
-import { AuthContext } from '../contexts/AuthContext';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Icon from 'react-native-vector-icons/FontAwesome';
+  SafeAreaView,
+  Alert,
+} from "react-native";
+import Icon from "react-native-vector-icons/FontAwesome";
+import { useNavigation } from "@react-navigation/native";
+import { AuthContext } from "../contexts/AuthContext";
 
-const { width } = Dimensions.get('window');
+const user = {
+  id: 1,
+  name: "Phạm Mạnh Cường",
+  phone: "0866880125",
+  email: "cuong@gmail.com",
+  status: "Active",
+  avatar:
+    "https://res.cloudinary.com/dcq99dv8p/image/upload/v1742023863/IMAGES/ndnjb4tksmhu460nuklq.jpg",
+  location: "Phù Mỹ, Bình Định",
+  dateOfBirth: "2003-12-25",
+  createdAt: "2025-03-14T04:31:32.497",
+  updatedAt: "2025-03-14T04:31:32.497",
+  roleName: "Customer",
+  sex: "Nam",
+};
 
-const LoginScreen = ({ navigation }) => {
-  const [auth, setAuth] = useState('');
-  const [password, setPassword] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [secureTextEntry, setSecureTextEntry] = useState(true);
-  const [keyboardVisible, setKeyboardVisible] = useState(false);
-  
-  const { login } = useContext(AuthContext);
+const ProfileScreen = () => {
+  const navigation = useNavigation();
+  const { logout } = useContext(AuthContext);
 
-  useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener(
-      'keyboardDidShow',
-      () => {
-        setKeyboardVisible(true);
-      }
+  const MenuItem = ({ icon, text, onPress }) => (
+    <TouchableOpacity style={styles.menuItem} onPress={onPress}>
+      <View style={styles.menuIconContainer}>
+        <Icon name={icon} size={22} color="#835101" />
+      </View>
+      <Text style={styles.menuText}>{text}</Text>
+      <Icon
+        name="chevron-right"
+        size={16}
+        color="#835101"
+        style={styles.menuArrow}
+      />
+    </TouchableOpacity>
+  );
+
+  const handleLogout = () => {
+    Alert.alert(
+      "Đăng xuất",
+      "Bạn có chắc chắn muốn đăng xuất?",
+      [
+        {
+          text: "Hủy",
+          style: "cancel"
+        },
+        {
+          text: "Đăng xuất",
+          onPress: async () => {
+            try {
+              await logout();
+            } catch (error) {
+              console.error("Lỗi khi đăng xuất:", error);
+              Alert.alert("Lỗi", "Đã xảy ra lỗi khi đăng xuất. Vui lòng thử lại sau.");
+            }
+          },
+          style: "destructive"
+        }
+      ],
+      { cancelable: true }
     );
-    const keyboardDidHideListener = Keyboard.addListener(
-      'keyboardDidHide',
-      () => {
-        setKeyboardVisible(false);
-      }
-    );
-
-    return () => {
-      keyboardDidHideListener.remove();
-      keyboardDidShowListener.remove();
-    };
-  }, []);
-
-  const handleLogin = async () => {
-    if (!auth || !password) {
-      Alert.alert('Thông báo', 'Vui lòng nhập đầy đủ thông tin đăng nhập');
-      return;
-    }
-    
-    setIsSubmitting(true);
-    const result = await login(auth, password);
-    setIsSubmitting(false);
-    
-    if (result.success) {
-      // Đăng nhập thành công, điều hướng sẽ được xử lý bởi AuthContext
-    } else {
-      Alert.alert('Đăng nhập thất bại', result.message);
-    }
-  };
-
-  const toggleSecureEntry = () => {
-    setSecureTextEntry(!secureTextEntry);
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-left" size={20} color="#000" />
-        </TouchableOpacity>
-      </View>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.container}
-      >
-        <ScrollView 
-          contentContainerStyle={styles.scrollContainer}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
+    <SafeAreaView style={styles.container}>
+      <ScrollView>
+        {/* Header Section */}
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Hồ sơ</Text>
+        </View>
+
+        {/* Profile Section */}
+        <TouchableOpacity
+          style={styles.profileSection}
+          onPress={() => navigation.navigate("ProfileDetail", { user })}
         >
-          <Text style={styles.title}>Đăng nhập</Text>
-          
-          <View style={styles.formContainer}>
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Email</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Nhập email"
-                value={auth}
-                onChangeText={setAuth}
-                autoCapitalize="none"
-                keyboardType="email-address"
-                returnKeyType="next"
-              />
-            </View>
-            
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Mật khẩu</Text>
-              <View style={styles.passwordContainer}>
-                <TextInput
-                  style={styles.passwordInput}
-                  placeholder="Nhập mật khẩu"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry={secureTextEntry}
-                  returnKeyType="done"
-                  onSubmitEditing={handleLogin}
-                />
-                <TouchableOpacity onPress={toggleSecureEntry} style={styles.eyeIcon}>
-                  <Icon 
-                    name={secureTextEntry ? "eye-slash" : "eye"} 
-                    size={20} 
-                    color="#888" 
-                  />
-                </TouchableOpacity>
-              </View>
-            </View>
-            
-            <TouchableOpacity style={styles.forgotPassword}>
-              <Text style={styles.forgotPasswordText}>Quên mật khẩu</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={styles.loginButton}
-              onPress={handleLogin}
-              disabled={isSubmitting || !auth || !password}
-            >
-              {isSubmitting ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.loginButtonText}>Đăng nhập</Text>
-              )}
-            </TouchableOpacity>
+          <Image source={{ uri: user.avatar }} style={styles.avatar} />
+          <View style={styles.profileInfo}>
+            <Text style={styles.profileName}>{user.name}</Text>
+            <Text style={styles.profileEmail}>{user.email}</Text>
+            <Text style={styles.profilePhone}>{user.phone}</Text>
           </View>
-          
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>Không có tài khoản? </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-              <Text style={styles.registerText}>Đăng ký</Text>
-            </TouchableOpacity>
-          </View>
+        </TouchableOpacity>
 
-          <View style={styles.dividerContainer}>
-            <View style={styles.divider} />
-            <Text style={styles.dividerText}>Hoặc đăng nhập với</Text>
-            <View style={styles.divider} />
-          </View>
+        {/* Settings Section */}
+        <View style={styles.settingsSection}>
+          <MenuItem icon="credit-card" text="Ví WorkHive" onPress={() => {}} />
+          <MenuItem
+            icon="history"
+            text="Lịch sử thanh toán"
+            onPress={() => {}}
+          />
+          <MenuItem icon="bell" text="Thông báo" onPress={() => {}} />
+          <MenuItem icon="star" text="Đánh giá của bạn" onPress={() => {}} />
+          <MenuItem icon="question-circle" text="Hỗ trợ" onPress={() => {}} />
+          <MenuItem icon="file-text" text="Điều khoản" onPress={() => {}} />
+        </View>
 
-          <TouchableOpacity style={styles.googleButton}>
-            <Image 
-              source={require('../../assets/images/logo.png')} 
-              style={styles.googleIcon} 
-            />
-          </TouchableOpacity>
-
-          <View style={styles.termsContainer}>
-            <Text style={styles.termsText}>
-              Bằng cách đăng ký, bạn đồng ý với Điều khoản và 
-            </Text>
-            <TouchableOpacity>
-              <Text style={styles.termsLink}>Điều kiện Sử dụng của chúng tôi</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Icon name="sign-out" size={20} color="#FF3B30" style={styles.logoutIcon} />
+          <Text style={styles.logoutText}>Đăng xuất</Text>
+        </TouchableOpacity>
+      </ScrollView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 10,
-  },
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#F2F2F7",
   },
-  scrollContainer: {
-    flexGrow: 1,
-    paddingHorizontal: 24,
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingTop: 50,
+    paddingBottom: 20,
+    backgroundColor: "#FFFFFF",
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 30,
-    color: '#000',
-    textAlign: 'center',
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#000000",
   },
-  formContainer: {
-    width: '100%',
-  },
-  inputContainer: {
-    marginBottom: 16,
-  },
-  inputLabel: {
-    fontSize: 16,
-    marginBottom: 8,
-    color: '#000',
-  },
-  input: {
-    backgroundColor: '#F5F5F5',
-    borderRadius: 8,
-    padding: 15,
-    fontSize: 16,
-    color: '#333',
-  },
-  passwordContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F5F5F5',
-    borderRadius: 8,
-  },
-  passwordInput: {
-    flex: 1,
-    padding: 15,
-    fontSize: 16,
-    color: '#333',
-  },
-  eyeIcon: {
-    padding: 15,
-  },
-  forgotPassword: {
-    alignSelf: 'flex-end',
-    marginBottom: 25,
-  },
-  forgotPasswordText: {
-    color: '#FF3B6F',
-    fontSize: 14,
-  },
-  loginButton: {
-    backgroundColor: '#835101',
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
+  profileSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    backgroundColor: "#FFFFFF",
     marginBottom: 20,
   },
-  loginButtonText: {
-    color: '#FFFFFF',
+  avatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+  },
+  profileInfo: {
+    marginLeft: 20,
+  },
+  profileName: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 5,
+    color: "#000000",
+  },
+  profileEmail: {
     fontSize: 16,
-    fontWeight: '600',
+    color: "#666666",
+    marginBottom: 2,
   },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 10,
+  profilePhone: {
+    fontSize: 16,
+    color: "#666666",
   },
-  footerText: {
-    fontSize: 14,
-    color: '#666',
+  settingsSection: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 10,
+    marginHorizontal: 15,
+    marginBottom: 20,
   },
-  registerText: {
-    fontSize: 14,
-    color: '#835101',
-    fontWeight: '600',
-  },
-  dividerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 20,
-  },
-  divider: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#E0E0E0',
-  },
-  dividerText: {
-    marginHorizontal: 10,
-    color: '#666',
-    fontSize: 14,
-  },
-  googleButton: {
-    alignSelf: 'center',
-    padding: 10,
-  },
-  googleIcon: {
-    width: 30,
-    height: 30,
-  },
-  termsContainer: {
-    alignItems: 'center',
-    marginTop: 20,
+  menuItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 15,
     paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F2F2F7",
   },
-  termsText: {
-    fontSize: 12,
-    color: '#666',
-    textAlign: 'center',
+  menuIconContainer: {
+    width: 30,
+    alignItems: "center",
   },
-  termsLink: {
-    fontSize: 12,
-    color: '#835101',
-    fontWeight: '500',
+  menuText: {
+    flex: 1,
+    fontSize: 17,
+    marginLeft: 15,
+    color: "#000000",
+  },
+  menuArrow: {
+    marginLeft: 10,
+  },
+  logoutButton: {
+    flexDirection: "row",
+    marginHorizontal: 15,
+    paddingVertical: 15,
+    borderRadius: 10,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 30,
+  },
+  logoutIcon: {
+    marginRight: 10,
+  },
+  logoutText: {
+    color: "#FF3B30",
+    fontSize: 17,
+    fontWeight: "600",
   },
 });
 
-export default LoginScreen;
+export default ProfileScreen;

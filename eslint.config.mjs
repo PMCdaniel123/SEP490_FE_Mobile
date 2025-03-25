@@ -67,7 +67,7 @@ export default [
       'react/jsx-uses-react': 'error',
       'react/jsx-uses-vars': 'error',
       // 'react/prop-types': 'warn',
-      'react/no-unescaped-entities': 'error',
+      // 'react/no-unescaped-entities': 'error',
       'react/no-direct-mutation-state': 'error',
       'react-native/no-unused-styles': 'error',
       // 'react-native/no-inline-styles': 'warn',

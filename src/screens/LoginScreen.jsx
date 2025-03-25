@@ -1,4 +1,3 @@
-// src/screens/LoginScreen.js
 import React, { useState, useContext, useEffect } from 'react';
 import {
   View,
@@ -62,7 +61,6 @@ const LoginScreen = ({ navigation }) => {
     setIsSubmitting(false);
     
     if (result.success) {
-      // Đăng nhập thành công, điều hướng sẽ được xử lý bởi AuthContext
     } else {
       Alert.alert('Đăng nhập thất bại', result.message);
     }
@@ -95,31 +93,26 @@ const LoginScreen = ({ navigation }) => {
           )}
           
           <Text style={styles.title}>Đăng nhập</Text>
-          <Text style={styles.subtitle}>Chào mừng bạn quay trở lại!</Text>
           
           <View style={styles.formContainer}>
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Email hoặc số điện thoại</Text>
-              <View style={styles.inputWrapper}>
-                <Icon name="user" size={20} color="#888" style={styles.inputIcon} />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Nhập email hoặc số điện thoại"
-                  value={auth}
-                  onChangeText={setAuth}
-                  autoCapitalize="none"
-                  keyboardType="email-address"
-                  returnKeyType="next"
-                />
-              </View>
+              <Text style={styles.inputLabel}>Email/Số điện thoại di động</Text>
+              <TextInput
+                style={styles.input}
+                  placeholder="Nhập email hoặc số điện thoại của bạn"
+                value={auth}
+                onChangeText={setAuth}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                returnKeyType="next"
+              />
             </View>
             
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Mật khẩu</Text>
-              <View style={styles.inputWrapper}>
-                <Icon name="lock" size={20} color="#888" style={styles.inputIcon} />
+              <View style={styles.passwordContainer}>
                 <TextInput
-                  style={styles.input}
+                  style={styles.passwordInput}
                   placeholder="Nhập mật khẩu"
                   value={password}
                   onChangeText={setPassword}
@@ -141,10 +134,10 @@ const LoginScreen = ({ navigation }) => {
               <Text style={styles.forgotPasswordText}>Quên mật khẩu?</Text>
             </TouchableOpacity>
             
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[
                 styles.loginButton,
-                (!auth || !password) && styles.loginButtonDisabled
+                (!auth || !password) && styles.loginButtonDisabled,
               ]}
               onPress={handleLogin}
               disabled={isSubmitting || !auth || !password}
@@ -163,6 +156,21 @@ const LoginScreen = ({ navigation }) => {
               <Text style={styles.registerText}>Đăng ký ngay</Text>
             </TouchableOpacity>
           </View>
+
+          <View style={styles.divider}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>Hoặc đăng nhập với</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
+          <TouchableOpacity style={styles.googleButton}>
+            <Icon name="google" size={20} color="#000" />
+          </TouchableOpacity>
+
+          <Text style={styles.termsText}>
+            Bằng cách đăng ký, bạn đồng ý với Điều khoản và{'\n'}
+            <Text style={styles.termsLink}>Điều kiện Sử dụng của chúng tôi</Text>
+          </Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -176,7 +184,6 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
   },
   scrollContainer: {
     flexGrow: 1,
@@ -199,89 +206,106 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     color: '#000',
   },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 30,
-  },
+
   formContainer: {
     width: '100%',
   },
   inputContainer: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
   inputLabel: {
     fontSize: 16,
     marginBottom: 8,
     color: '#000',
   },
-  inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F5F5F5',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-    paddingHorizontal: 15,
-  },
-  inputIcon: {
-    marginRight: 10,
-  },
   input: {
-    flex: 1,
     backgroundColor: '#F5F5F5',
     borderRadius: 8,
     padding: 15,
     fontSize: 16,
-    color: '#333',
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F5F5F5',
+    borderRadius: 8,
+  },
+  passwordInput: {
+    flex: 1,
+    padding: 15,
+    fontSize: 16,
   },
   eyeIcon: {
-    padding: 10,
+    padding: 15,
   },
   forgotPassword: {
     alignSelf: 'flex-end',
-    marginBottom: 25,
-    marginTop: 5,
+    marginBottom: 20,
   },
   forgotPasswordText: {
-    color: '#007AFF',
-    fontSize: 15,
-    fontWeight: '500',
+    color: '#FF3B6F',
+    fontSize: 14,
   },
   loginButton: {
-    backgroundColor: '#007AFF',
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    shadowColor: '#007AFF',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 5,
-  },
-  loginButtonDisabled: {
-    backgroundColor: '#A0CFFF',
-    shadowOpacity: 0.1,
-  },
+    backgroundColor: '#835101',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',},
+
+    loginButtonDisabled: {
+      backgroundColor: '#D0BEA0',
+      shadowOpacity: 0.1,
+    },
+  
   loginButtonText: {
     color: '#FFFFFF',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
   },
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 30,
-    paddingBottom: 20,
+    marginTop: 20,
   },
   footerText: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: 14,
+    color: '#000',
   },
   registerText: {
-    fontSize: 16,
-    color: '#007AFF',
+    fontSize: 14,
+    color: '#835101',
     fontWeight: '600',
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#E0E0E0',
+  },
+  dividerText: {
+    marginHorizontal: 10,
+    color: '#888',
+    fontSize: 14,
+  },
+  googleButton: {
+    alignSelf: 'center',
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    borderRadius: 50,
+  },
+  termsText: {
+    fontSize: 12,
+    color: '#888',
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  termsLink: {
+    color: '#835101',
   },
 });
 

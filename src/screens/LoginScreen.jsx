@@ -166,11 +166,6 @@ const LoginScreen = ({ navigation }) => {
           <TouchableOpacity style={styles.googleButton}>
             <Icon name="google" size={20} color="#000" />
           </TouchableOpacity>
-
-          <Text style={styles.termsText}>
-            Bằng cách đăng ký, bạn đồng ý với Điều khoản và{'\n'}
-            <Text style={styles.termsLink}>Điều kiện Sử dụng của chúng tôi</Text>
-          </Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -298,15 +293,7 @@ const styles = StyleSheet.create({
     borderColor: '#E0E0E0',
     borderRadius: 50,
   },
-  termsText: {
-    fontSize: 12,
-    color: '#888',
-    textAlign: 'center',
-    marginTop: 20,
-  },
-  termsLink: {
-    color: '#835101',
-  },
+ 
 });
 
 export default LoginScreen;

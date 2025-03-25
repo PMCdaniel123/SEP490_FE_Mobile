@@ -38,18 +38,7 @@ const HomeStack = () => (
 const AuthScreens = () => (
   <AuthStack.Navigator screenOptions={{ headerShown: false }}>
     <AuthStack.Screen name="Login" component={LoginScreen} />
-    <AuthStack.Screen 
-      name="Register" 
-      component={RegisterScreen}
-      options={{ 
-        headerShown: true,
-        title: 'Đăng ký',
-        headerStyle: {
-          backgroundColor: '#FFFFFF',
-        },
-        headerTintColor: '#007AFF',
-      }}
-    />
+    <AuthStack.Screen name="Register" component={RegisterScreen} />
   </AuthStack.Navigator>
 );
 
@@ -65,7 +54,7 @@ const TabNavigator = () => (
         height: 65,
         ...styles.shadow,
       },
-          tabBarActiveTintColor: "#835101",
+      tabBarActiveTintColor: "#835101",
       tabBarInactiveTintColor: "#999",
       tabBarLabelStyle: {
         fontSize: 12,
@@ -82,14 +71,12 @@ const TabNavigator = () => (
       name="Trang chủ"
       component={HomeStack}
       options={{
-        tabBarIcon: ({ color }) => (
-          <Icon name="home" size={22} color={color} />
-        ),
+        tabBarIcon: ({ color }) => <Icon name="home" size={22} color={color} />,
       }}
     />
     <Tab.Screen
       name="Đặt chỗ"
-      component={Home} 
+      component={Home}
       options={{
         tabBarIcon: ({ color }) => (
           <Icon name="calendar" size={22} color={color} />
@@ -98,7 +85,7 @@ const TabNavigator = () => (
     />
     <Tab.Screen
       name="Tìm kiếm"
-      component={Home} 
+      component={Home}
       options={{
         tabBarIcon: ({ color }) => (
           <Icon name="search" size={22} color={color} />
@@ -109,9 +96,7 @@ const TabNavigator = () => (
       name="Tài khoản"
       component={ProfileStack}
       options={{
-        tabBarIcon: ({ color }) => (
-          <Icon name="user" size={22} color={color} />
-        ),
+        tabBarIcon: ({ color }) => <Icon name="user" size={22} color={color} />,
       }}
     />
   </Tab.Navigator>

@@ -1,109 +1,144 @@
-import { StyleSheet } from "react-native";
+import React, { useContext } from "react";
+import { StyleSheet, View, ActivityIndicator } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { createStackNavigator } from "@react-navigation/stack";
-import { useContext } from "react";
-import {
-  FavoritesContext,
-  FavoritesProvider,
-} from "./src/contexts/favoritesContext";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Icon from "react-native-vector-icons/FontAwesome";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import Home from "./src/screens/Home";
-import Favorite from "./src/screens/Favorite";
-import Detail from "./src/screens/Detail";
-import TopOfWeek from "./src/screens/TopOfWeek";
+import WorkspaceDetail from "./src/screens/WorkspaceDetail";
+import ProfileScreen from "./src/screens/Profile";
+import ProfileDetail from "./src/screens/ProfileDetail";
+import NotificationScreen from "./src/screens/Notification";
+import LoginScreen from "./src/screens/LoginScreen";
+
+// Context
+import { AuthContext, AuthProvider } from "./src/contexts/AuthContext";
+import RegisterScreen from "./src/screens/RegisterScreen";
 
 const Tab = createBottomTabNavigator();
-const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
+const AuthStack = createNativeStackNavigator();
 
-function TabNavigator() {
-  const { favorites } = useContext(FavoritesContext);
-  return (
-    <Tab.Navigator
-      screenOptions={{
-        tabBarStyle: { backgroundColor: "#fff" },
-        tabBarActiveTintColor: "#470101",
-        tabBarInactiveTintColor: "#ccc",
+const ProfileStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="ProfileMain" component={ProfileScreen} />
+    <Stack.Screen name="ProfileDetail" component={ProfileDetail} />
+  </Stack.Navigator>
+);
+
+const HomeStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="HomeMain" component={Home} />
+    <Stack.Screen name="WorkspaceDetail" component={WorkspaceDetail} />
+    <Stack.Screen name="Notification" component={NotificationScreen} />
+  </Stack.Navigator>
+);
+
+const AuthScreens = () => (
+  <AuthStack.Navigator screenOptions={{ headerShown: false }}>
+    <AuthStack.Screen name="Login" component={LoginScreen} />
+    <AuthStack.Screen name="Register" component={RegisterScreen} />
+  </AuthStack.Navigator>
+);
+
+const TabNavigator = () => (
+  <Tab.Navigator
+    screenOptions={{
+      tabBarStyle: {
+        position: "absolute",
+        left: 20,
+        right: 20,
+        elevation: 5,
+        backgroundColor: "#ffffff",
+        height: 65,
+        ...styles.shadow,
+      },
+      tabBarActiveTintColor: "#835101",
+      tabBarInactiveTintColor: "#999",
+      tabBarLabelStyle: {
+        fontSize: 12,
+        marginBottom: 5,
+      },
+      tabBarIconStyle: {
+        marginTop: 5,
+      },
+      headerShown: false,
+      tabBarHideOnKeyboard: true,
+    }}
+  >
+    <Tab.Screen
+      name="Trang chủ"
+      component={HomeStack}
+      options={{
+        tabBarIcon: ({ color }) => <Icon name="home" size={22} color={color} />,
       }}
-    >
-      <Tab.Screen
-        name="Home"
-        component={Home}
-        options={{
-          tabBarIcon: ({ color }) => (
-            <Icon name="home" size={26} color={color} />
-          ),
-          headerShown: true,
-          headerTitleAlign: "center",
-          headerStyle: { backgroundColor: "#470101" },
-          headerTintColor: "#fff",
-        }}
-      />
+    />
+    <Tab.Screen
+      name="Đặt chỗ"
+      component={Home}
+      options={{
+        tabBarIcon: ({ color }) => (
+          <Icon name="calendar" size={22} color={color} />
+        ),
+      }}
+    />
+    <Tab.Screen
+      name="Tìm kiếm"
+      component={Home}
+      options={{
+        tabBarIcon: ({ color }) => (
+          <Icon name="search" size={22} color={color} />
+        ),
+      }}
+    />
+    <Tab.Screen
+      name="Tài khoản"
+      component={ProfileStack}
+      options={{
+        tabBarIcon: ({ color }) => <Icon name="user" size={22} color={color} />,
+      }}
+    />
+  </Tab.Navigator>
+);
 
-      <Tab.Screen
-        name="Favorite"
-        component={Favorite}
-        options={{
-          tabBarIcon: ({ color }) => (
-            <Icon name="heart" size={26} color={color} />
-          ),
-          headerShown: true,
-          headerTitleAlign: "center",
-          headerStyle: { backgroundColor: "#470101" },
-          headerTintColor: "#fff",
-          tabBarBadge: favorites.length,
-          tabBarBadgeStyle: { backgroundColor: "red", fontSize: 10 },
-        }}
-      />
+const AppNavigator = () => {
+  const { isLoading, userToken } = useContext(AuthContext);
 
-      <Tab.Screen
-        name="Top Of Week"
-        component={TopOfWeek}
-        options={{
-          tabBarIcon: ({ color }) => (
-            <Icon name="list" size={26} color={color} />
-          ),
-          headerShown: true,
-          headerTitleAlign: "center",
-          headerStyle: { backgroundColor: "#470101" },
-          headerTintColor: "#fff",
-        }}
-      />
-    </Tab.Navigator>
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator color="#835101" />
+      </View>
+    );
+  }
+
+  return (
+    <NavigationContainer>
+      {userToken ? <TabNavigator /> : <AuthScreens />}
+    </NavigationContainer>
   );
-}
+};
 
 export default function App() {
   return (
-    <FavoritesProvider>
-      <NavigationContainer>
-        <Stack.Navigator>
-          <Stack.Screen
-            name="TabNavigator"
-            component={TabNavigator}
-            options={{ headerShown: false }}
-          />
-
-          <Stack.Screen
-            name="Detail"
-            component={Detail}
-            options={{
-              title: "Detail",
-              headerShown: true,
-              headerTitleAlign: "center",
-              headerStyle: { backgroundColor: "#470101" },
-              headerTintColor: "#fff",
-            }}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </FavoritesProvider>
+    <SafeAreaProvider>
+      <AuthProvider>
+        <AppNavigator />
+      </AuthProvider>
+    </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
+  shadow: {
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 5,
   },
 });

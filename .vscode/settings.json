@@ -1,0 +1,14 @@
+{
+    "conventionalCommits.scopes": [
+        "initialProject",
+        "highRateSpace",
+        "homePage",
+        "bottomTab",
+        "notification",
+        "recommenSpace",
+        "workSpaceDetail",
+        "loginFunction",
+        "registerFunction",
+        "userProfile"
+    ]
+}

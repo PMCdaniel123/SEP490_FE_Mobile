@@ -33,33 +33,33 @@ const HighRatedSpaces = () => {
 
   const renderSpaceItem = ({ item }) => (
     <TouchableOpacity
-      style={styles.spaceCard}
-      onPress={() => navigation.navigate('WorkspaceDetail', { workspace: item })}
-    >
-      <Image source={{ uri: item.images[0]?.imgUrl }} style={styles.spaceImage} />
-      <TouchableOpacity style={styles.favoriteButton}>
-        <Icon name="favorite-border" size={20} color="#FF5A5F" />
-      </TouchableOpacity>
-      <View style={styles.spaceInfo}>
-        <Text style={styles.spaceName} numberOfLines={1}>{item.name}</Text>
-        <Text style={styles.spaceLocation} numberOfLines={1}>
-          {item.address}
+    style={styles.spaceCard}
+    onPress={() => navigation.navigate('WorkspaceDetail', { id: item.id })} // Pass workspace ID
+  >
+    <Image source={{ uri: item.images[0]?.imgUrl }} style={styles.spaceImage} />
+    <TouchableOpacity style={styles.favoriteButton}>
+      <Icon name="favorite-border" size={20} color="#FF5A5F" />
+    </TouchableOpacity>
+    <View style={styles.spaceInfo}>
+      <Text style={styles.spaceName} numberOfLines={1}>{item.name}</Text>
+      <Text style={styles.spaceLocation} numberOfLines={1}>
+        {item.address}
+      </Text>
+      <View style={styles.priceRatingContainer}>
+        <Text style={styles.spacePrice}>
+          {item.prices.length > 1
+            ? `${formatCurrency(Math.min(...item.prices.map((p) => p.price)))} - ${formatCurrency(
+                Math.max(...item.prices.map((p) => p.price))
+              )}`
+            : `${formatCurrency(item.prices[0]?.price)}`}
         </Text>
-        <View style={styles.priceRatingContainer}>
-          <Text style={styles.spacePrice}>
-            {item.prices.length > 1
-              ? `${formatCurrency(Math.min(...item.prices.map((p) => p.price)))} - ${formatCurrency(
-                  Math.max(...item.prices.map((p) => p.price))
-                )}`
-              : `${formatCurrency(item.prices[0]?.price)}`}
-          </Text>
-          <View style={styles.ratingContainer}>
-            <Icon name="star" size={16} color="#FFD700" />
-            <Text style={styles.ratingText}>{item.rate}</Text>
-          </View>
+        <View style={styles.ratingContainer}>
+          <Icon name="star" size={16} color="#FFD700" />
+          <Text style={styles.ratingText}>{item.rate}</Text>
         </View>
       </View>
-    </TouchableOpacity>
+    </View>
+  </TouchableOpacity>
   );
 
   if (loading) {

@@ -69,37 +69,37 @@ const Recommendations = () => {
   );
 
   const renderSpaceItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.listItemCard}
-      onPress={() => navigation.navigate("WorkspaceDetail", { workspace: item })}
-      activeOpacity={0.8}
-    >
-      <View style={styles.imageContainer}>
-        <Image source={{ uri: item.images[0]?.imgUrl }} style={styles.listItemImage} />
+<TouchableOpacity
+  style={styles.listItemCard}
+  onPress={() => navigation.navigate("WorkspaceDetail", { id: item.id })} // Pass workspace ID
+  activeOpacity={0.8}
+>
+  <View style={styles.imageContainer}>
+    <Image source={{ uri: item.images[0]?.imgUrl }} style={styles.listItemImage} />
+  </View>
+  <View style={styles.listItemInfo}>
+    <Text style={styles.listItemName} numberOfLines={1}>
+      {item.name}
+    </Text>
+    <View style={styles.listItemLocation}>
+      <Icon name="location-on" size={14} color="#666" />
+      <Text style={styles.listItemLocationText} numberOfLines={2}>
+        {item.address}
+      </Text>
+    </View>
+    <View style={styles.listItemFooter}>
+      <Text style={styles.listItemPrice}>
+        {item.prices.length > 1
+          ? `${formatCurrency(item.prices[0].price)} - ${formatCurrency(item.prices[1].price)}`
+          : formatCurrency(item.prices[0]?.price)}
+      </Text>
+      <View style={styles.listItemRating}>
+        <Icon name="star" size={16} color="#FFD700" />
+        <Text style={styles.listItemRatingText}>{item.rating || 4.0}</Text>
       </View>
-      <View style={styles.listItemInfo}>
-        <Text style={styles.listItemName} numberOfLines={1}>
-          {item.name}
-        </Text>
-        <View style={styles.listItemLocation}>
-          <Icon name="location-on" size={14} color="#666" />
-          <Text style={styles.listItemLocationText} numberOfLines={2}>
-            {item.address}
-          </Text>
-        </View>
-        <View style={styles.listItemFooter}>
-          <Text style={styles.listItemPrice}>
-            {item.prices.length > 1
-              ? `${formatCurrency(item.prices[0].price)} - ${formatCurrency(item.prices[1].price)}`
-              : formatCurrency(item.prices[0]?.price)}
-          </Text>
-          <View style={styles.listItemRating}>
-            <Icon name="star" size={16} color="#FFD700" />
-            <Text style={styles.listItemRatingText}>{item.rating || 4.0}</Text>
-          </View>
-        </View>
-      </View>
-    </TouchableOpacity>
+    </View>
+  </View>
+</TouchableOpacity>
   );
 
   if (loading) {

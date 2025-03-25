@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -8,30 +8,52 @@ import {
   ScrollView,
   SafeAreaView,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useNavigation } from "@react-navigation/native";
 import { AuthContext } from "../contexts/AuthContext";
-
-const user = {
-  id: 1,
-  name: "Phạm Mạnh Cường",
-  phone: "0866880125",
-  email: "cuong@gmail.com",
-  status: "Active",
-  avatar:
-    "https://res.cloudinary.com/dcq99dv8p/image/upload/v1742023863/IMAGES/ndnjb4tksmhu460nuklq.jpg",
-  location: "Phù Mỹ, Bình Định",
-  dateOfBirth: "2003-12-25",
-  createdAt: "2025-03-14T04:31:32.497",
-  updatedAt: "2025-03-14T04:31:32.497",
-  roleName: "Customer",
-  sex: "Nam",
-};
+import axios from "axios";
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
-  const { logout } = useContext(AuthContext);
+  const { logout, userData, userToken } = useContext(AuthContext);
+  const [userProfile, setUserProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!userData || !userData.sub) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await axios.get(
+          `http://35.78.210.59:8080/users/${userData.sub}`,
+          {
+            headers: {
+              Authorization: `Bearer ${userToken}`,
+            },
+          }
+        );
+        
+        if (response.data && response.data.user) {
+          setUserProfile(response.data.user);
+        } else {
+          setError("Không thể tải thông tin người dùng");
+        }
+      } catch (error) {
+        console.error("Lỗi khi tải hồ sơ:", error);
+        setError("Đã xảy ra lỗi khi tải thông tin người dùng");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, [userData, userToken]);
 
   const MenuItem = ({ icon, text, onPress }) => (
     <TouchableOpacity style={styles.menuItem} onPress={onPress}>
@@ -74,6 +96,34 @@ const ProfileScreen = () => {
     );
   };
 
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#835101" />
+        <Text style={styles.loadingText}>Đang tải thông tin...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Icon name="exclamation-circle" size={50} color="#FF3B30" />
+        <Text style={styles.errorText}>{error}</Text>
+        <TouchableOpacity 
+          style={styles.retryButton}
+          onPress={() => {
+            setLoading(true);
+            setError(null);
+            fetchUserProfile();
+          }}
+        >
+          <Text style={styles.retryButtonText}>Thử lại</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
@@ -83,17 +133,24 @@ const ProfileScreen = () => {
         </View>
 
         {/* Profile Section */}
-        <TouchableOpacity
-          style={styles.profileSection}
-          onPress={() => navigation.navigate("ProfileDetail", { user })}
-        >
-          <Image source={{ uri: user.avatar }} style={styles.avatar} />
-          <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>{user.name}</Text>
-            <Text style={styles.profileEmail}>{user.email}</Text>
-            <Text style={styles.profilePhone}>{user.phone}</Text>
-          </View>
-        </TouchableOpacity>
+        {userProfile && (
+          <TouchableOpacity
+            style={styles.profileSection}
+            onPress={() => navigation.navigate("ProfileDetail", { user: userProfile })}
+          >
+            <Image 
+              source={{ 
+                uri: userProfile.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(userProfile.name) 
+              }} 
+              style={styles.avatar} 
+            />
+            <View style={styles.profileInfo}>
+              <Text style={styles.profileName}>{userProfile.name}</Text>
+              <Text style={styles.profileEmail}>{userProfile.email}</Text>
+              <Text style={styles.profilePhone}>{userProfile.phone}</Text>
+            </View>
+          </TouchableOpacity>
+        )}
 
         {/* Settings Section */}
         <View style={styles.settingsSection}>
@@ -122,6 +179,42 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F2F2F7",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: "#F2F2F7",
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#666",
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: "#F2F2F7",
+    padding: 20,
+  },
+  errorText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#666",
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  retryButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: '#835101',
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '500',
   },
   header: {
     flexDirection: "row",

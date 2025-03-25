@@ -1,17 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import axios from 'axios';
+import { AuthContext } from '../contexts/AuthContext';
 
 const ProfileDetail = ({ route, navigation }) => {
   const { user: initialUser } = route.params;
   const [user, setUser] = useState(initialUser);
   const [isEditing, setIsEditing] = useState(false);
+  const { userData, userToken } = useContext(AuthContext);
 
-  const handleSave = () => {
-    // Todo
-    setIsEditing(false);
-    Alert.alert('Thành công', 'Thông tin của bạn đã được cập nhật');
+  const handleSave = async () => {
+    try {
+      const response = await axios.patch('http://35.78.210.59:8080/users/update', {
+        userId: userData.sub,
+        name: user.name,
+        email: user.email,
+        location: user.location,
+        phone: user.phone,
+        dateOfBirth: user.dateOfBirth,
+        sex: user.sex,
+        avatar: user.avatar
+      }, {
+        headers: {
+          'Authorization': `Bearer ${userToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.status === 200) {
+        setIsEditing(false);
+        Alert.alert('Thành công', 'Thông tin của bạn đã được cập nhật');
+      } else {
+        Alert.alert('Lỗi', 'Không thể cập nhật thông tin. Vui lòng thử lại sau.');
+      }
+    } catch (error) {
+      console.error('Lỗi khi cập nhật hồ sơ:', error);
+      Alert.alert('Lỗi', 'Đã xảy ra lỗi khi cập nhật hồ sơ');
+    }
   };
 
   const handleChange = (key, value) => {
@@ -35,7 +62,29 @@ const ProfileDetail = ({ route, navigation }) => {
     });
 
     if (!result.canceled) {
-      handleChange('avatar', result.assets[0].uri);
+      try {
+        const formData = new FormData();
+        formData.append('image', {
+          uri: result.assets[0].uri,
+          type: 'image/jpeg',
+          name: 'photo.jpg',
+        });
+
+        const response = await axios.post('http://35.78.210.59:8080/images/upload', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+
+        if (response.data.status === 200) {
+          handleChange('avatar', response.data.data[0]);
+        } else {
+          Alert.alert('Lỗi', 'Không thể tải lên ảnh. Vui lòng thử lại sau.');
+        }
+      } catch (error) {
+        console.error('Lỗi khi tải lên ảnh:', error);
+        Alert.alert('Lỗi', 'Đã xảy ra lỗi khi tải lên ảnh');
+      }
     }
   };
 
@@ -122,11 +171,11 @@ const InfoItem = ({ icon, label, value, isEditing, onChangeText }) => (
       {isEditing ? (
         <TextInput
           style={styles.infoInput}
-          value={value}
+          value={value || ""} 
           onChangeText={onChangeText}
         />
       ) : (
-        <Text style={styles.infoValue}>{value}</Text>
+        <Text style={styles.infoValue}>{value || "Trống"}</Text>
       )}
     </View>
   </View>

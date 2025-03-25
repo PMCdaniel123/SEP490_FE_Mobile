@@ -8,6 +8,7 @@
         "recommenSpace",
         "workSpaceDetail",
         "loginFunction",
-        "registerFunction"
+        "registerFunction",
+        "userProfile"
     ]
 }

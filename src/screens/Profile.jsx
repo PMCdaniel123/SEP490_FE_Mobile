@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import {
   View,
   Text,
@@ -7,9 +7,12 @@ import {
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
+  Alert,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { useNavigation } from "@react-navigation/native";
+import { AuthContext } from "../contexts/AuthContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const user = {
   id: 1,
@@ -29,6 +32,7 @@ const user = {
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
+  const { logout } = useContext(AuthContext);
 
   const MenuItem = ({ icon, text, onPress }) => (
     <TouchableOpacity style={styles.menuItem} onPress={onPress}>
@@ -44,6 +48,32 @@ const ProfileScreen = () => {
       />
     </TouchableOpacity>
   );
+
+  const handleLogout = () => {
+    Alert.alert(
+      "Đăng xuất",
+      "Bạn có chắc chắn muốn đăng xuất?",
+      [
+        {
+          text: "Hủy",
+          style: "cancel"
+        },
+        {
+          text: "Đăng xuất",
+          onPress: async () => {
+            try {
+              await logout();
+            } catch (error) {
+              console.error("Lỗi khi đăng xuất:", error);
+              Alert.alert("Lỗi", "Đã xảy ra lỗi khi đăng xuất. Vui lòng thử lại sau.");
+            }
+          },
+          style: "destructive"
+        }
+      ],
+      { cancelable: true }
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -80,7 +110,8 @@ const ProfileScreen = () => {
           <MenuItem icon="file-text" text="Điều khoản" onPress={() => {}} />
         </View>
 
-        <TouchableOpacity style={styles.logoutButton}>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Icon name="sign-out" size={20} color="#FF3B30" style={styles.logoutIcon} />
           <Text style={styles.logoutText}>Đăng xuất</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -166,12 +197,17 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   logoutButton: {
+    flexDirection: "row",
     marginHorizontal: 15,
     paddingVertical: 15,
     borderRadius: 10,
     backgroundColor: "#FFFFFF",
     alignItems: "center",
+    justifyContent: "center",
     marginBottom: 30,
+  },
+  logoutIcon: {
+    marginRight: 10,
   },
   logoutText: {
     color: "#FF3B30",

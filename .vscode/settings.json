@@ -6,6 +6,7 @@
         "bottomTab",
         "notification",
         "recommenSpace",
-        "workSpaceDetail"
+        "workSpaceDetail",
+        "loginFunction"
     ]
 }

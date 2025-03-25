@@ -3,6 +3,7 @@
         "initialProject",
         "highRateSpace",
         "homePage",
-        "bottomTab"
+        "bottomTab",
+        "notification"
     ]
 }

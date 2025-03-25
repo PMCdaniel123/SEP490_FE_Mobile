@@ -13,15 +13,17 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import HighRatedSpaces from "../components/HighRatedSpaces";
 import Recommendations from "../components/Recommendations";
 import SpaceNearYou from "../components/SpaceNearYou";
+import { useNavigation } from "@react-navigation/native";
 
 const HomeScreen = () => {
+  const navigation = useNavigation();
+
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <View style={styles.userInfo}>
           <Image
-            source={require("../../assets/images/workspace2.jpg")}
+            source={require('../../assets/images/workspace2.jpg')}
             style={styles.avatar}
           />
           <View>
@@ -36,13 +38,15 @@ const HomeScreen = () => {
           <TouchableOpacity style={styles.iconButton}>
             <Icon name="search" size={24} color="#000" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
+          <TouchableOpacity
+            style={styles.iconButton}
+            onPress={() => navigation.navigate('Notification')}
+          >
             <Icon name="notifications-none" size={24} color="#000" />
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Location Banner */}
       <TouchableOpacity style={styles.locationBanner}>
         <Icon
           name="location-on"
@@ -55,7 +59,6 @@ const HomeScreen = () => {
         </Text>
         <Icon name="chevron-right" size={24} color="#000" />
       </TouchableOpacity>
-      {/* Main Content */}
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* High Rated Spaces */}
         <HighRatedSpaces />
@@ -66,7 +69,6 @@ const HomeScreen = () => {
     </SafeAreaView>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -131,27 +133,6 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
 
-  // bottomNav: {
-  //   flexDirection: 'row',
-  //   justifyContent: 'space-around',
-  //   paddingVertical: 12,
-  //   borderTopWidth: 1,
-  //   borderTopColor: '#eee',
-  //   backgroundColor: '#fff',
-  // },
-  // navItem: {
-  //   alignItems: 'center',
-  // },
-  // navText: {
-  //   fontSize: 12,
-  //   color: '#999',
-  //   marginTop: 4,
-  // },
-  // activeNavText: {
-  //   fontSize: 12,
-  //   color: '#B25F00',
-  //   marginTop: 4,
-  // },
 });
 
 export default HomeScreen;

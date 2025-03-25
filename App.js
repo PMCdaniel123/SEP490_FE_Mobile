@@ -7,6 +7,7 @@ import Home from "./src/screens/Home";
 import WorkspaceDetail from "./src/screens/WorkspaceDetail";
 import ProfileScreen from "./src/screens/Profile";
 import ProfileDetail from "./src/screens/ProfileDetail";
+import NotificationScreen from "./src/screens/Notification";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -15,6 +16,7 @@ const ProfileStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="Profile" component={ProfileScreen} />
     <Stack.Screen name="ProfileDetail" component={ProfileDetail} />
+   
   </Stack.Navigator>
 );
 
@@ -22,6 +24,7 @@ const HomeStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="Home" component={Home} />
     <Stack.Screen name="WorkspaceDetail" component={WorkspaceDetail} />
+    <Stack.Screen name="Notification" component={NotificationScreen} />
   </Stack.Navigator>
 );
 
@@ -61,8 +64,8 @@ export default function App() {
           }}
         />
         <Tab.Screen
-          name="Đặt chỗ của tôi"
-          component={Home} // Replace with the actual component
+          name="Đặt chỗ"
+          component={Home} 
           options={{
             tabBarIcon: ({ color }) => (
               <Icon name="calendar" size={22} color={color} />
@@ -71,7 +74,7 @@ export default function App() {
         />
         <Tab.Screen
           name="Message"
-          component={Home} // Replace with the actual component
+          component={Home} 
           options={{
             tabBarIcon: ({ color }) => (
               <Icon name="comment" size={22} color={color} />
@@ -80,7 +83,7 @@ export default function App() {
         />
         <Tab.Screen
           name="Tài khoản"
-          component={ProfileStack} // Use ProfileStack here
+          component={ProfileStack}
           options={{
             tabBarIcon: ({ color }) => (
               <Icon name="user" size={22} color={color} />

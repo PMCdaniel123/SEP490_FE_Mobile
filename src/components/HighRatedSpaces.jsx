@@ -1,122 +1,8 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
-
-const highRatedSpaces = [
-  {
-    id: 1,
-    name: 'Workaholic Bàn cá nhân',
-    address: '21A1 Đ Làng Tăng Phú, Tăng Nhơn Phú A, Thủ Đức, Hồ Chí Minh, Việt Nam',
-    googleMapUrl: 'https://www.google.com/maps/place/WORKAHOLIC+CAFE+24%2F7/',
-    description: 'Coffee and workspace Workaholic',
-    capacity: 5,
-    category: 'Bàn cá nhân',
-    status: 'Active',
-    createdAt: '2025-03-24T16:38:43.984Z',
-    updatedAt: '2025-03-24T16:38:43.984Z',
-    cleanTime: 15,
-    rate: 4.6,
-    area: 10,
-    openTime: '00:00:00',
-    closeTime: '23:59:00',
-    is24h: 1,
-    prices: [
-      {
-        id: 1,
-        price: 100,
-        category: 'Giờ',
-      },
-      {
-        id: 2,
-        price: 500,
-        category: 'Ngày',
-      },
-    ],
-    images: [
-      {
-        id: 1,
-        imgUrl: 'https://res.cloudinary.com/dcq99dv8p/image/upload/v1741894818/IMAGES/djgfdgh9elztkr0svfwi.jpg',
-      },
-      {
-        id: 2,
-        imgUrl: 'https://res.cloudinary.com/dcq99dv8p/image/upload/v1741894872/IMAGES/jxr6ekgv5gvlgygbtlly.jpg',
-      },
-    ],
-    facilities: [
-      {
-        id: 1,
-        facilityName: 'Quầy tự phục vụ',
-      },
-      {
-        id: 2,
-        facilityName: 'Tivi 65 inch',
-      },
-    ],
-    policies: [
-      {
-        id: 1,
-        policyName: 'Không mang thức ăn từ bên ngoài vào',
-      },
-      {
-        id: 2,
-        policyName: 'Không mang theo động vật',
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: 'Opal Grove Inn',
-    address: 'Le Van Viet, Thu Duc',
-    googleMapUrl: 'https://www.google.com/maps/place/OPAL+GROVE+INN/',
-    description: 'A cozy workspace with modern amenities',
-    capacity: 10,
-    category: 'Phòng họp',
-    status: 'Active',
-    createdAt: '2025-03-24T16:38:43.984Z',
-    updatedAt: '2025-03-24T16:38:43.984Z',
-    cleanTime: 20,
-    rate: 4.5,
-    area: 20,
-    openTime: '08:00:00',
-    closeTime: '20:00:00',
-    is24h: 0,
-    prices: [
-      {
-        id: 1,
-        price: 200,
-        category: 'Giờ',
-      },
-      {
-        id: 2,
-        price: 1000,
-        category: 'Ngày',
-      },
-    ],
-    images: [
-      {
-        id: 1,
-        imgUrl: 'https://res.cloudinary.com/dcq99dv8p/image/upload/v1741894920/IMAGES/ul4gto2ywr0vwpbgamhy.jpg',
-      },
-    ],
-    facilities: [
-      {
-        id: 1,
-        facilityName: 'Máy lạnh',
-      },
-      {
-        id: 2,
-        facilityName: 'Wifi tốc độ cao',
-      },
-    ],
-    policies: [
-      {
-        id: 1,
-        policyName: 'Không hút thuốc',
-      },
-    ],
-  },
-];
+import axios from 'axios';
 
 const formatCurrency = (value) => {
   return new Intl.NumberFormat('vi-VN', {
@@ -126,7 +12,63 @@ const formatCurrency = (value) => {
 };
 
 const HighRatedSpaces = () => {
+  const [highRatedSpaces, setHighRatedSpaces] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
+
+  useEffect(() => {
+    const fetchHighRatedSpaces = async () => {
+      try {
+        const response = await axios.get('http://35.78.210.59:8080/users/searchbyrate');
+        setHighRatedSpaces(response.data.workspaces || []);
+      } catch (error) {
+        console.error('Error fetching high-rated spaces:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHighRatedSpaces();
+  }, []);
+
+  const renderSpaceItem = ({ item }) => (
+    <TouchableOpacity
+      style={styles.spaceCard}
+      onPress={() => navigation.navigate('WorkspaceDetail', { workspace: item })}
+    >
+      <Image source={{ uri: item.images[0]?.imgUrl }} style={styles.spaceImage} />
+      <TouchableOpacity style={styles.favoriteButton}>
+        <Icon name="favorite-border" size={20} color="#FF5A5F" />
+      </TouchableOpacity>
+      <View style={styles.spaceInfo}>
+        <Text style={styles.spaceName} numberOfLines={1}>{item.name}</Text>
+        <Text style={styles.spaceLocation} numberOfLines={1}>
+          {item.address}
+        </Text>
+        <View style={styles.priceRatingContainer}>
+          <Text style={styles.spacePrice}>
+            {item.prices.length > 1
+              ? `${formatCurrency(Math.min(...item.prices.map((p) => p.price)))} - ${formatCurrency(
+                  Math.max(...item.prices.map((p) => p.price))
+                )}`
+              : `${formatCurrency(item.prices[0]?.price)}`}
+          </Text>
+          <View style={styles.ratingContainer}>
+            <Icon name="star" size={16} color="#FFD700" />
+            <Text style={styles.ratingText}>{item.rate}</Text>
+          </View>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#835101" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.sectionContainer}>
@@ -136,39 +78,14 @@ const HighRatedSpaces = () => {
           <Text style={styles.seeAllText}>Xem tất cả</Text>
         </TouchableOpacity>
       </View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        {highRatedSpaces.map((space) => (
-          <TouchableOpacity
-            key={space.id}
-            style={styles.spaceCard}
-            onPress={() => navigation.navigate('WorkspaceDetail', { workspace: space })}
-          >
-            <Image source={{ uri: space.images[0]?.imgUrl }} style={styles.spaceImage} />
-            <TouchableOpacity style={styles.favoriteButton}>
-              <Icon name="favorite-border" size={20} color="#FF5A5F" />
-            </TouchableOpacity>
-            <View style={styles.spaceInfo}>
-              <Text style={styles.spaceName}>{space.name}</Text>
-              <Text style={styles.spaceLocation} numberOfLines={1}>
-                {space.address}
-              </Text>
-              <View style={styles.priceRatingContainer}>
-                <Text style={styles.spacePrice}>
-                  {space.prices.length > 1
-                    ? `${formatCurrency(Math.min(...space.prices.map((p) => p.price)))} - ${formatCurrency(
-                        Math.max(...space.prices.map((p) => p.price))
-                      )}`
-                    : `${formatCurrency(space.prices[0]?.price)}`}
-                </Text>
-                <View style={styles.ratingContainer}>
-                  <Icon name="star" size={16} color="#FFD700" />
-                  <Text style={styles.ratingText}>{space.rate}</Text>
-                </View>
-              </View>
-            </View>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+      <FlatList
+        data={highRatedSpaces}
+        renderItem={renderSpaceItem}
+        keyExtractor={(item) => item.id.toString()}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.listContainer}
+      />
     </View>
   );
 };
@@ -187,14 +104,19 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: '#333',
   },
   seeAllText: {
     color: '#B25F00',
     fontWeight: '500',
   },
+  listContainer: {
+    paddingLeft: 16,
+    paddingRight: 8,
+  },
   spaceCard: {
-    width: 250,
-    marginLeft: 16,
+    width: 260,
+    marginRight: 12,
     borderRadius: 12,
     overflow: 'hidden',
     backgroundColor: '#fff',
@@ -203,17 +125,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
+    marginBottom: 4,
   },
   spaceImage: {
     width: '100%',
-    height: 150,
+    height: 160,
     resizeMode: 'cover',
   },
   favoriteButton: {
     position: 'absolute',
     top: 8,
     right: 8,
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderRadius: 20,
     padding: 6,
   },
@@ -224,6 +147,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 4,
+    color: '#333',
   },
   spaceLocation: {
     fontSize: 14,
@@ -238,14 +162,25 @@ const styles = StyleSheet.create({
   spacePrice: {
     fontSize: 14,
     fontWeight: 'bold',
+    color: '#B25F00',
   },
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: 'rgba(255, 215, 0, 0.1)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
   },
   ratingText: {
     marginLeft: 4,
     fontWeight: 'bold',
+    color: '#333',
+  },
+  loadingContainer: {
+    height: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

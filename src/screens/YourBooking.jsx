@@ -7,17 +7,19 @@ import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const BookingScreen = () => {
-const isFocused = useIsFocused();
-
+  const isFocused = useIsFocused();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const { userData, userToken } = useContext(AuthContext);
   const navigation = useNavigation();
+  const [activeTab, setActiveTab] = useState('Success');
+
   useEffect(() => {
     if (isFocused) {
       navigation.getParent()?.setOptions({ tabBarStyle: { display: "flex" } });
     }
   }, [isFocused]);
+
   useEffect(() => {
     fetchBookingHistory();
   }, []);
@@ -32,9 +34,12 @@ const isFocused = useIsFocused();
           },
         }
       );
-
+  
       if (response.data && response.data.bookingHistories) {
-        setBookings(response.data.bookingHistories);
+        const sortedBookings = response.data.bookingHistories.sort((a, b) => {
+          return new Date(b.booking_CreatedAt) - new Date(a.booking_CreatedAt); // Sort by newest
+        });
+        setBookings(sortedBookings);
       }
     } catch (error) {
       console.error('Lỗi khi tải lịch sử đặt chỗ:', error);
@@ -59,6 +64,19 @@ const isFocused = useIsFocused();
     return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + "đ";
   };
 
+  const getStatusText = (status) => {
+    switch (status) {
+      case 'Success':
+        return 'Giao dịch thành công';
+      case 'Pending':
+        return 'Đang chờ xử lý';
+      case 'Fail':
+        return 'Giao dịch thất bại';
+      default:
+        return 'Không xác định';
+    }
+  };
+  
   const getStatusColor = (status) => {
     switch (status) {
       case 'Success':
@@ -90,7 +108,7 @@ const isFocused = useIsFocused();
             {item.license_Address}
           </Text>
           <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.booking_Status) }]}>
-            <Text style={styles.statusText}>{item.booking_Status}</Text>
+            <Text style={styles.statusText}>{getStatusText(item.booking_Status)}</Text>
           </View>
         </View>
       </View>
@@ -123,46 +141,72 @@ const isFocused = useIsFocused();
 
   if (loading) {
     return (
-        <SafeAreaView style={styles.safeArea}>
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#835101" />
-        <Text style={styles.loadingText}>Đang tải lịch sử đặt chỗ...</Text>
-      </View>
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#835101" />
+          <Text style={styles.loadingText}>Đang tải lịch sử đặt chỗ...</Text>
+        </View>
       </SafeAreaView>
     );
   }
 
+  const filteredBookings = bookings.filter((item) => item.booking_Status === activeTab);
+
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Lịch sử đặt chỗ</Text>
-      </View>
-
-      {bookings.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Ionicons name="calendar-outline" size={80} color="#CCCCCC" />
-          <Text style={styles.emptyText}>Bạn chưa có lịch sử đặt chỗ nào</Text>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Lịch sử đặt chỗ</Text>
         </View>
-      ) : (
-        <FlatList
-          data={bookings}
-          renderItem={renderBookingItem}
-          keyExtractor={(item) => item.booking_Id.toString()}
-          contentContainerStyle={styles.listContainer}
-          showsVerticalScrollIndicator={false}
-        />
-      )}
-    </View>
+
+        {/* Tab Bar */}
+        <View style={styles.tabContainer}>
+          <TouchableOpacity 
+            style={[styles.tabButton, activeTab === 'Success' && styles.activeTabButton]}
+            onPress={() => setActiveTab('Success')}
+          >
+            <Text style={[styles.tabText, activeTab === 'Success' && styles.activeTabText]}>
+              Thành công
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.tabButton, activeTab === 'Fail' && styles.activeTabButton]}
+            onPress={() => setActiveTab('Fail')}
+          >
+            <Text style={[styles.tabText, activeTab === 'Fail' && styles.activeTabText]}>
+              Thất bại
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {filteredBookings.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Ionicons name="calendar-outline" size={80} color="#CCCCCC" />
+            <Text style={styles.emptyText}>
+              {activeTab === 'Success' 
+                ? 'Bạn chưa có lịch sử đặt chỗ thành công nào' 
+                : 'Bạn chưa có lịch sử đặt chỗ thất bại nào'}
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={filteredBookings}
+            renderItem={renderBookingItem}
+            keyExtractor={(item) => item.booking_Id.toString()}
+            contentContainerStyle={styles.listContainer}
+            showsVerticalScrollIndicator={false}
+          />
+        )}
+      </View>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-        backgroundColor: '#FFFFFF',
-      },
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
   container: {
     flex: 1,
     backgroundColor: '#F2F2F7',
@@ -177,6 +221,34 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
     color: '#000000',
+  },
+  // Tab styles
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 20,
+    paddingBottom: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEEEEE',
+  },
+  tabButton: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  activeTabButton: {
+    borderBottomColor: '#835101',
+  },
+  tabText: {
+    fontSize: 16,
+    color: '#666666',
+    fontWeight: '500',
+  },
+  activeTabText: {
+    color: '#835101',
+    fontWeight: 'bold',
   },
   loadingContainer: {
     flex: 1,

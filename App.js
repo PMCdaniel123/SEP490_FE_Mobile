@@ -47,7 +47,7 @@ const BookingStack = () => (
       component={BookingDetailScreen}
       options={{
         headerShown: false,
-        presentation: "modal",
+        // presentation: "modal",
       }}
     />
   </Stack.Navigator>

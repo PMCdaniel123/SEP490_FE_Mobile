@@ -11,6 +11,7 @@
         "registerFunction",
         "userProfile",
         "workSpace",
-        "yourBooking UI"
+        "yourBooking UI",
+        "yourBookingDetail"
     ]
 }

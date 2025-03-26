@@ -230,7 +230,7 @@ const BookingDetailScreen = ({ route }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#FFFFFF',
   },
   container: {
     flex: 1,
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 15,
-    paddingTop: 50,
+    paddingTop: 20,
     paddingBottom: 15,
     backgroundColor: '#FFFFFF',
   },

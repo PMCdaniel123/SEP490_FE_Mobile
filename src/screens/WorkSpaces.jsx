@@ -33,6 +33,8 @@ const WorkSpaces = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [viewType, setViewType] = useState("grid");
+  const [categories, setCategories] = useState(["Tất cả"]);
+  const [selectedCategory, setSelectedCategory] = useState("Tất cả");
 
   const fetchSpaces = async () => {
     try {
@@ -41,6 +43,12 @@ const WorkSpaces = ({ navigation }) => {
       const data = response.data.workspaces || [];
       setSpaces(data);
       setFilteredSpaces(data);
+
+      const uniqueCategories = [
+        "Tất cả",
+        ...new Set(data.map((space) => space.category)),
+      ];
+      setCategories(uniqueCategories);
     } catch (error) {
       console.error("Error fetching spaces:", error);
     } finally {
@@ -54,17 +62,25 @@ const WorkSpaces = ({ navigation }) => {
   }, []);
 
   useEffect(() => {
-    if (searchText.trim() === "") {
-      setFilteredSpaces(spaces);
-    } else {
-      const filtered = spaces.filter(
+    // Filter spaces based on search text and selected category
+    let filtered = spaces;
+
+    if (selectedCategory !== "Tất cả") {
+      filtered = filtered.filter(
+        (space) => space.category === selectedCategory
+      );
+    }
+
+    if (searchText.trim() !== "") {
+      filtered = filtered.filter(
         (space) =>
           space.name.toLowerCase().includes(searchText.toLowerCase()) ||
           space.address.toLowerCase().includes(searchText.toLowerCase())
       );
-      setFilteredSpaces(filtered);
     }
-  }, [searchText, spaces]);
+
+    setFilteredSpaces(filtered);
+  }, [searchText, selectedCategory, spaces]);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -74,7 +90,25 @@ const WorkSpaces = ({ navigation }) => {
   const toggleViewType = () => {
     setViewType(viewType === "grid" ? "list" : "grid");
   };
-
+  const renderCategoryItem = ({ item }) => (
+    <TouchableOpacity
+      style={[
+        styles.filterButton,
+        selectedCategory === item && styles.activeFilterButton,
+      ]}
+      onPress={() => setSelectedCategory(item)}
+    >
+      <Text
+        style={
+          selectedCategory === item
+            ? styles.activeFilterText
+            : styles.filterText
+        }
+      >
+        {item}
+      </Text>
+    </TouchableOpacity>
+  );
   const renderGridItem = ({ item }) => (
     <TouchableOpacity
       style={styles.gridItem}
@@ -100,13 +134,13 @@ const WorkSpaces = ({ navigation }) => {
         </View>
       </View>
       <View style={styles.gridItemInfo}>
-      <Text style={styles.gridItemLicense} numberOfLines={1}>
+        <Text style={styles.gridItemLicense} numberOfLines={1}>
           {item.licenseName || "Chưa có giấy phép"}
         </Text>
         <Text style={styles.gridItemName} numberOfLines={1}>
           {item.name}
         </Text>
-      
+
         <View style={styles.gridItemLocation}>
           <Icon name="location-on" size={12} color="#666" />
           <Text style={styles.gridLocationText} numberOfLines={1}>
@@ -152,13 +186,13 @@ const WorkSpaces = ({ navigation }) => {
         </View>
       </View>
       <View style={styles.listItemInfo}>
-      <Text style={styles.listItemLicense} numberOfLines={1}>
+        <Text style={styles.listItemLicense} numberOfLines={1}>
           {item.licenseName || "Chưa có giấy phép"}
         </Text>
         <Text style={styles.listItemName} numberOfLines={1}>
           {item.name}
         </Text>
-      
+
         <View style={styles.listItemLocation}>
           <Icon name="location-on" size={14} color="#666" />
           <Text style={styles.listItemLocationText} numberOfLines={2}>
@@ -172,8 +206,8 @@ const WorkSpaces = ({ navigation }) => {
                   item.prices[1].price
                 )}`
               : item.prices && item.prices.length === 1
-              ? formatCurrency(item.prices[0]?.price)
-              : "Liên hệ"}
+                ? formatCurrency(item.prices[0]?.price)
+                : "Liên hệ"}
           </Text>
         </View>
       </View>
@@ -198,7 +232,10 @@ const WorkSpaces = ({ navigation }) => {
             Tìm không gian làm việc phù hợp với bạn
           </Text>
         </View>
-        <TouchableOpacity onPress={toggleViewType} style={styles.viewTypeButton}> 
+        <TouchableOpacity
+          onPress={toggleViewType}
+          style={styles.viewTypeButton}
+        >
           <Icon
             name={viewType === "grid" ? "view-list" : "grid-view"}
             size={24}
@@ -206,6 +243,14 @@ const WorkSpaces = ({ navigation }) => {
           />
         </TouchableOpacity>
       </View>
+      <FlatList
+        data={categories}
+        renderItem={renderCategoryItem}
+        keyExtractor={(item) => item}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.filterContainer}
+      />
     </View>
   );
 
@@ -215,7 +260,12 @@ const WorkSpaces = ({ navigation }) => {
 
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
-          <Icon name="search" size={20} color="#666" style={styles.searchIcon} />
+          <Icon
+            name="search"
+            size={20}
+            color="#666"
+            style={styles.searchIcon}
+          />
           <TextInput
             style={styles.searchInput}
             placeholder="Tìm kiếm không gian làm việc..."
@@ -275,16 +325,16 @@ const styles = StyleSheet.create({
     color: "#666",
     marginBottom: 4,
   },
-  
+
   listItemLicense: {
     fontSize: 14,
     color: "#666",
     marginBottom: 8,
   },
   headerTitleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   headerTitle: {
     fontSize: 24,
@@ -299,7 +349,7 @@ const styles = StyleSheet.create({
   viewTypeButton: {
     padding: 8,
     borderRadius: 8,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: "#f0f0f0",
   },
   searchContainer: {
     flexDirection: "row",
@@ -410,7 +460,7 @@ const styles = StyleSheet.create({
   },
   // Styles grid
   gridRow: {
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
   },
   gridItem: {
     width: COLUMN_WIDTH,
@@ -510,7 +560,27 @@ const styles = StyleSheet.create({
     color: "#666",
     textAlign: "center",
   },
-
+  filterContainer: {
+    paddingTop: 30,
+    paddingVertical: 8,
+  },
+  filterButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginRight: 8,
+    backgroundColor: "#f5f5f5",
+  },
+  activeFilterButton: {
+    backgroundColor: "#835101",
+  },
+  filterText: {
+    color: "#666",
+  },
+  activeFilterText: {
+    color: "#fff",
+    fontWeight: "500",
+  },
 });
 
 export default WorkSpaces;

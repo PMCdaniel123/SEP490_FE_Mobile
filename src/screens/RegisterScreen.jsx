@@ -94,7 +94,7 @@ const RegisterScreen = ({ navigation }) => {
                 />
                 {touched.name && errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
 
-                <Text style={styles.label}>E-mail</Text>
+                <Text style={styles.label}>Email</Text>
                 <TextInput
                   style={[styles.input, touched.email && errors.email && styles.inputError]}
                   placeholder="Nhập email"

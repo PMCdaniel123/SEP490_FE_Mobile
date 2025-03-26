@@ -9,6 +9,7 @@
         "workSpaceDetail",
         "loginFunction",
         "registerFunction",
-        "userProfile"
+        "userProfile",
+        "workSpace"
     ]
 }

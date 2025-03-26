@@ -114,9 +114,9 @@ const Recommendations = () => {
     <View style={styles.sectionContainer}>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Đề xuất dành cho bạn</Text>
-        <TouchableOpacity>
-          <Text style={styles.seeAllText}>Xem tất cả</Text>
-        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("WorkSpaces")}>
+  <Text style={styles.seeAllText}>Xem tất cả</Text>
+</TouchableOpacity>
       </View>
 
       <FlatList

@@ -4,7 +4,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Icon from "react-native-vector-icons/FontAwesome";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import Home from "./src/screens/Home";
 import WorkspaceDetail from "./src/screens/WorkspaceDetail";
 import ProfileScreen from "./src/screens/Profile";
@@ -15,24 +15,33 @@ import LoginScreen from "./src/screens/LoginScreen";
 // Context
 import { AuthContext, AuthProvider } from "./src/contexts/AuthContext";
 import RegisterScreen from "./src/screens/RegisterScreen";
+import WorkSpaces from "./src/screens/WorkSpaces";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 const AuthStack = createNativeStackNavigator();
 
 const ProfileStack = () => (
+
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="ProfileMain" component={ProfileScreen} />
     <Stack.Screen name="ProfileDetail" component={ProfileDetail} />
   </Stack.Navigator>
+
 );
 
 const HomeStack = () => (
+
+   
+      
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="HomeMain" component={Home} />
     <Stack.Screen name="WorkspaceDetail" component={WorkspaceDetail} />
     <Stack.Screen name="Notification" component={NotificationScreen} />
+    <Stack.Screen name="WorkSpaces" component={WorkSpaces} />
   </Stack.Navigator>
+
+
 );
 
 const AuthScreens = () => (

@@ -124,8 +124,7 @@ const AppNavigator = () => {
 
   return (
     <NavigationContainer>
-      {/* {userToken ? <TabNavigator /> : <AuthScreens />} */}
-      <TabNavigator />
+      {userToken ? <TabNavigator /> : <AuthScreens />}
     </NavigationContainer>
   );
 };

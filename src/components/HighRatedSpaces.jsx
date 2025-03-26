@@ -1,13 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useNavigation } from '@react-navigation/native';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
+import Icon from "react-native-vector-icons/MaterialIcons";
+import { useNavigation } from "@react-navigation/native";
+import axios from "axios";
 
 const formatCurrency = (value) => {
-  return new Intl.NumberFormat('vi-VN', {
-    style: 'currency',
-    currency: 'VND',
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
   }).format(value);
 };
 
@@ -19,10 +27,12 @@ const HighRatedSpaces = () => {
   useEffect(() => {
     const fetchHighRatedSpaces = async () => {
       try {
-        const response = await axios.get('http://35.78.210.59:8080/users/searchbyrate');
+        const response = await axios.get(
+          "http://35.78.210.59:8080/users/searchbyrate"
+        );
         setHighRatedSpaces(response.data.workspaces || []);
       } catch (error) {
-        console.error('Error fetching high-rated spaces:', error);
+        console.error("Error fetching high-rated spaces:", error);
       } finally {
         setLoading(false);
       }
@@ -33,33 +43,38 @@ const HighRatedSpaces = () => {
 
   const renderSpaceItem = ({ item }) => (
     <TouchableOpacity
-    style={styles.spaceCard}
-    onPress={() => navigation.navigate('WorkspaceDetail', { id: item.id })} // Pass workspace ID
-  >
-    <Image source={{ uri: item.images[0]?.imgUrl }} style={styles.spaceImage} />
-    <TouchableOpacity style={styles.favoriteButton}>
-      <Icon name="favorite-border" size={20} color="#FF5A5F" />
-    </TouchableOpacity>
-    <View style={styles.spaceInfo}>
-      <Text style={styles.spaceName} numberOfLines={1}>{item.name}</Text>
-      <Text style={styles.spaceLocation} numberOfLines={1}>
-        {item.address}
-      </Text>
-      <View style={styles.priceRatingContainer}>
-        <Text style={styles.spacePrice}>
-          {item.prices.length > 1
-            ? `${formatCurrency(Math.min(...item.prices.map((p) => p.price)))} - ${formatCurrency(
-                Math.max(...item.prices.map((p) => p.price))
-              )}`
-            : `${formatCurrency(item.prices[0]?.price)}`}
+      style={styles.spaceCard}
+      onPress={() => navigation.navigate("WorkspaceDetail", { id: item.id })} // Pass workspace ID
+    >
+      <Image
+        source={{ uri: item.images[0]?.imgUrl }}
+        style={styles.spaceImage}
+      />
+      <TouchableOpacity style={styles.favoriteButton}>
+        <Icon name="favorite-border" size={20} color="#FF5A5F" />
+      </TouchableOpacity>
+      <View style={styles.spaceInfo}>
+        <Text style={styles.spaceName} numberOfLines={1}>
+          {item.name}
         </Text>
-        <View style={styles.ratingContainer}>
-          <Icon name="star" size={16} color="#FFD700" />
-          <Text style={styles.ratingText}>{item.rate}</Text>
+        <Text style={styles.spaceLocation} numberOfLines={1}>
+          {item.address}
+        </Text>
+        <View style={styles.priceRatingContainer}>
+          <Text style={styles.spacePrice}>
+            {item.prices.length > 1
+              ? `${formatCurrency(Math.min(...item.prices.map((p) => p.price)))} - ${formatCurrency(
+                  Math.max(...item.prices.map((p) => p.price))
+                )}`
+              : `${formatCurrency(item.prices[0]?.price)}`}
+          </Text>
+          <View style={styles.ratingContainer}>
+            <Icon name="star" size={16} color="#FFD700" />
+            <Text style={styles.ratingText}>{item.rate}</Text>
+          </View>
         </View>
       </View>
-    </View>
-  </TouchableOpacity>
+    </TouchableOpacity>
   );
 
   if (loading) {
@@ -95,20 +110,20 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 16,
     marginBottom: 12,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
   },
   seeAllText: {
-    color: '#B25F00',
-    fontWeight: '500',
+    color: "#B25F00",
+    fontWeight: "500",
   },
   listContainer: {
     paddingLeft: 16,
@@ -118,9 +133,9 @@ const styles = StyleSheet.create({
     width: 260,
     marginRight: 12,
     borderRadius: 12,
-    overflow: 'hidden',
-    backgroundColor: '#fff',
-    shadowColor: '#000',
+    overflow: "hidden",
+    backgroundColor: "#fff",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -128,15 +143,15 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   spaceImage: {
-    width: '100%',
+    width: "100%",
     height: 160,
-    resizeMode: 'cover',
+    resizeMode: "cover",
   },
   favoriteButton: {
-    position: 'absolute',
+    position: "absolute",
     top: 8,
     right: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
     borderRadius: 20,
     padding: 6,
   },
@@ -145,42 +160,42 @@ const styles = StyleSheet.create({
   },
   spaceName: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 4,
-    color: '#333',
+    color: "#333",
   },
   spaceLocation: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
     marginBottom: 8,
   },
   priceRatingContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   spacePrice: {
     fontSize: 14,
-    fontWeight: 'bold',
-    color: '#B25F00',
+    fontWeight: "bold",
+    color: "#B25F00",
   },
   ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 215, 0, 0.1)',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 215, 0, 0.1)",
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
   },
   ratingText: {
     marginLeft: 4,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
   },
   loadingContainer: {
     height: 200,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

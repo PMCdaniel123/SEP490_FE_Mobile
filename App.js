@@ -16,6 +16,8 @@ import LoginScreen from "./src/screens/LoginScreen";
 import { AuthContext, AuthProvider } from "./src/contexts/AuthContext";
 import RegisterScreen from "./src/screens/RegisterScreen";
 import WorkSpaces from "./src/screens/WorkSpaces";
+import { CartProvider } from "./src/contexts/CartContext";
+import Checkout from "./src/screens/Checkout";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -39,6 +41,7 @@ const HomeStack = () => (
     <Stack.Screen name="WorkspaceDetail" component={WorkspaceDetail} />
     <Stack.Screen name="Notification" component={NotificationScreen} />
     <Stack.Screen name="WorkSpaces" component={WorkSpaces} />
+    <Stack.Screen name="Checkout" component={Checkout} />
   </Stack.Navigator>
 
 
@@ -55,9 +58,6 @@ const TabNavigator = () => (
   <Tab.Navigator
     screenOptions={{
       tabBarStyle: {
-        position: "absolute",
-        left: 20,
-        right: 20,
         elevation: 5,
         backgroundColor: "#ffffff",
         height: 65,
@@ -133,7 +133,9 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <AuthProvider>
-        <AppNavigator />
+        <CartProvider>
+          <AppNavigator />
+        </CartProvider>
       </AuthProvider>
     </SafeAreaProvider>
   );

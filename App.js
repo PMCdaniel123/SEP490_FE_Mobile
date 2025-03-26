@@ -16,32 +16,41 @@ import LoginScreen from "./src/screens/LoginScreen";
 import { AuthContext, AuthProvider } from "./src/contexts/AuthContext";
 import RegisterScreen from "./src/screens/RegisterScreen";
 import WorkSpaces from "./src/screens/WorkSpaces";
+import YourBooking from "./src/screens/YourBooking";
+import BookingDetailScreen from "./src/screens/YourBookingDetail";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 const AuthStack = createNativeStackNavigator();
 
 const ProfileStack = () => (
-
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="ProfileMain" component={ProfileScreen} />
     <Stack.Screen name="ProfileDetail" component={ProfileDetail} />
   </Stack.Navigator>
-
 );
 
 const HomeStack = () => (
-
-   
-      
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="HomeMain" component={Home} />
     <Stack.Screen name="WorkspaceDetail" component={WorkspaceDetail} />
     <Stack.Screen name="Notification" component={NotificationScreen} />
     <Stack.Screen name="WorkSpaces" component={WorkSpaces} />
   </Stack.Navigator>
+);
 
-
+const BookingStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="YourBooking" component={YourBooking} />
+    <Stack.Screen
+      name="BookingDetail"
+      component={BookingDetailScreen}
+      options={{
+        headerShown: false,
+        presentation: "modal",
+      }}
+    />
+  </Stack.Navigator>
 );
 
 const AuthScreens = () => (
@@ -53,7 +62,7 @@ const AuthScreens = () => (
 
 const TabNavigator = () => (
   <Tab.Navigator
-    screenOptions={{
+    screenOptions={({ route }) => ({
       tabBarStyle: {
         position: "absolute",
         left: 20,
@@ -62,6 +71,7 @@ const TabNavigator = () => (
         backgroundColor: "#ffffff",
         height: 65,
         ...styles.shadow,
+        display: route.name === "Đặt chỗ" && route.state?.routes[route.state.index]?.name === "BookingDetail" ? "none" : "flex", // Hide tab bar for BookingDetail
       },
       tabBarActiveTintColor: "#835101",
       tabBarInactiveTintColor: "#999",
@@ -74,7 +84,7 @@ const TabNavigator = () => (
       },
       headerShown: false,
       tabBarHideOnKeyboard: true,
-    }}
+    })}
   >
     <Tab.Screen
       name="Trang chủ"
@@ -85,7 +95,7 @@ const TabNavigator = () => (
     />
     <Tab.Screen
       name="Đặt chỗ"
-      component={Home}
+      component={BookingStack}
       options={{
         tabBarIcon: ({ color }) => (
           <Icon name="calendar" size={22} color={color} />
@@ -110,7 +120,6 @@ const TabNavigator = () => (
     />
   </Tab.Navigator>
 );
-
 const AppNavigator = () => {
   const { isLoading, userToken } = useContext(AuthContext);
 

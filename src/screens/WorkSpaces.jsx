@@ -100,9 +100,13 @@ const WorkSpaces = ({ navigation }) => {
         </View>
       </View>
       <View style={styles.gridItemInfo}>
+      <Text style={styles.gridItemLicense} numberOfLines={1}>
+          {item.licenseName || "Chưa có giấy phép"}
+        </Text>
         <Text style={styles.gridItemName} numberOfLines={1}>
           {item.name}
         </Text>
+      
         <View style={styles.gridItemLocation}>
           <Icon name="location-on" size={12} color="#666" />
           <Text style={styles.gridLocationText} numberOfLines={1}>
@@ -148,9 +152,13 @@ const WorkSpaces = ({ navigation }) => {
         </View>
       </View>
       <View style={styles.listItemInfo}>
+      <Text style={styles.listItemLicense} numberOfLines={1}>
+          {item.licenseName || "Chưa có giấy phép"}
+        </Text>
         <Text style={styles.listItemName} numberOfLines={1}>
           {item.name}
         </Text>
+      
         <View style={styles.listItemLocation}>
           <Icon name="location-on" size={14} color="#666" />
           <Text style={styles.listItemLocationText} numberOfLines={2}>
@@ -167,7 +175,6 @@ const WorkSpaces = ({ navigation }) => {
               ? formatCurrency(item.prices[0]?.price)
               : "Liên hệ"}
           </Text>
-         
         </View>
       </View>
     </TouchableOpacity>
@@ -262,6 +269,17 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingBottom: 16,
+  },
+  gridItemLicense: {
+    fontSize: 12,
+    color: "#666",
+    marginBottom: 4,
+  },
+  
+  listItemLicense: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 8,
   },
   headerTitleRow: {
     flexDirection: 'row',

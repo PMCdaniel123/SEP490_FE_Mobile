@@ -10,6 +10,7 @@
         "loginFunction",
         "registerFunction",
         "userProfile",
-        "workSpace"
+        "workSpace",
+        "yourBooking UI"
     ]
 }

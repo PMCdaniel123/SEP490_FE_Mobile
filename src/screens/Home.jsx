@@ -1,5 +1,5 @@
 /* eslint-disable import/no-unresolved */
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -14,20 +14,64 @@ import HighRatedSpaces from "../components/HighRatedSpaces";
 import Recommendations from "../components/Recommendations";
 import SpaceNearYou from "../components/SpaceNearYou";
 import { useNavigation } from "@react-navigation/native";
+import { AuthContext } from "../contexts/AuthContext";
+import axios from "axios";
 
 const HomeScreen = () => {
   const navigation = useNavigation();
+  const { userData, userToken } = useContext(AuthContext);
+  const [userProfile, setUserProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!userData || !userData.sub) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await axios.get(
+          `http://35.78.210.59:8080/users/${userData.sub}`,
+          {
+            headers: {
+              Authorization: `Bearer ${userToken}`,
+            },
+          }
+        );
+
+        if (response.data && response.data.user) {
+          setUserProfile(response.data.user);
+        } else {
+          setError("Không thể tải thông tin người dùng");
+        }
+      } catch (error) {
+        console.error("Lỗi khi tải hồ sơ:", error);
+        setError("Đã xảy ra lỗi khi tải thông tin người dùng");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, [userData, userToken]);
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.userInfo}>
           <Image
-            source={require('../../assets/images/workspace2.jpg')}
+            source={{
+              uri:
+                userProfile?.avatar ||
+                "https://ui-avatars.com/api/?name=" +
+                  encodeURIComponent(userProfile?.name),
+            }}
             style={styles.avatar}
           />
           <View>
-            <Text style={styles.userName}>Khanh Quang</Text>
+            <Text style={styles.userName}>{userProfile?.name}</Text>
             <View style={styles.locationContainer}>
               <Icon name="location-on" size={16} color="#666" />
               <Text style={styles.location}>Thu Duc</Text>
@@ -40,7 +84,7 @@ const HomeScreen = () => {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.iconButton}
-            onPress={() => navigation.navigate('Notification')}
+            onPress={() => navigation.navigate("Notification")}
           >
             <Icon name="notifications-none" size={24} color="#000" />
           </TouchableOpacity>
@@ -70,7 +114,6 @@ const HomeScreen = () => {
   );
 };
 const styles = StyleSheet.create({
-
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -129,7 +172,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginRight: 8,
   },
-
 });
 
 export default HomeScreen;

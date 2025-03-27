@@ -7,6 +7,7 @@ import {
   ScrollView,
   ActivityIndicator,
   TouchableOpacity,
+  Image,
 } from "react-native";
 import axios from "axios";
 import ImageList from "../components/ImageList";
@@ -40,11 +41,12 @@ const WorkspaceDetail = ({ route }) => {
         dispatch({
           type: "SET_WORKSPACE_ID",
           payload: {
-            id: id,
-            price: response.data.getWorkSpaceByIdResult.prices[0].price,
-            priceType: "1",
+            workspaceId: id,
+            price: response.data.getWorkSpaceByIdResult.prices[1].price,
+            priceType: "2",
           },
         });
+        dispatch({ type: "CALCULATE_TOTAL" });
       } catch (error) {
         console.error("Error fetching workspace details:", error);
       } finally {
@@ -91,7 +93,7 @@ const WorkspaceDetail = ({ route }) => {
       <View style={{ margin: 12, gap: 8 }}>
         <View style={{ marginTop: 8 }}>
           <Text style={styles.price}>
-            {formatCurrency(workspaceDetail?.prices[0].price)} -
+            {formatCurrency(workspaceDetail?.prices[0].price)} -{" "}
             {formatCurrency(workspaceDetail?.prices[1].price)}
           </Text>
         </View>
@@ -106,6 +108,17 @@ const WorkspaceDetail = ({ route }) => {
         >
           <MaterialIcons name="location-on" size={20} color="#835101" />
           <Text>{workspaceDetail?.address}</Text>
+        </View>
+        <View style={styles.userInfo}>
+          <Image
+            source={require("../../assets/images/workspace2.jpg")}
+            style={styles.avatar}
+          />
+          <View>
+            <Text style={styles.licenseName}>
+              {workspaceDetail?.licenseName}
+            </Text>
+          </View>
         </View>
       </View>
 
@@ -166,6 +179,20 @@ const WorkspaceDetail = ({ route }) => {
           >
             <Text style={styles.boldText}>Mô tả:</Text>
             <Text>{workspaceDetail?.description}</Text>
+            <View
+              style={{ flexDirection: "row", gap: 6, alignItems: "center" }}
+            >
+              <Text>
+                Đặt theo giờ: {formatCurrency(workspaceDetail?.prices[0].price)}
+              </Text>
+              <Text style={{ color: "red", fontSize: 12, fontStyle: "italic" }}>
+                {" "}
+                (chưa hỗ trợ)
+              </Text>
+            </View>
+            <Text>
+              Đặt theo ngày: {formatCurrency(workspaceDetail?.prices[1].price)}
+            </Text>
           </View>
           <View
             style={{
@@ -212,7 +239,10 @@ const WorkspaceDetail = ({ route }) => {
           </View>
         </View>
       ) : (
-        <BookingDetail />
+        <BookingDetail
+          openTime={workspaceDetail?.openTime}
+          closeTime={workspaceDetail?.closeTime}
+        />
       )}
     </ScrollView>
   );
@@ -222,6 +252,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
+  },
+  userInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 12,
+  },
+  licenseName: {
+    fontSize: 14,
   },
   price: { fontSize: 24, fontWeight: "bold", color: "#835101" },
   name: { fontSize: 18, fontWeight: "bold", color: "#835101" },

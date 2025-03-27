@@ -9,6 +9,7 @@ import {
 import { formatCurrency } from "../../constants";
 import { useState } from "react";
 import { useCart } from "../../contexts/CartContext";
+import { BlurView } from "expo-blur";
 
 function AmenityItem({ amenity }) {
   const [modalVisible, setModalVisible] = useState(false);
@@ -51,7 +52,7 @@ function AmenityItem({ amenity }) {
       </TouchableOpacity>
 
       <Modal visible={modalVisible} transparent animationType="fade">
-        <View style={styles.modalContainer}>
+        <BlurView intensity={60} style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <TouchableOpacity
               style={styles.closeButton}
@@ -59,10 +60,11 @@ function AmenityItem({ amenity }) {
             >
               <Text style={styles.closeButtonText}>×</Text>
             </TouchableOpacity>
+            <Image source={{ uri: amenity.imgUrl }} style={styles.modalImage} />
             <Text style={styles.modalTitle}>{amenity.name}</Text>
             <Text style={styles.modalText}>Loại: {amenity.category}</Text>
             <Text style={styles.modalText}>
-              Giá: {formatCurrency(amenity.price)}
+              Đơn giá: {formatCurrency(amenity.price)}
             </Text>
             <Text style={styles.modalText}>Số lượng: {amenity.quantity}</Text>
             <Text style={styles.modalText}>
@@ -72,10 +74,10 @@ function AmenityItem({ amenity }) {
               style={styles.modalButton}
               onPress={handleAddToCart}
             >
-              <Text style={styles.modalButtonText}>Thêm vào giỏ hàng</Text>
+              <Text style={styles.modalButtonText}>📌 Thêm vào giỏ hàng</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </BlurView>
       </Modal>
     </>
   );
@@ -127,17 +129,29 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.6)",
   },
   modalContent: {
-    width: 320,
-    padding: 20,
+    width: 300,
+    padding: 24,
     backgroundColor: "#fff",
-    borderRadius: 12,
+    borderRadius: 16,
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 5,
+  },
+  modalImage: {
+    width: 210,
+    height: 210,
+    borderRadius: 8,
+    marginBottom: 12,
   },
   modalTitle: {
     fontSize: 22,
     fontWeight: "bold",
-    marginBottom: 12,
+    marginBottom: 10,
     color: "#333",
+    textAlign: "center",
   },
   modalText: {
     fontSize: 16,
@@ -149,8 +163,8 @@ const styles = StyleSheet.create({
     top: 10,
     right: 10,
     backgroundColor: "#FF4D4D",
-    width: 30,
-    height: 30,
+    width: 26,
+    height: 26,
     borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
@@ -161,11 +175,11 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   modalButton: {
-    marginTop: 12,
+    marginTop: 16,
     backgroundColor: "#835101",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 6,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
   },
   modalButtonText: {
     fontSize: 16,

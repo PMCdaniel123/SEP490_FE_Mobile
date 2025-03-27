@@ -18,6 +18,9 @@ import RegisterScreen from "./src/screens/RegisterScreen";
 import WorkSpaces from "./src/screens/WorkSpaces";
 import { CartProvider } from "./src/contexts/CartContext";
 import Checkout from "./src/screens/Checkout";
+import YourBooking from "./src/screens/YourBooking";
+import BookingDetailScreen from "./src/screens/YourBookingDetail";
+import ReviewScreen from "./src/screens/ReviewScreen";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -40,6 +43,28 @@ const HomeStack = () => (
   </Stack.Navigator>
 );
 
+const BookingStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="YourBooking" component={YourBooking} />
+    <Stack.Screen
+      name="BookingDetail"
+      component={BookingDetailScreen}
+      options={{
+        headerShown: false,
+        // presentation: "modal",
+      }}
+    />
+    <Stack.Screen
+      name="ReviewScreen"
+      component={ReviewScreen}
+      options={{
+        headerShown: false,
+        tabBarStyle: { display: "none" },
+      }}
+    />
+  </Stack.Navigator>
+);
+
 const AuthScreens = () => (
   <AuthStack.Navigator screenOptions={{ headerShown: false }}>
     <AuthStack.Screen name="Login" component={LoginScreen} />
@@ -49,12 +74,17 @@ const AuthScreens = () => (
 
 const TabNavigator = () => (
   <Tab.Navigator
-    screenOptions={{
+    screenOptions={({ route }) => ({
       tabBarStyle: {
         elevation: 5,
         backgroundColor: "#ffffff",
         height: 65,
         ...styles.shadow,
+        display:
+          route.name === "Đặt chỗ" &&
+          route.state?.routes[route.state.index]?.name === "BookingDetail"
+            ? "none"
+            : "flex",
       },
       tabBarActiveTintColor: "#835101",
       tabBarInactiveTintColor: "#999",
@@ -67,7 +97,7 @@ const TabNavigator = () => (
       },
       headerShown: false,
       tabBarHideOnKeyboard: true,
-    }}
+    })}
   >
     <Tab.Screen
       name="Trang chủ"
@@ -78,7 +108,7 @@ const TabNavigator = () => (
     />
     <Tab.Screen
       name="Đặt chỗ"
-      component={Home}
+      component={BookingStack}
       options={{
         tabBarIcon: ({ color }) => (
           <Icon name="calendar" size={22} color={color} />
@@ -103,7 +133,6 @@ const TabNavigator = () => (
     />
   </Tab.Navigator>
 );
-
 const AppNavigator = () => {
   const { isLoading, userToken } = useContext(AuthContext);
 

@@ -1,115 +1,124 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet, ScrollView } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useNavigation } from '@react-navigation/native';
+import React from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  ScrollView,
+} from "react-native";
+import Icon from "react-native-vector-icons/MaterialIcons";
+import { useNavigation } from "@react-navigation/native";
 
 const spacesNearYou = [
   {
     id: 1,
-    name: 'Cozy Workspace',
-    address: '123 Main Street, District 1, Ho Chi Minh City, Vietnam',
-    googleMapUrl: 'https://www.google.com/maps/place/COZY+WORKSPACE/',
-    description: 'A cozy workspace for professionals.',
+    name: "Cozy Workspace",
+    address: "123 Main Street, District 1, Ho Chi Minh City, Vietnam",
+    googleMapUrl: "https://www.google.com/maps/place/COZY+WORKSPACE/",
+    description: "A cozy workspace for professionals.",
     capacity: 8,
-    category: 'Shared Space',
-    status: 'Active',
+    category: "Shared Space",
+    status: "Active",
     cleanTime: 10,
     rate: 4.8,
     area: 15,
-    openTime: '07:00:00',
-    closeTime: '22:00:00',
+    openTime: "07:00:00",
+    closeTime: "22:00:00",
     is24h: 0,
     prices: [
       {
         id: 1,
         price: 50000,
-        category: 'Giờ',
+        category: "Giờ",
       },
       {
         id: 2,
         price: 300000,
-        category: 'Ngày',
+        category: "Ngày",
       },
     ],
     images: [
       {
         id: 1,
-        imgUrl: 'https://res.cloudinary.com/dcq99dv8p/image/upload/v1741894960/IMAGES/mkjegiedszefqdwdsz64.jpg',
+        imgUrl:
+          "https://res.cloudinary.com/dcq99dv8p/image/upload/v1741894960/IMAGES/mkjegiedszefqdwdsz64.jpg",
       },
     ],
     facilities: [
       {
         id: 1,
-        facilityName: 'Wifi tốc độ cao',
+        facilityName: "Wifi tốc độ cao",
       },
       {
         id: 2,
-        facilityName: 'Máy lạnh',
+        facilityName: "Máy lạnh",
       },
     ],
     policies: [
       {
         id: 1,
-        policyName: 'Không hút thuốc',
+        policyName: "Không hút thuốc",
       },
     ],
   },
   {
     id: 2,
-    name: 'Modern Meeting Room',
-    address: '456 Business Avenue, District 3, Ho Chi Minh City, Vietnam',
-    googleMapUrl: 'https://www.google.com/maps/place/MODERN+MEETING+ROOM/',
-    description: 'A modern meeting room with premium facilities.',
+    name: "Modern Meeting Room",
+    address: "456 Business Avenue, District 3, Ho Chi Minh City, Vietnam",
+    googleMapUrl: "https://www.google.com/maps/place/MODERN+MEETING+ROOM/",
+    description: "A modern meeting room with premium facilities.",
     capacity: 12,
-    category: 'Meeting Room',
-    status: 'Active',
+    category: "Meeting Room",
+    status: "Active",
     cleanTime: 15,
     rate: 4.7,
     area: 25,
-    openTime: '08:00:00',
-    closeTime: '20:00:00',
+    openTime: "08:00:00",
+    closeTime: "20:00:00",
     is24h: 0,
     prices: [
       {
         id: 1,
         price: 100000,
-        category: 'Giờ',
+        category: "Giờ",
       },
       {
         id: 2,
         price: 600000,
-        category: 'Ngày',
+        category: "Ngày",
       },
     ],
     images: [
       {
         id: 1,
-        imgUrl: 'https://res.cloudinary.com/dcq99dv8p/image/upload/v1741894988/IMAGES/kkmmgzyvbml4bajjybgl.jpg',
+        imgUrl:
+          "https://res.cloudinary.com/dcq99dv8p/image/upload/v1741894988/IMAGES/kkmmgzyvbml4bajjybgl.jpg",
       },
     ],
     facilities: [
       {
         id: 1,
-        facilityName: 'Máy chiếu',
+        facilityName: "Máy chiếu",
       },
       {
         id: 2,
-        facilityName: 'Bảng trắng',
+        facilityName: "Bảng trắng",
       },
     ],
     policies: [
       {
         id: 1,
-        policyName: 'Không gây ồn ào',
+        policyName: "Không gây ồn ào",
       },
     ],
   },
 ];
 
 const formatCurrency = (value) => {
-  return new Intl.NumberFormat('vi-VN', {
-    style: 'currency',
-    currency: 'VND',
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
   }).format(value);
 };
 
@@ -129,9 +138,14 @@ const SpaceNearYou = () => {
           <TouchableOpacity
             key={space.id}
             style={styles.listItemCard}
-            onPress={() => navigation.navigate('WorkspaceDetail', { workspace: space })}
+            onPress={() =>
+              navigation.navigate("WorkspaceDetail", { workspace: space })
+            }
           >
-            <Image source={{ uri: space.images[0]?.imgUrl }} style={styles.listItemImage} />
+            <Image
+              source={{ uri: space.images[0]?.imgUrl }}
+              style={styles.listItemImage}
+            />
             <View style={styles.listItemInfo}>
               <Text style={styles.listItemName}>{space.name}</Text>
               <View style={styles.listItemLocation}>
@@ -161,31 +175,31 @@ const SpaceNearYou = () => {
 
 const styles = StyleSheet.create({
   sectionContainer: {
-    marginBottom: 50,
+    marginBottom: 100,
   },
   sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 16,
     marginBottom: 12,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   seeAllText: {
-    color: '#B25F00',
-    fontWeight: '500',
+    color: "#B25F00",
+    fontWeight: "500",
   },
   listItemCard: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginHorizontal: 16,
     marginBottom: 16,
     borderRadius: 12,
-    overflow: 'hidden',
-    backgroundColor: '#fff',
-    shadowColor: '#000',
+    overflow: "hidden",
+    backgroundColor: "#fff",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -194,7 +208,7 @@ const styles = StyleSheet.create({
   listItemImage: {
     width: 100,
     height: 100,
-    resizeMode: 'cover',
+    resizeMode: "cover",
   },
   listItemInfo: {
     flex: 1,
@@ -202,36 +216,36 @@ const styles = StyleSheet.create({
   },
   listItemName: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 4,
   },
   listItemLocation: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    alignItems: "flex-start",
     marginBottom: 8,
   },
   listItemLocationText: {
     fontSize: 12,
-    color: '#666',
+    color: "#666",
     flex: 1,
     marginLeft: 4,
   },
   listItemFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   listItemPrice: {
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   listItemRating: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   listItemRatingText: {
     marginLeft: 4,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });
 

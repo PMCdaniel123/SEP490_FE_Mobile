@@ -38,7 +38,7 @@ const ProfileScreen = () => {
             },
           }
         );
-        
+
         if (response.data && response.data.user) {
           setUserProfile(response.data.user);
         } else {
@@ -77,7 +77,7 @@ const ProfileScreen = () => {
       [
         {
           text: "Hủy",
-          style: "cancel"
+          style: "cancel",
         },
         {
           text: "Đăng xuất",
@@ -86,11 +86,14 @@ const ProfileScreen = () => {
               await logout();
             } catch (error) {
               console.error("Lỗi khi đăng xuất:", error);
-              Alert.alert("Lỗi", "Đã xảy ra lỗi khi đăng xuất. Vui lòng thử lại sau.");
+              Alert.alert(
+                "Lỗi",
+                "Đã xảy ra lỗi khi đăng xuất. Vui lòng thử lại sau."
+              );
             }
           },
-          style: "destructive"
-        }
+          style: "destructive",
+        },
       ],
       { cancelable: true }
     );
@@ -110,7 +113,7 @@ const ProfileScreen = () => {
       <View style={styles.errorContainer}>
         <Icon name="exclamation-circle" size={50} color="#FF3B30" />
         <Text style={styles.errorText}>{error}</Text>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.retryButton}
           onPress={() => {
             setLoading(true);
@@ -136,13 +139,18 @@ const ProfileScreen = () => {
         {userProfile && (
           <TouchableOpacity
             style={styles.profileSection}
-            onPress={() => navigation.navigate("ProfileDetail", { user: userProfile })}
+            onPress={() =>
+              navigation.navigate("ProfileDetail", { user: userProfile })
+            }
           >
-            <Image 
-              source={{ 
-                uri: userProfile.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(userProfile.name) 
-              }} 
-              style={styles.avatar} 
+            <Image
+              source={{
+                uri:
+                  userProfile.avatar ||
+                  "https://ui-avatars.com/api/?name=" +
+                    encodeURIComponent(userProfile.name),
+              }}
+              style={styles.avatar}
             />
             <View style={styles.profileInfo}>
               <Text style={styles.profileName}>{userProfile.name}</Text>
@@ -167,7 +175,12 @@ const ProfileScreen = () => {
         </View>
 
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Icon name="sign-out" size={20} color="#FF3B30" style={styles.logoutIcon} />
+          <Icon
+            name="sign-out"
+            size={20}
+            color="#FF3B30"
+            style={styles.logoutIcon}
+          />
           <Text style={styles.logoutText}>Đăng xuất</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -178,12 +191,12 @@ const ProfileScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F2F2F7",
+    backgroundColor: "#FFFFFF",
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     backgroundColor: "#F2F2F7",
   },
   loadingText: {
@@ -193,8 +206,8 @@ const styles = StyleSheet.create({
   },
   errorContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     backgroundColor: "#F2F2F7",
     padding: 20,
   },
@@ -202,19 +215,19 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 16,
     color: "#666",
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 20,
   },
   retryButton: {
     paddingHorizontal: 20,
     paddingVertical: 10,
-    backgroundColor: '#835101',
+    backgroundColor: "#835101",
     borderRadius: 8,
   },
   retryButtonText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   header: {
     flexDirection: "row",

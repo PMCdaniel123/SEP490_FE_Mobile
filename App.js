@@ -24,18 +24,13 @@ const Stack = createNativeStackNavigator();
 const AuthStack = createNativeStackNavigator();
 
 const ProfileStack = () => (
-
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="ProfileMain" component={ProfileScreen} />
     <Stack.Screen name="ProfileDetail" component={ProfileDetail} />
   </Stack.Navigator>
-
 );
 
 const HomeStack = () => (
-
-   
-      
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="HomeMain" component={Home} />
     <Stack.Screen name="WorkspaceDetail" component={WorkspaceDetail} />
@@ -43,8 +38,6 @@ const HomeStack = () => (
     <Stack.Screen name="WorkSpaces" component={WorkSpaces} />
     <Stack.Screen name="Checkout" component={Checkout} />
   </Stack.Navigator>
-
-
 );
 
 const AuthScreens = () => (

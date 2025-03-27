@@ -12,16 +12,29 @@ const BookingScreen = () => {
   const [loading, setLoading] = useState(true);
   const { userData, userToken } = useContext(AuthContext);
   const navigation = useNavigation();
-  const [activeTab, setActiveTab] = useState('Success');
+  const [activeTab, setActiveTab] = useState("Success");
 
   useEffect(() => {
     if (isFocused) {
-      navigation.getParent()?.setOptions({ tabBarStyle: { display: "flex" } });
+      navigation.getParent()?.setOptions({
+        tabBarStyle: {
+          display: "flex",
+          elevation: 5,
+          backgroundColor: "#ffffff",
+          height: 65,
+          ...styles.shadow,
+        },
+      });
     }
   }, [isFocused]);
 
   useEffect(() => {
     fetchBookingHistory();
+    const unsubscribe = navigation.addListener("focus", () => {
+      fetchBookingHistory();
+    });
+
+    return unsubscribe;
   }, []);
 
   const fetchBookingHistory = async () => {
@@ -34,7 +47,7 @@ const BookingScreen = () => {
           },
         }
       );
-  
+
       if (response.data && response.data.bookingHistories) {
         const sortedBookings = response.data.bookingHistories.sort((a, b) => {
           return new Date(b.booking_CreatedAt) - new Date(a.booking_CreatedAt); // Sort by newest
@@ -42,8 +55,8 @@ const BookingScreen = () => {
         setBookings(sortedBookings);
       }
     } catch (error) {
-      console.error('Lỗi khi tải lịch sử đặt chỗ:', error);
-      Alert.alert('Lỗi', 'Không thể tải lịch sử đặt chỗ. Vui lòng thử lại sau.');
+      console.error("Lỗi khi tải lịch sử đặt chỗ:", error);
+      Alert.alert("Lỗi", "Không thể tải lịch sử đặt chỗ. Vui lòng thử lại sau.");
     } finally {
       setLoading(false);
     }
@@ -51,12 +64,12 @@ const BookingScreen = () => {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleTimeString('vi-VN', {
-      hour: '2-digit',
-      minute: '2-digit',
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
+    return date.toLocaleTimeString("vi-VN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
     });
   };
 
@@ -66,34 +79,34 @@ const BookingScreen = () => {
 
   const getStatusText = (status) => {
     switch (status) {
-      case 'Success':
-        return 'Giao dịch thành công';
-      case 'Pending':
-        return 'Đang chờ xử lý';
-      case 'Fail':
-        return 'Giao dịch thất bại';
+      case "Success":
+        return "Giao dịch thành công";
+      case "Pending":
+        return "Đang chờ xử lý";
+      case "Fail":
+        return "Giao dịch thất bại";
       default:
-        return 'Không xác định';
+        return "Không xác định";
     }
   };
-  
+
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Success':
-        return '#4CAF50';
-      case 'Pending':
-        return '#FFC107';
-      case 'Fail':
-        return '#F44336';
+      case "Success":
+        return "#4CAF50";
+      case "Pending":
+        return "#FFC107";
+      case "Fail":
+        return "#F44336";
       default:
-        return '#757575';
+        return "#757575";
     }
   };
 
   const renderBookingItem = ({ item }) => (
     <TouchableOpacity
       style={styles.bookingCard}
-      onPress={() => navigation.navigate('BookingDetail', { booking: item })}
+      onPress={() => navigation.navigate("BookingDetail", { booking: item })}
     >
       <View style={styles.bookingHeader}>
         <View style={styles.workspaceImageContainer}>
@@ -107,8 +120,15 @@ const BookingScreen = () => {
           <Text style={styles.licenseAddress} numberOfLines={2}>
             {item.license_Address}
           </Text>
-          <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.booking_Status) }]}>
-            <Text style={styles.statusText}>{getStatusText(item.booking_Status)}</Text>
+          <View
+            style={[
+              styles.statusBadge,
+              { backgroundColor: getStatusColor(item.booking_Status) },
+            ]}
+          >
+            <Text style={styles.statusText}>
+              {getStatusText(item.booking_Status)}
+            </Text>
           </View>
         </View>
       </View>
@@ -119,16 +139,21 @@ const BookingScreen = () => {
         <View style={styles.infoRow}>
           <Ionicons name="calendar-outline" size={18} color="#835101" />
           <Text style={styles.infoText}>
-            {formatDate(item.booking_StartDate)} - {formatDate(item.booking_EndDate)}
+            {formatDate(item.booking_StartDate)} -{" "}
+            {formatDate(item.booking_EndDate)}
           </Text>
         </View>
         <View style={styles.infoRow}>
           <Ionicons name="people-outline" size={18} color="#835101" />
-          <Text style={styles.infoText}>Sức chứa: {item.workspace_Capacity} người</Text>
+          <Text style={styles.infoText}>
+            Sức chứa: {item.workspace_Capacity} người
+          </Text>
         </View>
         <View style={styles.infoRow}>
           <Ionicons name="card-outline" size={18} color="#835101" />
-          <Text style={styles.infoText}>Thanh toán: {item.payment_Method}</Text>
+          <Text style={styles.infoText}>
+            Thanh toán: {item.payment_Method}
+          </Text>
         </View>
       </View>
 
@@ -150,10 +175,16 @@ const BookingScreen = () => {
     );
   }
 
-  const filteredBookings = bookings.filter((item) => item.booking_Status === activeTab);
+  // Filter bookings based on the active tab
+  const filteredBookings =
+    activeTab === "Chưa đánh giá"
+      ? bookings.filter(
+          (item) => item.booking_Status === "Success" && item.isReview === 0
+        )
+      : bookings.filter((item) => item.booking_Status === activeTab);
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Lịch sử đặt chỗ</Text>
@@ -161,20 +192,52 @@ const BookingScreen = () => {
 
         {/* Tab Bar */}
         <View style={styles.tabContainer}>
-          <TouchableOpacity 
-            style={[styles.tabButton, activeTab === 'Success' && styles.activeTabButton]}
-            onPress={() => setActiveTab('Success')}
+          <TouchableOpacity
+            style={[
+              styles.tabButton,
+              activeTab === "Success" && styles.activeTabButton,
+            ]}
+            onPress={() => setActiveTab("Success")}
           >
-            <Text style={[styles.tabText, activeTab === 'Success' && styles.activeTabText]}>
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === "Success" && styles.activeTabText,
+              ]}
+            >
               Thành công
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.tabButton, activeTab === 'Fail' && styles.activeTabButton]}
-            onPress={() => setActiveTab('Fail')}
+          <TouchableOpacity
+            style={[
+              styles.tabButton,
+              activeTab === "Fail" && styles.activeTabButton,
+            ]}
+            onPress={() => setActiveTab("Fail")}
           >
-            <Text style={[styles.tabText, activeTab === 'Fail' && styles.activeTabText]}>
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === "Fail" && styles.activeTabText,
+              ]}
+            >
               Thất bại
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.tabButton,
+              activeTab === "Chưa đánh giá" && styles.activeTabButton,
+            ]}
+            onPress={() => setActiveTab("Chưa đánh giá")}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === "Chưa đánh giá" && styles.activeTabText,
+              ]}
+            >
+              Chưa đánh giá
             </Text>
           </TouchableOpacity>
         </View>
@@ -183,9 +246,11 @@ const BookingScreen = () => {
           <View style={styles.emptyContainer}>
             <Ionicons name="calendar-outline" size={80} color="#CCCCCC" />
             <Text style={styles.emptyText}>
-              {activeTab === 'Success' 
-                ? 'Bạn chưa có lịch sử đặt chỗ thành công nào' 
-                : 'Bạn chưa có lịch sử đặt chỗ thất bại nào'}
+              {activeTab === "Success"
+                ? "Bạn chưa có lịch sử đặt chỗ thành công nào"
+                : activeTab === "Fail"
+                ? "Bạn chưa có lịch sử đặt chỗ thất bại nào"
+                : "Bạn đã đánh giá tất cả không gian"}
             </Text>
           </View>
         ) : (
@@ -201,7 +266,6 @@ const BookingScreen = () => {
     </SafeAreaView>
   );
 };
-
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,

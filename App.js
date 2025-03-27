@@ -20,6 +20,7 @@ import { CartProvider } from "./src/contexts/CartContext";
 import Checkout from "./src/screens/Checkout";
 import YourBooking from "./src/screens/YourBooking";
 import BookingDetailScreen from "./src/screens/YourBookingDetail";
+import ReviewScreen from "./src/screens/ReviewScreen";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -53,6 +54,14 @@ const BookingStack = () => (
         // presentation: "modal",
       }}
     />
+    <Stack.Screen
+      name="ReviewScreen"
+      component={ReviewScreen}
+      options={{
+        headerShown: false,
+        tabBarStyle: { display: "none" },
+      }}
+    />
   </Stack.Navigator>
 );
 
@@ -71,7 +80,11 @@ const TabNavigator = () => (
         backgroundColor: "#ffffff",
         height: 65,
         ...styles.shadow,
-        display: route.name === "Đặt chỗ" && route.state?.routes[route.state.index]?.name === "BookingDetail" ? "none" : "flex", // Hide tab bar for BookingDetail
+        display:
+          route.name === "Đặt chỗ" &&
+          route.state?.routes[route.state.index]?.name === "BookingDetail"
+            ? "none"
+            : "flex",
       },
       tabBarActiveTintColor: "#835101",
       tabBarInactiveTintColor: "#999",

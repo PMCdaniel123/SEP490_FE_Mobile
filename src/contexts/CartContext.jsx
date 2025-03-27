@@ -1,5 +1,6 @@
 import React, { createContext, useReducer, useContext } from "react";
 import dayjs from "dayjs";
+import { parseDate } from "../constants";
 
 const CartContext = createContext();
 
@@ -107,18 +108,22 @@ const cartReducer = (state, action) => {
       );
 
       let duration = 0;
-      // if (state.priceType === "1") {
-      //   const start = dayjs(state.startTime, "HH:mm DD/MM/YYYY")
-      //     .toDate()
-      //     .getTime();
-      //   const end = dayjs(state.endTime, "HH:mm DD/MM/YYYY").toDate().getTime();
-      //   duration = (end - start) / (1000 * 60 * 60);
-      // } else {
-      //   const start = dayjs(state.startTime, "HH:mm DD/MM/YYYY").startOf("day");
-      //   const end = dayjs(state.endTime, "HH:mm DD/MM/YYYY").startOf("day");
-      //   const result = end.diff(start, "day");
-      //   duration = result === 0 ? 1 : result;
-      // }
+      if (state.priceType === "1") {
+        const start = dayjs(state.startTime, "HH:mm DD/MM/YYYY")
+          .toDate()
+          .getTime();
+        const end = dayjs(state.endTime, "HH:mm DD/MM/YYYY").toDate().getTime();
+        duration = (end - start) / (1000 * 60 * 60);
+      } else {
+        if (!state.startTime || !state.endTime) return state;
+        const startDate = parseDate(state.startTime);
+        const endDate = parseDate(state.endTime);
+
+        const diffTime = endDate - startDate;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        duration = diffDays + 1;
+      }
 
       const price = state.price * duration;
       return { ...state, total: price + beverageTotal + amenityTotal };

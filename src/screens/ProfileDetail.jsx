@@ -69,7 +69,7 @@ const ProfileDetail = ({ route, navigation }) => {
         );
       }
     } catch (error) {
-      console.error("Lỗi khi cập nhật hồ sơ:", error);
+      alert("Lỗi khi cập nhật hồ sơ:", error);
       Alert.alert("Lỗi", "Đã xảy ra lỗi khi cập nhật hồ sơ");
     } finally {
       setLoading(false);
@@ -149,7 +149,7 @@ const ProfileDetail = ({ route, navigation }) => {
           Alert.alert("Lỗi", "Không thể tải lên ảnh. Vui lòng thử lại sau.");
         }
       } catch (error) {
-        console.error("Lỗi khi tải lên ảnh:", error);
+        alert("Lỗi khi tải lên ảnh:", error);
         Alert.alert("Lỗi", "Đã xảy ra lỗi khi tải lên ảnh");
       }
     }

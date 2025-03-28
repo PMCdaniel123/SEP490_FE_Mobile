@@ -47,7 +47,7 @@ const HomeScreen = () => {
           setError("Không thể tải thông tin người dùng");
         }
       } catch (error) {
-        console.error("Lỗi khi tải hồ sơ:", error);
+        alert("Lỗi khi tải hồ sơ:", error);
         setError("Đã xảy ra lỗi khi tải thông tin người dùng");
       } finally {
         setLoading(false);
@@ -74,7 +74,17 @@ const HomeScreen = () => {
             <Text style={styles.userName}>{userProfile?.name}</Text>
             <View style={styles.locationContainer}>
               <Icon name="location-on" size={16} color="#666" />
-              <Text style={styles.location}>Thu Duc</Text>
+              {userProfile?.location !== null ? (
+                <Text style={styles.location}>{userProfile?.location}</Text>
+              ) : (
+                <TouchableOpacity
+                  onPress={() =>
+                    navigation.navigate("ProfileDetail", { user: userProfile })
+                  }
+                >
+                  <Text style={styles.location}>Chưa cập nhật</Text>
+                </TouchableOpacity>
+              )}
             </View>
           </View>
         </View>

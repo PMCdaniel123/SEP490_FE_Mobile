@@ -22,7 +22,7 @@ function BeverageList({ ownerId }) {
         );
         setBeverageList(response.data.beverages || []);
       } catch (error) {
-        console.error("Error fetching beverages list:", error);
+        alert("Error fetching beverages list:", error);
       } finally {
         setLoading(false);
       }

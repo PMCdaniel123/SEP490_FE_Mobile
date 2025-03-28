@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
         }
       }
     } catch (e) {
-      console.log('Lỗi khi khôi phục token', e);
+      alert('Lỗi khi khôi phục token', e);
       await AsyncStorage.removeItem('userToken');
     } finally {
       setIsLoading(false);
@@ -67,7 +67,7 @@ export const AuthProvider = ({ children }) => {
         };
       }
     } catch (error) {
-      console.log('Lỗi đăng nhập:', error);
+      alert('Lỗi đăng nhập:', error);
       return { 
         success: false, 
         message: 'Có lỗi xảy ra, vui lòng thử lại sau'
@@ -84,7 +84,7 @@ export const AuthProvider = ({ children }) => {
       setUserToken(null);
       setUserData(null);
     } catch (e) {
-      console.log('Lỗi khi đăng xuất', e);
+      alert('Lỗi khi đăng xuất', e);
     } finally {
       setIsLoading(false);
     }

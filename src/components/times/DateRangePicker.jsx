@@ -42,21 +42,12 @@ LocaleConfig.locales["vn"] = {
 
 LocaleConfig.defaultLocale = "vn";
 
-const DateRangePicker = ({ openTime, closeTime }) => {
+const DateRangePicker = ({ openTime, closeTime, workspaceId }) => {
   const today = new Date().toISOString().split("T")[0];
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
-  const [markedDates, setMarkedDates] = useState({
-    [today]: {
-      selected: true,
-      startingDay: true,
-      endingDay: true,
-      color: "#835101",
-      textColor: "white",
-    },
-  });
-  const { state, dispatch } = useCart();
-  const { workspaceId } = state;
+  const [markedDates, setMarkedDates] = useState({});
+  const { dispatch } = useCart();
   const [timeList, setTimeList] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -78,7 +69,7 @@ const DateRangePicker = ({ openTime, closeTime }) => {
               );
         setTimeList(filterTimeList);
       } catch (error) {
-        console.error("Error fetching time list:", error);
+        alert("Error fetching time list:", error);
       }
     };
     fetchTimeList();

@@ -21,6 +21,7 @@ import Checkout from "./src/screens/Checkout";
 import YourBooking from "./src/screens/YourBooking";
 import BookingDetailScreen from "./src/screens/YourBookingDetail";
 import ReviewScreen from "./src/screens/ReviewScreen";
+import AllReview from "./src/screens/AllReview";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -37,6 +38,7 @@ const HomeStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="HomeMain" component={Home} />
     <Stack.Screen name="WorkspaceDetail" component={WorkspaceDetail} />
+    <Stack.Screen name="AllReview" component={AllReview} />
     <Stack.Screen name="Notification" component={NotificationScreen} />
     <Stack.Screen name="WorkSpaces" component={WorkSpaces} />
     <Stack.Screen name="Checkout" component={Checkout} />

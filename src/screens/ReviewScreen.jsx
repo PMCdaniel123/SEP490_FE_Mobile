@@ -78,7 +78,7 @@ const ReviewScreen = ({ route }) => {
           Alert.alert("Lỗi", "Không thể tải lên ảnh. Vui lòng thử lại sau.");
         }
       } catch (error) {
-        console.error("Lỗi khi tải lên ảnh:", error);
+        alert("Lỗi khi tải lên ảnh:", error);
         Alert.alert("Lỗi", "Đã xảy ra lỗi khi tải lên ảnh");
       }
     }
@@ -110,7 +110,7 @@ const ReviewScreen = ({ route }) => {
         Alert.alert("Lỗi", "Không thể gửi đánh giá. Vui lòng thử lại sau.");
       }
     } catch (error) {
-      console.error("Lỗi khi gửi đánh giá:", error);
+      alert("Lỗi khi gửi đánh giá:", error);
       Alert.alert("Lỗi", "Đã xảy ra lỗi khi gửi đánh giá.");
     } finally {
       setLoading(false);

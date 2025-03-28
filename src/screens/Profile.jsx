@@ -45,7 +45,7 @@ const ProfileScreen = () => {
           setError("Không thể tải thông tin người dùng");
         }
       } catch (error) {
-        console.error("Lỗi khi tải hồ sơ:", error);
+        alert("Lỗi khi tải hồ sơ:", error);
         setError("Đã xảy ra lỗi khi tải thông tin người dùng");
       } finally {
         setLoading(false);
@@ -85,7 +85,7 @@ const ProfileScreen = () => {
             try {
               await logout();
             } catch (error) {
-              console.error("Lỗi khi đăng xuất:", error);
+              alert("Lỗi khi đăng xuất:", error);
               Alert.alert(
                 "Lỗi",
                 "Đã xảy ra lỗi khi đăng xuất. Vui lòng thử lại sau."

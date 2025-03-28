@@ -22,7 +22,7 @@ function AmenityList({ ownerId }) {
         );
         setAmenityList(response.data.amenities || []);
       } catch (error) {
-        console.error("Error fetching amenities list:", error);
+        alert("Error fetching amenities list:", error);
       } finally {
         setLoading(false);
       }

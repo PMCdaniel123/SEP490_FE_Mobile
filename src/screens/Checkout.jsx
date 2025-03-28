@@ -136,14 +136,7 @@ function Checkout() {
   }
 
   const renderItem = ({ item }) => (
-    <View
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-      }}
-      key={item.id}
-    >
+    <View style={styles.rowBetwween} key={item.id}>
       <View style={{ flexDirection: "row", alignItems: "center" }}>
         <Image
           source={{ uri: item.imgUrl }}
@@ -167,7 +160,7 @@ function Checkout() {
       <ScrollView style={{ flex: 1 }}>
         <View style={styles.header}>
           <TouchableOpacity
-            style={{ backgroundColor: "#835101", padding: 8, borderRadius: 50 }}
+            style={styles.backButton}
             onPress={() =>
               navigation.navigate("WorkspaceDetail", { id: workspaceId })
             }
@@ -175,84 +168,26 @@ function Checkout() {
             <Ionicons name="arrow-back" size={20} color="white" />
           </TouchableOpacity>
         </View>
-        <View
-          style={{
-            alignItems: "center",
-            marginTop: 20,
-            padding: 16,
-          }}
-        >
-          <Text style={{ fontSize: 24, fontWeight: "bold" }}>Thanh toán</Text>
+        <View style={styles.screenTitleContainer}>
+          <Text style={styles.screenTitle}>Thanh toán</Text>
         </View>
-        <View
-          style={{
-            paddingHorizontal: 12,
-            paddingVertical: 20,
-            marginBottom: 20,
-            backgroundColor: "#fff",
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 16,
-              fontWeight: "bold",
-              color: "#835101",
-              marginBottom: 10,
-              textAlign: "center",
-            }}
-          >
-            Thông tin người dùng
-          </Text>
-          <View
-            style={{
-              flexDirection: "row",
-              marginVertical: 4,
-              justifyContent: "space-between",
-            }}
-          >
-            <Text style={{ fontWeight: "bold" }}>Tên:</Text>
-            <Text style={{ fontWeight: "bold" }}>{userProfile?.name}</Text>
+        <View style={styles.sectionContainer}>
+          <Text style={styles.headerContainer}>Thông tin người dùng</Text>
+          <View style={styles.rowBetweenVertical4}>
+            <Text style={styles.boldText}>Tên:</Text>
+            <Text style={styles.boldText}>{userProfile?.name}</Text>
           </View>
-          <View
-            style={{
-              flexDirection: "row",
-              marginVertical: 4,
-              justifyContent: "space-between",
-            }}
-          >
-            <Text style={{ fontWeight: "bold" }}>Số điện thoại:</Text>
+          <View style={styles.rowBetweenVertical4}>
+            <Text style={styles.boldText}>Số điện thoại:</Text>
             <Text>{userProfile?.phone}</Text>
           </View>
-          <View
-            style={{
-              flexDirection: "row",
-              marginVertical: 4,
-              justifyContent: "space-between",
-            }}
-          >
-            <Text style={{ fontWeight: "bold" }}>Email:</Text>
+          <View style={styles.rowBetweenVertical4}>
+            <Text style={styles.boldText}>Email:</Text>
             <Text>{userProfile?.email}</Text>
           </View>
         </View>
-        <View
-          style={{
-            paddingHorizontal: 12,
-            paddingVertical: 20,
-            marginBottom: 20,
-            backgroundColor: "#fff",
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 16,
-              fontWeight: "bold",
-              color: "#835101",
-              marginBottom: 10,
-              textAlign: "center",
-            }}
-          >
-            Thông tin đơn đặt chỗ
-          </Text>
+        <View style={styles.sectionContainer}>
+          <Text style={styles.headerContainer}>Thông tin đơn đặt chỗ</Text>
           <View style={styles.listItemCard}>
             <View style={styles.imageContainer}>
               <Image
@@ -270,85 +205,38 @@ function Checkout() {
                   {workspace?.address}
                 </Text>
               </View>
-              <View
-                style={{
-                  borderWidth: 1,
-                  borderColor: "#ccc",
-                  padding: 8,
-                  borderRadius: 8,
-                  marginTop: 10,
-                }}
-              >
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <Text style={{ fontSize: 11, color: "#666" }}>Loại:</Text>
-                  <Text style={{ fontSize: 11, color: "#666" }}>
+              <View style={styles.detailContainer}>
+                <View style={styles.rowBetwween}>
+                  <Text style={styles.text11color666}>Loại:</Text>
+                  <Text style={styles.text11color666}>
                     {workspace?.category}
                   </Text>
                 </View>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <Text style={{ fontSize: 11, color: "#666" }}>
-                    Diện tích:
-                  </Text>
-                  <Text style={{ fontSize: 11, color: "#666" }}>
+                <View style={styles.rowBetwween}>
+                  <Text style={styles.text11color666}>Diện tích:</Text>
+                  <Text style={styles.text11color666}>
                     {workspace?.area} m²
                   </Text>
                 </View>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <Text style={{ fontSize: 11, color: "#666" }}>Sức chứa:</Text>
-                  <Text style={{ fontSize: 11, color: "#666" }}>
+                <View style={styles.rowBetwween}>
+                  <Text style={styles.text11color666}>Sức chứa:</Text>
+                  <Text style={styles.text11color666}>
                     {workspace?.capacity} người
                   </Text>
                 </View>
               </View>
             </View>
           </View>
-          <View
-            style={{
-              flexDirection: "row",
-              marginVertical: 4,
-              justifyContent: "space-between",
-            }}
-          >
-            <Text style={{ fontWeight: "bold" }}>Thời gian bắt đầu:</Text>
+          <View style={styles.rowBetweenVertical4}>
+            <Text style={styles.boldText}>Thời gian bắt đầu:</Text>
             <Text>{startTime}</Text>
           </View>
-          <View
-            style={{
-              flexDirection: "row",
-              marginVertical: 4,
-              justifyContent: "space-between",
-            }}
-          >
-            <Text style={{ fontWeight: "bold" }}>Thời gian kết thúc:</Text>
+          <View style={styles.rowBetweenVertical4}>
+            <Text style={styles.boldText}>Thời gian kết thúc:</Text>
             <Text>{endTime}</Text>
           </View>
           {amenityList.length + beverageList.length > 0 && (
-            <View
-              style={{
-                borderWidth: 1,
-                borderColor: "#ccc",
-                padding: 8,
-                borderRadius: 8,
-                marginTop: 10,
-                flexDirection: "column",
-                gap: 8,
-              }}
-            >
+            <View style={styles.serviceContainer}>
               <Text style={{ fontSize: 14, fontWeight: "bold" }}>
                 Kèm theo:
               </Text>
@@ -359,46 +247,20 @@ function Checkout() {
             </View>
           )}
         </View>
-        <View
-          style={{
-            paddingHorizontal: 12,
-            paddingVertical: 20,
-            marginBottom: 20,
-            backgroundColor: "#fff",
-            gap: 10,
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-            }}
-          >
-            <Text style={{ fontWeight: "bold" }}>Tạm tính:</Text>
+        <View style={styles.gap10SectionContainer}>
+          <View style={styles.rowBetwween}>
+            <Text style={styles.boldText}>Tạm tính:</Text>
             <Text>{formatCurrency(total)}</Text>
           </View>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              paddingBottom: 20,
-              borderBottomWidth: 1,
-              borderBottomColor: "#ccc",
-            }}
-          >
-            <Text style={{ fontWeight: "bold" }}>Mã khuyến mại:</Text>
+          <View style={styles.promotionSectionContainer}>
+            <Text style={styles.boldText}>Mã khuyến mại:</Text>
             <Text>
               {promotion
                 ? promotion.code + " - " + promotion.discount + "%"
                 : ""}
             </Text>
           </View>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-            }}
-          >
+          <View style={styles.rowBetwween}>
             <Text style={{ fontWeight: "bold", fontSize: 18 }}>Tổng cộng:</Text>
             <Text
               style={{ fontWeight: "bold", fontSize: 18, color: "#835101" }}
@@ -409,50 +271,22 @@ function Checkout() {
             </Text>
           </View>
         </View>
-        <View
-          style={{
-            paddingHorizontal: 12,
-            paddingVertical: 20,
-            marginBottom: 20,
-            backgroundColor: "#fff",
-            gap: 10,
-          }}
-        >
+        <View style={styles.gap10SectionContainer}>
           <TouchableOpacity
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
+            style={styles.rowBetwween}
             onPress={() => setModalVisible(true)}
           >
-            <Text style={{ fontWeight: "bold" }}>Áp dụng mã khuyến mại</Text>
+            <Text style={styles.boldText}>Áp dụng mã khuyến mại</Text>
             <Ionicons name="chevron-forward-sharp" size={20} color="black" />
           </TouchableOpacity>
         </View>
-        <View
-          style={{
-            paddingHorizontal: 12,
-            paddingVertical: 20,
-            marginBottom: 20,
-            backgroundColor: "#fff",
-            gap: 10,
-          }}
-        >
-          <Text style={{ fontWeight: "bold" }}>
-            Chọn phương thức thanh toán
-          </Text>
+        <View style={styles.gap10SectionContainer}>
+          <Text style={styles.boldText}>Chọn phương thức thanh toán</Text>
           <RadioButton.Group
             onValueChange={setPaymentMethod}
             value={paymentMethod}
           >
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                marginVertical: 4,
-              }}
-            >
+            <View style={styles.rowCenterVertical4}>
               <RadioButton value="1" color="#835101" />
               <Image
                 source={require("../../assets/images/vietqr.png")}
@@ -460,13 +294,7 @@ function Checkout() {
               />
               <Text>Thanh toán bằng ngân hàng</Text>
             </View>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                marginVertical: 4,
-              }}
-            >
+            <View style={styles.rowCenterVertical4}>
               <RadioButton value="2" color="#835101" />
               <Image
                 source={require("../../assets/images/logo.png")}
@@ -477,16 +305,7 @@ function Checkout() {
           </RadioButton.Group>
         </View>
 
-        <TouchableOpacity
-          style={{
-            padding: 16,
-            backgroundColor: "#835101",
-            alignItems: "center",
-            borderRadius: 8,
-            marginBottom: 20,
-            marginHorizontal: 12,
-          }}
-        >
+        <TouchableOpacity style={styles.checkoutButton}>
           <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 16 }}>
             Thanh toán
           </Text>
@@ -494,57 +313,17 @@ function Checkout() {
       </ScrollView>
 
       <Modal visible={modalVisible} transparent animationType="fade">
-        <BlurView
-          intensity={60}
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "rgba(0,0,0,0.6)",
-          }}
-        >
-          <View
-            style={{
-              width: 320,
-              padding: 20,
-              backgroundColor: "#fff",
-              borderRadius: 16,
-              alignItems: "center",
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.2,
-              shadowRadius: 6,
-              elevation: 5,
-            }}
-          >
+        <BlurView intensity={60} style={styles.blurView}>
+          <View style={styles.promotionContainer}>
             <TouchableOpacity
-              style={{
-                position: "absolute",
-                top: 12,
-                right: 12,
-                backgroundColor: "#FF4D4D",
-                width: 30,
-                height: 30,
-                borderRadius: 15,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
+              style={styles.closeButton}
               onPress={() => setModalVisible(false)}
             >
               <Text style={{ fontSize: 18, fontWeight: "bold", color: "#fff" }}>
                 ×
               </Text>
             </TouchableOpacity>
-            <Text
-              style={{
-                fontSize: 16,
-                fontWeight: "bold",
-                marginBottom: 10,
-                color: "#835101",
-              }}
-            >
-              Danh sách mã khuyến mãi
-            </Text>
+            <Text style={styles.promotionTitle}>Danh sách mã khuyến mãi</Text>
             {promotionList.length > 0 ? (
               promotionList.map((item) => (
                 <TouchableOpacity
@@ -568,23 +347,8 @@ function Checkout() {
                     setModalVisible(false);
                   }}
                 >
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginBottom: 6,
-                    }}
-                  >
-                    <Text
-                      style={{
-                        fontSize: 16,
-                        fontWeight: "bold",
-                        color: "#333",
-                      }}
-                    >
-                      {item.code}
-                    </Text>
+                  <View style={styles.promotionHeaderContainer}>
+                    <Text style={styles.promotionCode}>{item.code}</Text>
                     <Text style={{ fontSize: 16, color: "#835101" }}>
                       {item.discount}%
                     </Text>
@@ -661,6 +425,132 @@ const styles = StyleSheet.create({
     color: "#666",
     flex: 1,
     marginLeft: 2,
+  },
+  backButton: { backgroundColor: "#835101", padding: 8, borderRadius: 50 },
+  screenTitleContainer: {
+    alignItems: "center",
+    marginTop: 20,
+    padding: 16,
+  },
+  screenTitle: { fontSize: 24, fontWeight: "bold" },
+  sectionContainer: {
+    paddingHorizontal: 12,
+    paddingVertical: 20,
+    marginBottom: 20,
+    backgroundColor: "#fff",
+  },
+  gap10SectionContainer: {
+    paddingHorizontal: 12,
+    paddingVertical: 20,
+    marginBottom: 20,
+    backgroundColor: "#fff",
+    gap: 10,
+  },
+  rowBetwween: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  rowBetweenVertical4: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginVertical: 4,
+  },
+  rowCenterVertical4: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 4,
+  },
+  boldText: {
+    fontWeight: "bold",
+  },
+  headerContainer: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#835101",
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  text11color666: {
+    fontSize: 11,
+    color: "#666",
+  },
+  detailContainer: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 8,
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  serviceContainer: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 8,
+    borderRadius: 8,
+    marginTop: 10,
+    flexDirection: "column",
+    gap: 8,
+  },
+  promotionSectionContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+  },
+  checkoutButton: {
+    padding: 16,
+    backgroundColor: "#835101",
+    alignItems: "center",
+    borderRadius: 8,
+    marginBottom: 20,
+    marginHorizontal: 12,
+  },
+  blurView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.6)",
+  },
+  promotionContainer: {
+    width: 320,
+    padding: 20,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 5,
+  },
+  promotionTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 10,
+    color: "#835101",
+  },
+  closeButton: {
+    position: "absolute",
+    top: 12,
+    right: 12,
+    backgroundColor: "#FF4D4D",
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  promotionHeaderContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 6,
+  },
+  promotionCode: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#333",
   },
 });
 

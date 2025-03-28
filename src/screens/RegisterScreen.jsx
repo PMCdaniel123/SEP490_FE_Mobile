@@ -52,7 +52,7 @@ const RegisterScreen = ({ navigation }) => {
         navigation.navigate("Login");
       }
     } catch (error) {
-      console.error("Lỗi đăng ký:", error.response?.data || error.message);
+      alert("Lỗi đăng ký:", error.response?.data || error.message);
       Alert.alert("Đăng ký thất bại", error.response?.data?.notification || "Đã xảy ra lỗi trong quá trình đăng ký.");
     } finally {
       setLoading(false);

@@ -6,7 +6,7 @@ import SelectedBeverages from "../beverages/SelectedBeverages";
 import { useNavigation } from "@react-navigation/native";
 import DateRangePicker from "../times/DateRangePicker";
 
-function BookingDetail({ openTime, closeTime }) {
+function BookingDetail({ openTime, closeTime, workspaceId }) {
   const { state, dispatch } = useCart();
   const { total, amenityList, beverageList } = state;
   const navigation = useNavigation();
@@ -18,7 +18,7 @@ function BookingDetail({ openTime, closeTime }) {
 
   return (
     <View style={styles.infoContainer}>
-      <DateRangePicker openTime={openTime} closeTime={closeTime} />
+      <DateRangePicker openTime={openTime} closeTime={closeTime} workspaceId={workspaceId} />
       <TouchableOpacity
         onPress={clearAll}
         style={{

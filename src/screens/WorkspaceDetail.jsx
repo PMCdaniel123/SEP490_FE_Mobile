@@ -19,6 +19,7 @@ import { formatCurrency } from "../constants";
 import BeverageList from "../components/beverages/BeverageList";
 import { useCart } from "../contexts/CartContext";
 import BookingDetail from "../components/booking/BookingDetail";
+import ReviewList from "../components/reviews/ReviewList";
 
 const WorkspaceDetail = ({ route }) => {
   const { id } = route.params;
@@ -48,7 +49,7 @@ const WorkspaceDetail = ({ route }) => {
         });
         dispatch({ type: "CALCULATE_TOTAL" });
       } catch (error) {
-        console.error("Error fetching workspace details:", error);
+        alert("Error fetching workspace details:", error);
       } finally {
         setLoading(false);
       }
@@ -80,7 +81,7 @@ const WorkspaceDetail = ({ route }) => {
   }
 
   const handleBackPress = () => {
-    navigation.goBack();
+    navigation.navigate("HomeMain");
   };
 
   return (
@@ -237,11 +238,16 @@ const WorkspaceDetail = ({ route }) => {
           <View style={styles.serviceList}>
             <BeverageList ownerId={workspaceDetail?.ownerId} />
           </View>
+
+          <View style={styles.serviceList}>
+            <ReviewList workspaceId={workspaceDetail?.id} />
+          </View>
         </View>
       ) : (
         <BookingDetail
           openTime={workspaceDetail?.openTime}
           closeTime={workspaceDetail?.closeTime}
+          workspaceId={id}
         />
       )}
     </ScrollView>

@@ -1,10 +1,20 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, ActivityIndicator, Alert } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import axios from 'axios';
-import { AuthContext } from '../contexts/AuthContext';
-import { useNavigation, useIsFocused } from '@react-navigation/native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useState, useEffect, useContext } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  Image,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import axios from "axios";
+import { AuthContext } from "../contexts/AuthContext";
+import { useNavigation, useIsFocused } from "@react-navigation/native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const BookingScreen = () => {
   const isFocused = useIsFocused();
@@ -26,7 +36,7 @@ const BookingScreen = () => {
         },
       });
     }
-  }, [isFocused]);
+  }, [isFocused, navigation]);
 
   useEffect(() => {
     fetchBookingHistory();
@@ -35,7 +45,7 @@ const BookingScreen = () => {
     });
 
     return unsubscribe;
-  }, []);
+  }, [navigation]);
 
   const fetchBookingHistory = async () => {
     try {
@@ -55,8 +65,11 @@ const BookingScreen = () => {
         setBookings(sortedBookings);
       }
     } catch (error) {
-      console.error("Lỗi khi tải lịch sử đặt chỗ:", error);
-      Alert.alert("Lỗi", "Không thể tải lịch sử đặt chỗ. Vui lòng thử lại sau.");
+      alert("Lỗi khi tải lịch sử đặt chỗ:", error);
+      Alert.alert(
+        "Lỗi",
+        "Không thể tải lịch sử đặt chỗ. Vui lòng thử lại sau."
+      );
     } finally {
       setLoading(false);
     }
@@ -151,9 +164,7 @@ const BookingScreen = () => {
         </View>
         <View style={styles.infoRow}>
           <Ionicons name="card-outline" size={18} color="#835101" />
-          <Text style={styles.infoText}>
-            Thanh toán: {item.payment_Method}
-          </Text>
+          <Text style={styles.infoText}>Thanh toán: {item.payment_Method}</Text>
         </View>
       </View>
 
@@ -249,8 +260,8 @@ const BookingScreen = () => {
               {activeTab === "Success"
                 ? "Bạn chưa có lịch sử đặt chỗ thành công nào"
                 : activeTab === "Fail"
-                ? "Bạn chưa có lịch sử đặt chỗ thất bại nào"
-                : "Bạn đã đánh giá tất cả không gian"}
+                  ? "Bạn chưa có lịch sử đặt chỗ thất bại nào"
+                  : "Bạn đã đánh giá tất cả không gian"}
             </Text>
           </View>
         ) : (
@@ -269,158 +280,158 @@ const BookingScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
   },
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: "#F2F2F7",
   },
   header: {
     paddingTop: 20,
     paddingBottom: 15,
     paddingHorizontal: 20,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
   },
   headerTitle: {
     fontSize: 22,
-    fontWeight: 'bold',
-    color: '#000000',
+    fontWeight: "bold",
+    color: "#000000",
   },
   // Tab styles
   tabContainer: {
-    flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
+    flexDirection: "row",
+    backgroundColor: "#FFFFFF",
     paddingHorizontal: 20,
     paddingBottom: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#EEEEEE',
+    borderBottomColor: "#EEEEEE",
   },
   tabButton: {
     flex: 1,
     paddingVertical: 10,
-    alignItems: 'center',
+    alignItems: "center",
     borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
+    borderBottomColor: "transparent",
   },
   activeTabButton: {
-    borderBottomColor: '#835101',
+    borderBottomColor: "#835101",
   },
   tabText: {
     fontSize: 16,
-    color: '#666666',
-    fontWeight: '500',
+    color: "#666666",
+    fontWeight: "500",
   },
   activeTabText: {
-    color: '#835101',
-    fontWeight: 'bold',
+    color: "#835101",
+    fontWeight: "bold",
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   loadingText: {
     marginTop: 10,
     fontSize: 16,
-    color: '#666',
+    color: "#666",
   },
   emptyContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
   },
   emptyText: {
     marginTop: 20,
     fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
+    color: "#666",
+    textAlign: "center",
   },
   listContainer: {
     padding: 15,
   },
   bookingCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderRadius: 12,
     padding: 15,
     marginBottom: 15,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
   bookingHeader: {
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   workspaceImageContainer: {
     width: 80,
     height: 80,
     borderRadius: 8,
-    overflow: 'hidden',
+    overflow: "hidden",
     marginRight: 15,
   },
   workspaceImage: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   headerInfo: {
     flex: 1,
   },
   workspaceName: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
     marginBottom: 4,
   },
   licenseAddress: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
     marginBottom: 8,
   },
   statusBadge: {
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
   },
   statusText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   divider: {
     height: 1,
-    backgroundColor: '#EEEEEE',
+    backgroundColor: "#EEEEEE",
     marginVertical: 12,
   },
   bookingInfo: {
     marginBottom: 10,
   },
   infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 8,
   },
   infoText: {
     fontSize: 14,
-    color: '#333',
+    color: "#333",
     marginLeft: 8,
   },
   priceContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
   },
   priceLabel: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
     marginRight: 8,
   },
   priceValue: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#835101',
+    fontWeight: "bold",
+    color: "#835101",
   },
 });
 

@@ -18,7 +18,7 @@ export const FavoritesProvider = ({ children }) => {
         setFavorites(JSON.parse(storedFavorites));
       }
     } catch (error) {
-      console.log("Failed to load favorite:", error);
+      alert("Failed to load favorite:", error);
     }
   };
 
@@ -34,7 +34,7 @@ export const FavoritesProvider = ({ children }) => {
         Alert.alert("Already in Favorites", `${favorite.name} is already added to favorites.`);
       }
     } catch (error) {
-      console.log("Failed to add to favorites:", error);
+      alert("Failed to add to favorites:", error);
     }
   };
 
@@ -55,7 +55,7 @@ export const FavoritesProvider = ({ children }) => {
       setFavorites(updatedFavorites);
       await AsyncStorage.setItem("favorites", JSON.stringify(updatedFavorites));
     } catch (error) {
-      console.log("Failed to remove item from favorites:", error);
+      alert("Failed to remove item from favorites:", error);
     }
   };
 
@@ -75,7 +75,7 @@ export const FavoritesProvider = ({ children }) => {
       setFavorites([]);
       await AsyncStorage.removeItem("favorites");
     } catch (error) {
-      console.log("Failed to remove all from favorites:", error);
+      alert("Failed to remove all from favorites:", error);
     }
   };
 

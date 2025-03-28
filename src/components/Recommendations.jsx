@@ -39,7 +39,7 @@ const Recommendations = () => {
         ];
         setCategories(uniqueCategories);
       } catch (error) {
-        console.error("Error fetching recommended spaces:", error);
+        alert("Error fetching recommended spaces:", error);
       } finally {
         setLoading(false);
       }

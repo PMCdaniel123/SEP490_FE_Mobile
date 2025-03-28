@@ -32,7 +32,7 @@ const HighRatedSpaces = () => {
         );
         setHighRatedSpaces(response.data.workspaces || []);
       } catch (error) {
-        console.error("Error fetching high-rated spaces:", error);
+        alert("Error fetching high-rated spaces:", error);
       } finally {
         setLoading(false);
       }

@@ -50,7 +50,7 @@ const WorkSpaces = ({ navigation }) => {
       ];
       setCategories(uniqueCategories);
     } catch (error) {
-      console.error("Error fetching spaces:", error);
+      alert("Error fetching spaces:", error);
     } finally {
       setLoading(false);
       setRefreshing(false);

@@ -5,17 +5,52 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Animated,
 } from "react-native";
 import { formatCurrency } from "../../constants";
+import { useState, useRef, useEffect } from "react";
 import { useCart } from "../../contexts/CartContext";
-import { useState } from "react";
 import { BlurView } from "expo-blur";
+import { MaterialIcons } from "@expo/vector-icons";
 
 function BeverageItem({ beverage }) {
   const [modalVisible, setModalVisible] = useState(false);
-  const { dispatch } = useCart();
+  const { dispatch, state } = useCart();
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const modalScaleAnim = useRef(new Animated.Value(0)).current;
+
+  const isInCart = state.beverageList.some((item) => item.id === beverage.id);
+
+  const animatePress = () => {
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 0.95,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  useEffect(() => {
+    if (modalVisible) {
+      Animated.spring(modalScaleAnim, {
+        toValue: 1,
+        tension: 50,
+        friction: 7,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      modalScaleAnim.setValue(0);
+    }
+  }, [modalVisible, modalScaleAnim]);
 
   const handleAddToCart = () => {
+    animatePress();
     dispatch({
       type: "ADD_BEVERAGE",
       payload: {
@@ -32,50 +67,105 @@ function BeverageItem({ beverage }) {
 
   return (
     <>
-      <TouchableOpacity
-        style={styles.card}
-        onPress={() => setModalVisible(true)}
-      >
-        <Image source={{ uri: beverage.imgUrl }} style={styles.image} />
-        <View style={styles.info}>
-          <Text style={styles.price}>{formatCurrency(beverage.price)}</Text>
-          <Text style={styles.name} numberOfLines={1}>
-            {beverage.name}
-          </Text>
-          <Text style={styles.detail} numberOfLines={1}>
-            Loại: {beverage.category}
-          </Text>
-        </View>
-      </TouchableOpacity>
+      <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+        <TouchableOpacity
+          style={[styles.card, isInCart && styles.cardInCart]}
+          onPress={() => {
+            animatePress();
+            setModalVisible(true);
+          }}
+          activeOpacity={0.8}
+        >
+          <Image source={{ uri: beverage.imgUrl }} style={styles.image} />
+          {isInCart && (
+            <View style={styles.inCartBadge}>
+              <MaterialIcons name="check-circle" size={20} color="#fff" />
+            </View>
+          )}
+          <View style={styles.info}>
+            <View style={styles.priceContainer}>
+              <Text style={styles.price}>{formatCurrency(beverage.price)}</Text>
+              <Text style={styles.priceUnit}>/món</Text>
+            </View>
+            <Text style={styles.name} numberOfLines={1}>
+              {beverage.name}
+            </Text>
+            <View style={styles.detailRow}>
+              <MaterialIcons name="category" size={14} color="#666" />
+              <Text style={styles.detail} numberOfLines={1}>
+                {beverage.category}
+              </Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </Animated.View>
 
-      <Modal visible={modalVisible} transparent animationType="fade">
+      <Modal visible={modalVisible} transparent animationType="none">
         <BlurView intensity={60} style={styles.modalContainer}>
-          <View style={styles.modalContent}>
+          <Animated.View
+            style={[
+              styles.modalContent,
+              {
+                transform: [
+                  { scale: modalScaleAnim },
+                  {
+                    translateY: modalScaleAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [50, 0],
+                    }),
+                  },
+                ],
+              },
+            ]}
+          >
             <TouchableOpacity
               style={styles.closeButton}
               onPress={() => setModalVisible(false)}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <Text style={styles.closeButtonText}>×</Text>
+              <MaterialIcons name="close" size={24} color="#666" />
             </TouchableOpacity>
-            <Image
-              source={{ uri: beverage.imgUrl }}
-              style={styles.modalImage}
-            />
-            <Text style={styles.modalTitle}>{beverage.name}</Text>
-            <Text style={styles.modalText}>Loại: {beverage.category}</Text>
-            <Text style={styles.modalText}>
-              Đơn giá: {formatCurrency(beverage.price)}
-            </Text>
-            <Text style={styles.modalText}>
-              Mô tả: {beverage.description || "Không có mô tả"}
-            </Text>
+
+            <Image source={{ uri: beverage.imgUrl }} style={styles.modalImage} />
+
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>{beverage.name}</Text>
+              <Text style={styles.modalPrice}>
+                {formatCurrency(beverage.price)}
+                <Text style={styles.modalPriceUnit}>/món</Text>
+              </Text>
+            </View>
+
+            <View style={styles.modalDetails}>
+              <View style={styles.modalDetailRow}>
+                <MaterialIcons name="category" size={20} color="#835101" />
+                <Text style={styles.modalDetailText}>
+                  Loại: {beverage.category}
+                </Text>
+              </View>
+              <View style={styles.modalDetailRow}>
+                <MaterialIcons name="description" size={20} color="#835101" />
+                <Text style={styles.modalDetailText}>
+                  {beverage.description || "Không có mô tả"}
+                </Text>
+              </View>
+            </View>
+
             <TouchableOpacity
-              style={styles.modalButton}
+              style={[styles.modalButton, isInCart && styles.modalButtonInCart]}
               onPress={handleAddToCart}
+              disabled={isInCart}
             >
-              <Text style={styles.modalButtonText}>📌 Thêm vào giỏ hàng</Text>
+              <MaterialIcons
+                name={isInCart ? "check-circle" : "add-shopping-cart"}
+                size={20}
+                color="#fff"
+              />
+              <Text style={styles.modalButtonText}>
+                {isInCart ? "Đã thêm vào giỏ" : "Thêm vào giỏ hàng"}
+              </Text>
             </TouchableOpacity>
-          </View>
+          </Animated.View>
         </BlurView>
       </Modal>
     </>
@@ -86,7 +176,7 @@ const styles = StyleSheet.create({
   card: {
     width: 200,
     marginRight: 12,
-    borderRadius: 8,
+    borderRadius: 16,
     overflow: "hidden",
     backgroundColor: "#fff",
     shadowColor: "#000",
@@ -96,94 +186,142 @@ const styles = StyleSheet.create({
     elevation: 3,
     marginBottom: 4,
   },
+  cardInCart: {
+    borderColor: "#835101",
+    borderWidth: 2,
+  },
   image: {
     width: "100%",
-    height: 200,
+    height: 120,
     resizeMode: "cover",
+  },
+  inCartBadge: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    backgroundColor: "#835101",
+    borderRadius: 12,
+    padding: 4,
   },
   info: {
     padding: 12,
   },
-  name: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 4,
-    color: "#333",
-  },
-  detail: {
-    fontSize: 14,
-    color: "#666",
+  priceContainer: {
+    flexDirection: "row",
+    alignItems: "baseline",
     marginBottom: 4,
   },
   price: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: "bold",
     color: "#835101",
+  },
+  priceUnit: {
+    fontSize: 12,
+    color: "#666",
+    marginLeft: 2,
+  },
+  name: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#333",
     marginBottom: 8,
+  },
+  detailRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginBottom: 4,
+  },
+  detail: {
+    fontSize: 12,
+    color: "#666",
+    flex: 1,
   },
   modalContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.6)",
+    padding: 20,
   },
   modalContent: {
-    width: 300,
-    padding: 24,
     backgroundColor: "#fff",
-    borderRadius: 16,
-    alignItems: "center",
+    borderRadius: 20,
+    width: "90%",
+    maxWidth: 400,
+    overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
     elevation: 5,
-  },
-  modalImage: {
-    width: 210,
-    height: 210,
-    borderRadius: 8,
-    marginBottom: 12,
-  },
-  modalTitle: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginBottom: 10,
-    color: "#333",
-    textAlign: "center",
-  },
-  modalText: {
-    fontSize: 16,
-    marginBottom: 6,
-    color: "#555",
   },
   closeButton: {
     position: "absolute",
-    top: 10,
-    right: 10,
-    backgroundColor: "#FF4D4D",
-    width: 26,
-    height: 26,
-    borderRadius: 15,
-    justifyContent: "center",
-    alignItems: "center",
+    top: 16,
+    right: 16,
+    zIndex: 1,
+    backgroundColor: "rgba(255,255,255,0.9)",
+    borderRadius: 20,
+    padding: 4,
   },
-  closeButtonText: {
+  modalImage: {
+    width: "100%",
+    height: 200,
+    resizeMode: "cover",
+  },
+  modalHeader: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 8,
+  },
+  modalPrice: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#fff",
+    color: "#835101",
+  },
+  modalPriceUnit: {
+    fontSize: 14,
+    color: "#666",
+    fontWeight: "normal",
+  },
+  modalDetails: {
+    padding: 16,
+    gap: 12,
+  },
+  modalDetailRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  modalDetailText: {
+    fontSize: 14,
+    color: "#444",
+    flex: 1,
   },
   modalButton: {
-    marginTop: 16,
     backgroundColor: "#835101",
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    padding: 16,
+    margin: 16,
+    borderRadius: 12,
+  },
+  modalButtonInCart: {
+    backgroundColor: "#4CAF50",
   },
   modalButtonText: {
-    fontSize: 16,
     color: "#fff",
-    fontWeight: "bold",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });
 

@@ -169,7 +169,11 @@ const ProfileScreen = () => {
             onPress={() => {}}
           />
           <MenuItem icon="bell" text="Thông báo" onPress={() => {}} />
-          <MenuItem icon="star" text="Đánh giá của bạn" onPress={() => {}} />
+          <MenuItem
+            icon="star"
+            text="Đánh giá của bạn"
+            onPress={() => navigation.navigate("YourReview")}
+          />
           <MenuItem icon="question-circle" text="Hỗ trợ" onPress={() => {}} />
           <MenuItem icon="file-text" text="Điều khoản" onPress={() => {}} />
         </View>

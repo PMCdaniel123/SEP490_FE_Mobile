@@ -21,6 +21,7 @@ import Checkout from "./src/screens/Checkout";
 import YourBooking from "./src/screens/YourBooking";
 import BookingDetailScreen from "./src/screens/YourBookingDetail";
 import ReviewScreen from "./src/screens/ReviewScreen";
+import YourReviewScreen from "./src/screens/YourReview";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -30,6 +31,7 @@ const ProfileStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="ProfileMain" component={ProfileScreen} />
     <Stack.Screen name="ProfileDetail" component={ProfileDetail} />
+    <Stack.Screen name="YourReview" component={YourReviewScreen} />
   </Stack.Navigator>
 );
 

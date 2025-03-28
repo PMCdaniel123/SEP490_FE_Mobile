@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, Image, StyleSheet, FlatList, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  FlatList,
+  ActivityIndicator,
+} from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
@@ -13,7 +21,7 @@ const formatCurrency = (value) => {
 
 const Recommendations = () => {
   const [recommendedSpaces, setRecommendedSpaces] = useState([]);
-  const [categories, setCategories] = useState(["Tất cả"]); 
+  const [categories, setCategories] = useState(["Tất cả"]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("Tất cả");
   const navigation = useNavigation();
@@ -31,7 +39,7 @@ const Recommendations = () => {
         ];
         setCategories(uniqueCategories);
       } catch (error) {
-        console.error("Error fetching recommended spaces:", error);
+        alert("Error fetching recommended spaces:", error);
       } finally {
         setLoading(false);
       }
@@ -40,11 +48,12 @@ const Recommendations = () => {
     fetchRecommendedSpaces();
   }, []);
 
-
   const filteredSpaces =
     selectedCategory === "Tất cả"
       ? recommendedSpaces
-      : recommendedSpaces.filter((space) => space.category === selectedCategory);
+      : recommendedSpaces.filter(
+          (space) => space.category === selectedCategory
+        );
 
   const limitedSpaces = filteredSpaces.slice(0, 4);
 
@@ -69,37 +78,40 @@ const Recommendations = () => {
   );
 
   const renderSpaceItem = ({ item }) => (
-<TouchableOpacity
-  style={styles.listItemCard}
-  onPress={() => navigation.navigate("WorkspaceDetail", { id: item.id })} // Pass workspace ID
-  activeOpacity={0.8}
->
-  <View style={styles.imageContainer}>
-    <Image source={{ uri: item.images[0]?.imgUrl }} style={styles.listItemImage} />
-  </View>
-  <View style={styles.listItemInfo}>
-    <Text style={styles.listItemName} numberOfLines={1}>
-      {item.name}
-    </Text>
-    <View style={styles.listItemLocation}>
-      <Icon name="location-on" size={14} color="#666" />
-      <Text style={styles.listItemLocationText} numberOfLines={2}>
-        {item.address}
-      </Text>
-    </View>
-    <View style={styles.listItemFooter}>
-      <Text style={styles.listItemPrice}>
-        {item.prices.length > 1
-          ? `${formatCurrency(item.prices[0].price)} - ${formatCurrency(item.prices[1].price)}`
-          : formatCurrency(item.prices[0]?.price)}
-      </Text>
-      <View style={styles.listItemRating}>
-        <Icon name="star" size={16} color="#FFD700" />
-        <Text style={styles.listItemRatingText}>{item.rating || 4.0}</Text>
+    <TouchableOpacity
+      style={styles.listItemCard}
+      onPress={() => navigation.navigate("WorkspaceDetail", { id: item.id })} // Pass workspace ID
+      activeOpacity={0.8}
+    >
+      <View style={styles.imageContainer}>
+        <Image
+          source={{ uri: item.images[0]?.imgUrl }}
+          style={styles.listItemImage}
+        />
       </View>
-    </View>
-  </View>
-</TouchableOpacity>
+      <View style={styles.listItemInfo}>
+        <Text style={styles.listItemName} numberOfLines={1}>
+          {item.name}
+        </Text>
+        <View style={styles.listItemLocation}>
+          <Icon name="location-on" size={14} color="#666" />
+          <Text style={styles.listItemLocationText} numberOfLines={2}>
+            {item.address}
+          </Text>
+        </View>
+        <View style={styles.listItemFooter}>
+          <Text style={styles.listItemPrice}>
+            {item.prices.length > 1
+              ? `${formatCurrency(item.prices[0].price)} - ${formatCurrency(item.prices[1].price)}`
+              : formatCurrency(item.prices[0]?.price)}
+          </Text>
+          <View style={styles.listItemRating}>
+            <Icon name="star" size={16} color="#FFD700" />
+            <Text style={styles.listItemRatingText}>{item.rating || 4.0}</Text>
+          </View>
+        </View>
+      </View>
+    </TouchableOpacity>
   );
 
   if (loading) {
@@ -171,12 +183,12 @@ const styles = StyleSheet.create({
   filterButton: {
     paddingVertical: 8,
     paddingHorizontal: 16,
-    borderRadius: 20,
+    borderRadius: 8,
     marginRight: 8,
     backgroundColor: "#f5f5f5",
   },
   activeFilterButton: {
-    backgroundColor: "#B25F00",
+    backgroundColor: "#835101",
   },
   filterText: {
     color: "#666",
@@ -237,7 +249,7 @@ const styles = StyleSheet.create({
   listItemPrice: {
     fontSize: 14,
     fontWeight: "bold",
-    color: "#B25F00",
+    color: "#835101",
   },
   listItemRating: {
     flexDirection: "row",

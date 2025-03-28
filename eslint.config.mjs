@@ -52,7 +52,7 @@ export default [
       },
     },
     rules: {
-      'semi': ['error', 'always'],
+      // 'semi': ['error', 'always'],
       // 'no-unused-vars': 'error',
       'no-console': 'warn',
       'import/no-unresolved': ['error', { commonjs: true, amd: true }],

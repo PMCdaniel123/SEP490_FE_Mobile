@@ -52,7 +52,7 @@ const RegisterScreen = ({ navigation }) => {
         navigation.navigate("Login");
       }
     } catch (error) {
-      console.error("Lỗi đăng ký:", error.response?.data || error.message);
+      alert("Lỗi đăng ký:", error.response?.data || error.message);
       Alert.alert("Đăng ký thất bại", error.response?.data?.notification || "Đã xảy ra lỗi trong quá trình đăng ký.");
     } finally {
       setLoading(false);
@@ -94,7 +94,7 @@ const RegisterScreen = ({ navigation }) => {
                 />
                 {touched.name && errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
 
-                <Text style={styles.label}>E-mail</Text>
+                <Text style={styles.label}>Email</Text>
                 <TextInput
                   style={[styles.input, touched.email && errors.email && styles.inputError]}
                   placeholder="Nhập email"

@@ -96,7 +96,7 @@ const LoginScreen = ({ navigation }) => {
           
           <View style={styles.formContainer}>
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Email/Số điện thoại di động</Text>
+              <Text style={styles.inputLabel}>Email / Số điện thoại</Text>
               <TextInput
                 style={styles.input}
                   placeholder="Nhập email hoặc số điện thoại của bạn"

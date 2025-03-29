@@ -31,6 +31,7 @@
     "react-native-date-picker": "^5.0.11",
     "react-native-gesture-handler": "^2.24.0",
     "react-native-image-zoom-viewer": "^3.0.1",
+    "react-native-maps": "^1.20.1",
     "react-native-modal-datetime-picker": "^18.0.0",
     "react-native-paper": "^5.13.1",
     "react-native-picker-select": "^9.3.1",
@@ -52,7 +53,8 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-native": "^5.0.0",
     "globals": "^16.0.0",
-    "metro-react-native-babel-preset": "^0.77.0"
+    "metro-react-native-babel-preset": "^0.77.0",
+    "react-native-dotenv": "^3.4.11"
   },
   "private": true
 }

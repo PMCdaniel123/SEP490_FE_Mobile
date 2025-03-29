@@ -9,6 +9,7 @@ import {
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import ReviewItem from "../components/reviews/ReviewItem";
 import { useNavigation } from "@react-navigation/native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 function AllReview({ route }) {
   const { reviews, workspaceId } = route.params;
@@ -32,6 +33,7 @@ function AllReview({ route }) {
   ).length;
 
   return (
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity
@@ -111,10 +113,15 @@ function AllReview({ route }) {
         />
       )}
     </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
   container: {
     flex: 1,
     padding: 12,

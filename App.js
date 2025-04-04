@@ -24,6 +24,7 @@ import ReviewScreen from "./src/screens/ReviewScreen";
 import YourReviewScreen from "./src/screens/YourReview";
 import AllReview from "./src/screens/AllReview";
 import SearchScreen from "./src/screens/SearchScreen";
+import WalletScreen from "./src/screens/WalletScreen";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -34,6 +35,7 @@ const ProfileStack = () => (
     <Stack.Screen name="ProfileMain" component={ProfileScreen} />
     <Stack.Screen name="ProfileDetail" component={ProfileDetail} />
     <Stack.Screen name="YourReview" component={YourReviewScreen} />
+    <Stack.Screen name="Wallet" component={WalletScreen} />
   </Stack.Navigator>
 );
 

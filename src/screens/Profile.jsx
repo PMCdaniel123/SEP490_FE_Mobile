@@ -162,7 +162,7 @@ const ProfileScreen = () => {
 
         {/* Settings Section */}
         <View style={styles.settingsSection}>
-          <MenuItem icon="credit-card" text="Ví WorkHive" onPress={() => {}} />
+          <MenuItem icon="credit-card" text="Ví WorkHive" onPress={() => navigation.navigate("Wallet")} />
           <MenuItem
             icon="history"
             text="Lịch sử thanh toán"

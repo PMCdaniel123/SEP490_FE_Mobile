@@ -23,6 +23,7 @@ import BookingDetailScreen from "./src/screens/YourBookingDetail";
 import ReviewScreen from "./src/screens/ReviewScreen";
 import YourReviewScreen from "./src/screens/YourReview";
 import AllReview from "./src/screens/AllReview";
+import SearchScreen from "./src/screens/SearchScreen";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -43,6 +44,15 @@ const HomeStack = () => (
     <Stack.Screen name="AllReview" component={AllReview} />
     <Stack.Screen name="Notification" component={NotificationScreen} />
     <Stack.Screen name="WorkSpaces" component={WorkSpaces} />
+    <Stack.Screen name="Checkout" component={Checkout} />
+  </Stack.Navigator>
+);
+
+const SearchStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="SearchMain" component={SearchScreen} />
+    <Stack.Screen name="WorkspaceDetail" component={WorkspaceDetail} />
+    <Stack.Screen name="AllReview" component={AllReview} />
     <Stack.Screen name="Checkout" component={Checkout} />
   </Stack.Navigator>
 );
@@ -121,7 +131,7 @@ const TabNavigator = () => (
     />
     <Tab.Screen
       name="Tìm kiếm"
-      component={Home}
+      component={SearchStack}
       options={{
         tabBarIcon: ({ color }) => (
           <Icon name="search" size={22} color={color} />
@@ -137,6 +147,7 @@ const TabNavigator = () => (
     />
   </Tab.Navigator>
 );
+
 const AppNavigator = () => {
   const { isLoading, userToken } = useContext(AuthContext);
 

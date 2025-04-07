@@ -1,10 +1,10 @@
 import React, { useContext } from "react";
-import { StyleSheet, View, ActivityIndicator } from "react-native";
+import { StyleSheet, View, ActivityIndicator, Platform } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Icon from "react-native-vector-icons/FontAwesome";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import Home from "./src/screens/Home";
 import WorkspaceDetail from "./src/screens/WorkspaceDetail";
 import ProfileScreen from "./src/screens/Profile";
@@ -88,67 +88,85 @@ const AuthScreens = () => (
   </AuthStack.Navigator>
 );
 
-const TabNavigator = () => (
-  <Tab.Navigator
-    screenOptions={({ route }) => ({
-      tabBarStyle: {
-        elevation: 5,
-        backgroundColor: "#ffffff",
-        height: 65,
-        ...styles.shadow,
-        display:
-          route.name === "Đặt chỗ" &&
-          route.state?.routes[route.state.index]?.name === "BookingDetail"
-            ? "none"
-            : "flex",
-      },
-      tabBarActiveTintColor: "#835101",
-      tabBarInactiveTintColor: "#999",
-      tabBarLabelStyle: {
-        fontSize: 12,
-        marginBottom: 5,
-      },
-      tabBarIconStyle: {
-        marginTop: 5,
-      },
-      headerShown: false,
-      tabBarHideOnKeyboard: true,
-    })}
-  >
-    <Tab.Screen
-      name="Trang chủ"
-      component={HomeStack}
-      options={{
-        tabBarIcon: ({ color }) => <Icon name="home" size={22} color={color} />,
-      }}
-    />
-    <Tab.Screen
-      name="Đặt chỗ"
-      component={BookingStack}
-      options={{
-        tabBarIcon: ({ color }) => (
-          <Icon name="calendar" size={22} color={color} />
-        ),
-      }}
-    />
-    <Tab.Screen
-      name="Tìm kiếm"
-      component={SearchStack}
-      options={{
-        tabBarIcon: ({ color }) => (
-          <Icon name="search" size={22} color={color} />
-        ),
-      }}
-    />
-    <Tab.Screen
-      name="Tài khoản"
-      component={ProfileStack}
-      options={{
-        tabBarIcon: ({ color }) => <Icon name="user" size={22} color={color} />,
-      }}
-    />
-  </Tab.Navigator>
-);
+const TabNavigator = () => {
+  const insets = useSafeAreaInsets();
+  
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        tabBarStyle: {
+          elevation: 5,
+          backgroundColor: '#ffffff',
+          height: Platform.OS === 'ios' ? 60 + insets.bottom : 65,
+          paddingBottom: Platform.OS === 'ios' ? insets.bottom : 0,
+          ...styles.shadow,
+          display:
+            (route.name === 'Đặt chỗ' &&
+              route.state?.routes[route.state.index]?.name === 'BookingDetail') ||
+            (route.name === 'Tìm kiếm' &&
+              route.state?.routes[route.state.index]?.name === 'Checkout')
+              ? 'none'
+              : 'flex',
+          borderTopWidth: 1,
+          borderTopColor: '#f0f0f0',
+        },
+        tabBarActiveTintColor: '#835101',
+        tabBarInactiveTintColor: '#999',
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '500',
+          marginBottom: Platform.OS === 'ios' ? 0 : 5,
+        },
+        tabBarIconStyle: {
+          marginTop: 5,
+        },
+        headerShown: false,
+        tabBarHideOnKeyboard: true,
+        tabBarShowLabel: true,
+        tabBarAllowFontScaling: false,
+        tabBarPressColor: 'rgba(131, 81, 1, 0.1)',
+      })}
+    >
+      <Tab.Screen
+        name="Trang chủ"
+        component={HomeStack}
+        options={{
+          tabBarIcon: ({ color, focused }) => (
+            <Icon name="home" size={focused ? 24 : 22} color={color} />
+          ),
+          tabBarBadge: null,
+        }}
+      />
+      <Tab.Screen
+        name="Đặt chỗ"
+        component={BookingStack}
+        options={{
+          tabBarIcon: ({ color, focused }) => (
+            <Icon name="calendar" size={focused ? 24 : 22} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Tìm kiếm"
+        component={SearchStack}
+        options={{
+          tabBarIcon: ({ color, focused }) => (
+            <Icon name="search" size={focused ? 24 : 22} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Tài khoản"
+        component={ProfileStack}
+        options={{
+          tabBarIcon: ({ color, focused }) => (
+            <Icon name="user" size={focused ? 24 : 22} color={color} />
+          ),
+        }}
+      />
+    </Tab.Navigator>
+  );
+};
 
 const AppNavigator = () => {
   const { isLoading, userToken } = useContext(AuthContext);

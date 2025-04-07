@@ -166,7 +166,9 @@ const ProfileScreen = () => {
           <MenuItem
             icon="history"
             text="Lịch sử thanh toán"
-            onPress={() => {}}
+            onPress={() => {
+              navigation.navigate("Đặt chỗ");
+            }}
           />
           <MenuItem icon="bell" text="Thông báo" onPress={() => {}} />
           <MenuItem

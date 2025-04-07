@@ -9,15 +9,17 @@ import {
   Image,
   ActivityIndicator,
   Alert,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import { AuthContext } from "../contexts/AuthContext";
 import { useNavigation, useIsFocused } from "@react-navigation/native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 const BookingScreen = () => {
   const isFocused = useIsFocused();
+  const insets = useSafeAreaInsets();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const { userData, userToken } = useContext(AuthContext);
@@ -31,12 +33,15 @@ const BookingScreen = () => {
           display: "flex",
           elevation: 5,
           backgroundColor: "#ffffff",
-          height: 65,
+          height: Platform.OS === 'ios' ? 60 + (insets.bottom || 0) : 65,
+          paddingBottom: Platform.OS === 'ios' ? (insets.bottom || 0) : 0,
           ...styles.shadow,
+          borderTopWidth: 1,
+          borderTopColor: '#f0f0f0',
         },
       });
     }
-  }, [isFocused, navigation]);
+  }, [isFocused, navigation, insets]);
 
   useEffect(() => {
     fetchBookingHistory();

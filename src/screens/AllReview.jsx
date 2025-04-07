@@ -38,9 +38,7 @@ function AllReview({ route }) {
       <View style={styles.header}>
         <TouchableOpacity
           style={{ backgroundColor: "#835101", padding: 8, borderRadius: 50 }}
-          onPress={() =>
-            navigation.navigate("WorkspaceDetail", { id: workspaceId })
-          }
+          onPress={() => navigation.goBack()}
         >
           <Ionicons name="arrow-back" size={20} color="white" />
         </TouchableOpacity>

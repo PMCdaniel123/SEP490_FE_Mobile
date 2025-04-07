@@ -33,29 +33,73 @@ const AuthStack = createNativeStackNavigator();
 const ProfileStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="ProfileMain" component={ProfileScreen} />
-    <Stack.Screen name="ProfileDetail" component={ProfileDetail} />
-    <Stack.Screen name="YourReview" component={YourReviewScreen} />
-    <Stack.Screen name="Wallet" component={WalletScreen} />
+    <Stack.Screen 
+      name="ProfileDetail" 
+      component={ProfileDetail} 
+      options={{ tabBarVisible: false }}
+    />
+    <Stack.Screen 
+      name="YourReview" 
+      component={YourReviewScreen} 
+      options={{ tabBarVisible: false }}
+    />
+    <Stack.Screen 
+      name="Wallet" 
+      component={WalletScreen} 
+      options={{ tabBarVisible: false }}
+    />
   </Stack.Navigator>
 );
 
 const HomeStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="HomeMain" component={Home} />
-    <Stack.Screen name="WorkspaceDetail" component={WorkspaceDetail} />
-    <Stack.Screen name="AllReview" component={AllReview} />
-    <Stack.Screen name="Notification" component={NotificationScreen} />
-    <Stack.Screen name="WorkSpaces" component={WorkSpaces} />
-    <Stack.Screen name="Checkout" component={Checkout} />
+    <Stack.Screen 
+      name="WorkspaceDetail" 
+      component={WorkspaceDetail} 
+      options={{ tabBarVisible: false }}
+    />
+    <Stack.Screen 
+      name="AllReview" 
+      component={AllReview} 
+      options={{ tabBarVisible: false }}
+    />
+    <Stack.Screen 
+      name="Notification" 
+      component={NotificationScreen} 
+      options={{ tabBarVisible: false }}
+    />
+    <Stack.Screen 
+      name="WorkSpaces" 
+      component={WorkSpaces} 
+      options={{ tabBarVisible: false }}
+    />
+    <Stack.Screen 
+      name="Checkout" 
+      component={Checkout} 
+      options={{ tabBarVisible: false }}
+    />
   </Stack.Navigator>
 );
 
 const SearchStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="SearchMain" component={SearchScreen} />
-    <Stack.Screen name="WorkspaceDetail" component={WorkspaceDetail} />
-    <Stack.Screen name="AllReview" component={AllReview} />
-    <Stack.Screen name="Checkout" component={Checkout} />
+    <Stack.Screen 
+      name="WorkspaceDetail" 
+      component={WorkspaceDetail} 
+      options={{ tabBarVisible: false }}
+    />
+    <Stack.Screen 
+      name="AllReview" 
+      component={AllReview} 
+      options={{ tabBarVisible: false }}
+    />
+    <Stack.Screen 
+      name="Checkout" 
+      component={Checkout} 
+      options={{ tabBarVisible: false }}
+    />
   </Stack.Navigator>
 );
 
@@ -65,18 +109,12 @@ const BookingStack = () => (
     <Stack.Screen
       name="BookingDetail"
       component={BookingDetailScreen}
-      options={{
-        headerShown: false,
-        // presentation: "modal",
-      }}
+      options={{ tabBarVisible: false }}
     />
     <Stack.Screen
       name="ReviewScreen"
       component={ReviewScreen}
-      options={{
-        headerShown: false,
-        tabBarStyle: { display: "none" },
-      }}
+      options={{ tabBarVisible: false }}
     />
   </Stack.Navigator>
 );
@@ -104,7 +142,8 @@ const TabNavigator = () => {
             (route.name === 'Đặt chỗ' &&
               route.state?.routes[route.state.index]?.name === 'BookingDetail') ||
             (route.name === 'Tìm kiếm' &&
-              route.state?.routes[route.state.index]?.name === 'Checkout')
+              route.state?.routes[route.state.index]?.name === 'Checkout') ||
+            (route.state && route.state.index > 0)
               ? 'none'
               : 'flex',
           borderTopWidth: 1,

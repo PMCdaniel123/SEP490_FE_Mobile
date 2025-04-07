@@ -120,7 +120,7 @@ const WorkspaceDetail = ({ route }) => {
   }
 
   const handleBackPress = () => {
-    navigation.navigate("HomeMain");
+    navigation.goBack();
   };
 
   const openGoogleMaps = (url) => {

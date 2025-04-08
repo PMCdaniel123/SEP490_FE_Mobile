@@ -1,11 +1,13 @@
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useEffect } from "react";
+import axios from "axios";
 
-const CheckoutSuccessScreen = () => {
+const SuccessScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  const { OrderCode, BookingId, code, id, cancel, status, orderCode } = route.params || {};
+  const { OrderCode, BookingId } = route.params || {};
 
   const handleGoHome = () => {
     navigation.navigate("HomeMain");
@@ -15,26 +17,46 @@ const CheckoutSuccessScreen = () => {
     navigation.navigate("Đặt chỗ", { screen: "YourBooking" });
   };
 
+  useEffect(() => {
+    if (OrderCode !== null && BookingId !== null) {
+      const updateWorkspaceTimeStatus = async () => {
+        try {
+          await axios.put(
+            `http://35.78.210.59:8080/users/booking/updatetimestatus`,
+            {
+              bookingId: BookingId,
+              orderCode: OrderCode,
+            }
+          );
+        } catch (error) {
+          toast("Error updating workspace time status:", error);
+        }
+      };
+
+      updateWorkspaceTimeStatus();
+    }
+  }, [OrderCode, BookingId]);
+
   return (
     <View style={styles.container}>
       <View style={styles.successCard}>
-        <Ionicons name="checkmark-circle" size={80} color="#4CAF50" style={styles.icon} />
+        <Ionicons
+          name="checkmark-circle"
+          size={80}
+          color="#4CAF50"
+          style={styles.icon}
+        />
         <Text style={styles.title}>Thanh toán thành công!</Text>
-        
+
         <View style={styles.detailsContainer}>
           <View style={styles.detailRow}>
             <Text style={styles.label}>Mã đơn hàng:</Text>
-            <Text style={styles.value}>{OrderCode || orderCode}</Text>
+            <Text style={styles.value}>{OrderCode}</Text>
           </View>
-          
+
           <View style={styles.detailRow}>
             <Text style={styles.label}>Mã đặt chỗ:</Text>
             <Text style={styles.value}>{BookingId}</Text>
-          </View>
-          
-          <View style={styles.detailRow}>
-            <Text style={styles.label}>Trạng thái:</Text>
-            <Text style={[styles.value, styles.statusText]}>{status}</Text>
           </View>
         </View>
 
@@ -42,8 +64,11 @@ const CheckoutSuccessScreen = () => {
           <TouchableOpacity style={styles.button} onPress={handleViewBooking}>
             <Text style={styles.buttonText}>Xem đặt chỗ</Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity style={[styles.button, styles.secondaryButton]} onPress={handleGoHome}>
+
+          <TouchableOpacity
+            style={[styles.button, styles.secondaryButton]}
+            onPress={handleGoHome}
+          >
             <Text style={styles.secondaryButtonText}>Về trang chủ</Text>
           </TouchableOpacity>
         </View>
@@ -107,9 +132,6 @@ const styles = StyleSheet.create({
     color: "#333",
     fontWeight: "bold",
   },
-  statusText: {
-    color: "#4CAF50",
-  },
   buttonContainer: {
     width: "100%",
     gap: 12,
@@ -139,4 +161,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CheckoutSuccessScreen;
+export default SuccessScreen;

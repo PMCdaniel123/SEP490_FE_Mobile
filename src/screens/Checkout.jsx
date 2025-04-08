@@ -136,18 +136,16 @@ function Checkout() {
         }
       );
 
-      console.log("Checkout response:", response.data);
-      
       // Store booking information for later use
       const bookingInfo = {
         bookingId: response.data.bookingId,
         orderCode: response.data.orderCode,
-        status: response.data.status
+        status: response.data.status,
       };
-      
+
       // Save to local state for use after payment
       setBookingInfo(bookingInfo);
-      
+
       dispatch({ type: "CLEAR_CART" });
       setCheckoutUrl(response.data.checkoutUrl);
     } catch (error) {
@@ -158,39 +156,6 @@ function Checkout() {
   };
 
   useEffect(() => {
-    const fetchUserProfile = async () => {
-      if (!userData || !userData.sub) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const response = await axios.get(
-          `http://35.78.210.59:8080/users/${userData.sub}`,
-          {
-            headers: {
-              Authorization: `Bearer ${userToken}`,
-            },
-          }
-        );
-
-        if (response.data && response.data.user) {
-          setUserProfile(response.data.user);
-        } else {
-          setError("Không thể tải thông tin người dùng");
-        }
-      } catch (error) {
-        alert("Lỗi khi tải hồ sơ:", error);
-        setError("Đã xảy ra lỗi khi tải thông tin người dùng");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserProfile();
-  }, [userData, userToken]);
-
-  useEffect(() => {
     // Handle deep links when the app is already open
     const handleUrl = (event) => {
       const { url } = event;
@@ -198,10 +163,10 @@ function Checkout() {
     };
 
     // Add event listener for URL changes
-    Linking.addEventListener('url', handleUrl);
+    Linking.addEventListener("url", handleUrl);
 
     // Check for initial URL that launched the app
-    Linking.getInitialURL().then(url => {
+    Linking.getInitialURL().then((url) => {
       if (url) {
         handleDeepLink(url);
       }
@@ -209,32 +174,37 @@ function Checkout() {
 
     return () => {
       // Clean up event listener
-      Linking.removeEventListener('url', handleUrl);
+      Linking.removeEventListener("url", handleUrl);
     };
   }, [handleDeepLink]);
 
   // Function to handle deep links
-  const handleDeepLink = useCallback((url) => {
-    if (url && url.includes('success')) {
-      try {
-        // Extract parameters from URL
-        const queryString = url.split('?')[1];
-        const urlParams = new URLSearchParams(queryString);
-        const params = {};
-        
-        // Convert URLSearchParams to a regular object
-        urlParams.forEach((value, key) => {
-          params[key] = value;
-        });
-        
-        // Navigate to success screen with parameters
-        navigation.navigate('SuccessPage', params);
-      } catch (error) {
-        // If there's an error parsing the URL, navigate to success page with minimal params
-        navigation.navigate('SuccessPage', { status: 'PAID' });
+  const handleDeepLink = useCallback(
+    (url) => {
+      if (url && url.includes("success")) {
+        try {
+          // Extract parameters from URL
+          const queryString = url.split("?")[1];
+          const urlParams = new URLSearchParams(queryString);
+          const params = {};
+
+          // Convert URLSearchParams to a regular object
+          urlParams.forEach((value, key) => {
+            params[key] = value;
+          });
+
+          // Navigate to success screen with parameters
+          navigation.navigate("SuccessPage", params);
+        } catch (error) {
+          // If there's an error parsing the URL, navigate to success page with minimal params
+          navigation.navigate("SuccessPage", { status: "PAID" });
+        }
+      } else if (url && url.includes("cancel")) {
+        navigation.navigate("FailPage");
       }
-    }
-  }, [navigation]);
+    },
+    [navigation]
+  );
 
   if (loading) {
     return (
@@ -271,40 +241,43 @@ function Checkout() {
         source={{ uri: checkoutUrl }}
         onNavigationStateChange={(navState) => {
           // PayOS typically redirects to a success URL after payment
-          if (navState.url.includes("result") || 
-              navState.url.includes("success") || 
-              navState.url.includes("callback") ||
-              navState.url.includes("return")) {
-            
+          if (
+            navState.url.includes("result") ||
+            navState.url.includes("success") ||
+            navState.url.includes("callback") ||
+            navState.url.includes("return")
+          ) {
             // Check if the URL contains success indicators
-            const isSuccess = 
-              navState.url.includes("success=true") || 
+            const isSuccess =
+              navState.url.includes("success=true") ||
               navState.url.includes("status=success") ||
               navState.url.includes("status=PAID") ||
               navState.url.toLowerCase().includes("success");
-            
+
             if (isSuccess && bookingInfo) {
               // Navigate to success screen with booking information
               navigation.navigate("SuccessPage", {
                 OrderCode: bookingInfo.orderCode,
                 BookingId: bookingInfo.bookingId,
                 status: "PAID",
-                cancel: false
+                cancel: false,
               });
             }
           }
         }}
         onShouldStartLoadWithRequest={(request) => {
           // Handle redirects to custom URL schemes or success pages
-          if (request.url.startsWith('mobile://') || 
-              (request.url.includes("result") && request.url.toLowerCase().includes("success"))) {
-            
+          if (
+            request.url.startsWith("mobile://") ||
+            (request.url.includes("result") &&
+              request.url.toLowerCase().includes("success"))
+          ) {
             if (bookingInfo) {
               navigation.navigate("SuccessPage", {
                 OrderCode: bookingInfo.orderCode,
                 BookingId: bookingInfo.bookingId,
                 status: "PAID",
-                cancel: false
+                cancel: false,
               });
             }
             return false; // Prevent WebView from loading this URL
@@ -362,26 +335,27 @@ function Checkout() {
         onMessage={(event) => {
           try {
             const data = JSON.parse(event.nativeEvent.data);
-            
-            if (data.type === 'payment_success' && bookingInfo) {
+
+            if (data.type === "payment_success" && bookingInfo) {
               navigation.navigate("SuccessPage", {
                 OrderCode: bookingInfo.orderCode,
                 BookingId: bookingInfo.bookingId,
                 status: "PAID",
-                cancel: false
+                cancel: false,
               });
             }
-            
-            if (data.type === 'url_change' && 
-                data.url && 
-                (data.url.includes('success') || data.url.includes('result'))) {
-              
+
+            if (
+              data.type === "url_change" &&
+              data.url &&
+              (data.url.includes("success") || data.url.includes("result"))
+            ) {
               if (bookingInfo) {
                 navigation.navigate("SuccessPage", {
                   OrderCode: bookingInfo.orderCode,
                   BookingId: bookingInfo.bookingId,
                   status: "PAID",
-                  cancel: false
+                  cancel: false,
                 });
               }
             }

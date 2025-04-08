@@ -6,7 +6,6 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Icon from "react-native-vector-icons/FontAwesome";
 import {
   SafeAreaProvider,
-  SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import Home from "./src/screens/Home";
@@ -31,7 +30,8 @@ import SearchScreen from "./src/screens/SearchScreen";
 import WalletScreen from "./src/screens/WalletScreen";
 
 import * as Linking from "expo-linking";
-import CheckoutSuccessScreen from "./src/screens/CheckoutSuccessScreen";
+import SuccessScreen from "./src/screens/SuccessScreen";
+import FailScreen from "./src/screens/FailScreen";
 
 // Set up deep linking configuration
 const prefix = Linking.createURL("/");
@@ -46,11 +46,15 @@ const linking = {
             parse: {
               OrderCode: (OrderCode) => OrderCode,
               BookingId: (BookingId) => BookingId,
-              code: (code) => code,
-              id: (id) => id,
-              cancel: (cancel) => cancel === "true",
               status: (status) => status,
-              orderCode: (orderCode) => orderCode,
+            },
+          },
+          FailPage: {
+            path: "cancel",
+            parse: {
+              OrderCode: (OrderCode) => OrderCode,
+              BookingId: (BookingId) => BookingId,
+              status: (status) => status,
             },
           },
         },
@@ -114,7 +118,12 @@ const HomeStack = () => (
     />
     <Stack.Screen
       name="SuccessPage"
-      component={CheckoutSuccessScreen}
+      component={SuccessScreen}
+      options={{ tabBarVisible: false }}
+    />
+    <Stack.Screen
+      name="FailPage"
+      component={FailScreen}
       options={{ tabBarVisible: false }}
     />
   </Stack.Navigator>

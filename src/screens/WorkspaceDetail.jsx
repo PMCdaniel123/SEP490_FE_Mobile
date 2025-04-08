@@ -48,8 +48,6 @@ const WorkspaceDetail = ({ route }) => {
     extrapolate: "clamp",
   });
 
-  console.log(id);
-
   useEffect(() => {
     dispatch({ type: "CLEAR_CART" });
     const fetchWorkspaceDetails = async () => {

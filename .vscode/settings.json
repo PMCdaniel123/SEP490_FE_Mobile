@@ -16,6 +16,7 @@
         "reviewWorkSpace",
         "userReview",
         "searchFunction",
-        "userWallet"
+        "userWallet",
+        "checkOut"
     ]
 }

@@ -1,16 +1,142 @@
-import { useRoute } from "@react-navigation/native";
+import { useRoute, useNavigation } from "@react-navigation/native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 const CheckoutSuccessScreen = () => {
   const route = useRoute();
-  const { OrderCode, BookingId } = route.params || {};
+  const navigation = useNavigation();
+  const { OrderCode, BookingId, code, id, cancel, status, orderCode } = route.params || {};
+
+  const handleGoHome = () => {
+    navigation.navigate("HomeMain");
+  };
+
+  const handleViewBooking = () => {
+    navigation.navigate("Đặt chỗ", { screen: "YourBooking" });
+  };
 
   return (
-    <View>
-      <Text>Checkout Successful 🎉</Text>
-      <Text>Order Code: {OrderCode}</Text>
-      <Text>Booking ID: {BookingId}</Text>
+    <View style={styles.container}>
+      <View style={styles.successCard}>
+        <Ionicons name="checkmark-circle" size={80} color="#4CAF50" style={styles.icon} />
+        <Text style={styles.title}>Thanh toán thành công!</Text>
+        
+        <View style={styles.detailsContainer}>
+          <View style={styles.detailRow}>
+            <Text style={styles.label}>Mã đơn hàng:</Text>
+            <Text style={styles.value}>{OrderCode || orderCode}</Text>
+          </View>
+          
+          <View style={styles.detailRow}>
+            <Text style={styles.label}>Mã đặt chỗ:</Text>
+            <Text style={styles.value}>{BookingId}</Text>
+          </View>
+          
+          <View style={styles.detailRow}>
+            <Text style={styles.label}>Trạng thái:</Text>
+            <Text style={[styles.value, styles.statusText]}>{status}</Text>
+          </View>
+        </View>
+
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.button} onPress={handleViewBooking}>
+            <Text style={styles.buttonText}>Xem đặt chỗ</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={[styles.button, styles.secondaryButton]} onPress={handleGoHome}>
+            <Text style={styles.secondaryButtonText}>Về trang chủ</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
+    padding: 20,
+  },
+  successCard: {
+    backgroundColor: "white",
+    borderRadius: 16,
+    padding: 24,
+    width: "100%",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  icon: {
+    marginBottom: 16,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 24,
+    textAlign: "center",
+  },
+  detailsContainer: {
+    width: "100%",
+    marginBottom: 24,
+    backgroundColor: "#f9f9f9",
+    padding: 16,
+    borderRadius: 8,
+  },
+  detailRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+  label: {
+    fontSize: 16,
+    color: "#666",
+    fontWeight: "500",
+  },
+  value: {
+    fontSize: 16,
+    color: "#333",
+    fontWeight: "bold",
+  },
+  statusText: {
+    color: "#4CAF50",
+  },
+  buttonContainer: {
+    width: "100%",
+    gap: 12,
+  },
+  button: {
+    backgroundColor: "#835101",
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: "center",
+    width: "100%",
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  secondaryButton: {
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: "#835101",
+  },
+  secondaryButtonText: {
+    color: "#835101",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+});
 
 export default CheckoutSuccessScreen;

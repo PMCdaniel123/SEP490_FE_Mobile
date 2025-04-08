@@ -33,11 +33,28 @@ import WalletScreen from "./src/screens/WalletScreen";
 import * as Linking from "expo-linking";
 import CheckoutSuccessScreen from "./src/screens/CheckoutSuccessScreen";
 
+// Set up deep linking configuration
+const prefix = Linking.createURL("/");
 const linking = {
-  prefixes: ["mobile://"],
+  prefixes: [prefix, "mobile://", "https://workhive.com"],
   config: {
     screens: {
-      SuccessPage: "success",
+      HomeStack: {
+        screens: {
+          SuccessPage: {
+            path: "success",
+            parse: {
+              OrderCode: (OrderCode) => OrderCode,
+              BookingId: (BookingId) => BookingId,
+              code: (code) => code,
+              id: (id) => id,
+              cancel: (cancel) => cancel === "true",
+              status: (status) => status,
+              orderCode: (orderCode) => orderCode,
+            },
+          },
+        },
+      },
     },
   },
 };

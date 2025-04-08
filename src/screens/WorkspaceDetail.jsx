@@ -48,6 +48,8 @@ const WorkspaceDetail = ({ route }) => {
     extrapolate: "clamp",
   });
 
+  console.log(id);
+
   useEffect(() => {
     dispatch({ type: "CLEAR_CART" });
     const fetchWorkspaceDetails = async () => {
@@ -56,7 +58,6 @@ const WorkspaceDetail = ({ route }) => {
           `http://35.78.210.59:8080/workspaces/${id}`
         );
         const workspaceData = response.data.getWorkSpaceByIdResult;
-        console.log("Facilities count:", workspaceData.facilities?.length);
         setWorkspaceDetail(workspaceData);
 
         if (workspaceData.googleMapUrl) {
@@ -81,7 +82,7 @@ const WorkspaceDetail = ({ route }) => {
         dispatch({
           type: "SET_WORKSPACE_ID",
           payload: {
-            workspaceId: id,
+            workspaceId: id + "",
             price: workspaceData.prices[1].price,
             priceType: "2",
           },

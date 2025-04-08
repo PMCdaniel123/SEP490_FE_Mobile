@@ -103,8 +103,10 @@ const DateRangePicker = ({ openTime, closeTime, workspaceId }) => {
       dispatch({
         type: "SET_WORKSPACE_TIME",
         payload: {
-          startTime: openTime + " " + dayjs(startDate).format("DD/MM/YYYY"),
-          endTime: closeTime + " " + dayjs(endDate).format("DD/MM/YYYY"),
+          startTime:
+            openTime.slice(0, 5) + " " + dayjs(startDate).format("DD/MM/YYYY"),
+          endTime:
+            closeTime.slice(0, 5) + " " + dayjs(endDate).format("DD/MM/YYYY"),
           category: "Ngày",
         },
       });

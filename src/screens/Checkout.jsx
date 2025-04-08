@@ -21,6 +21,7 @@ import dayjs from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import { RadioButton } from "react-native-paper";
+import { WebView } from "react-native-webview";
 
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
@@ -31,13 +32,21 @@ function Checkout() {
   const [userProfile, setUserProfile] = useState(null);
   const [workspace, setWorkspace] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { state } = useCart();
-  const { workspaceId, startTime, endTime, beverageList, amenityList, total } =
-    state;
+  const { state, dispatch } = useCart();
+  const {
+    workspaceId,
+    startTime,
+    endTime,
+    beverageList,
+    amenityList,
+    total,
+    category,
+  } = state;
   const [promotion, setPromotion] = useState(null);
   const [promotionList, setPromotionList] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("1");
+  const [checkoutUrl, setCheckoutUrl] = useState(null);
 
   useEffect(() => {
     if (!workspaceId) {
@@ -89,6 +98,44 @@ function Checkout() {
       setPromotionList(formattedDate);
     } catch (error) {
       alert("Error fetching promotion details:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCheckout = async () => {
+    const amenitiesRequest = amenityList.map((amenity) => ({
+      id: amenity.id,
+      quantity: amenity.quantity,
+    }));
+    const beveragesRequest = beverageList.map((beverage) => ({
+      id: beverage.id,
+      quantity: beverage.quantity,
+    }));
+    const request = {
+      userId: Number(userData?.sub),
+      workspaceId: Number(workspaceId),
+      startDate: startTime,
+      endDate: endTime,
+      amenities: amenitiesRequest,
+      beverages: beveragesRequest,
+      promotionCode: promotion?.code || "",
+      price: total,
+      workspaceTimeCategory: category,
+    };
+    setLoading(true);
+    try {
+      const response = await axios.post(
+        `http://35.78.210.59:8080/users/bookingformobile`,
+        {
+          ...request,
+        }
+      );
+
+      dispatch({ type: "CLEAR_CART" });
+      setCheckoutUrl(response.data.checkoutUrl);
+    } catch (error) {
+      alert(error);
     } finally {
       setLoading(false);
     }
@@ -155,7 +202,11 @@ function Checkout() {
     </View>
   );
 
-  return (
+  return checkoutUrl ? (
+    <>
+      <WebView source={{ uri: checkoutUrl }} />
+    </>
+  ) : (
     <>
       <ScrollView style={{ flex: 1 }}>
         <View style={styles.header}>
@@ -305,7 +356,10 @@ function Checkout() {
           </RadioButton.Group>
         </View>
 
-        <TouchableOpacity style={styles.checkoutButton}>
+        <TouchableOpacity
+          style={styles.checkoutButton}
+          onPress={handleCheckout}
+        >
           <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 16 }}>
             Thanh toán
           </Text>

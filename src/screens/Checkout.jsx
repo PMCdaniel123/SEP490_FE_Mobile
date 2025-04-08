@@ -107,6 +107,39 @@ function Checkout() {
     }
   };
 
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!userData || !userData.sub) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await axios.get(
+          `http://35.78.210.59:8080/users/${userData.sub}`,
+          {
+            headers: {
+              Authorization: `Bearer ${userToken}`,
+            },
+          }
+        );
+
+        if (response.data && response.data.user) {
+          setUserProfile(response.data.user);
+        } else {
+          setError("Không thể tải thông tin người dùng");
+        }
+      } catch (error) {
+        alert("Lỗi khi tải hồ sơ:", error);
+        setError("Đã xảy ra lỗi khi tải thông tin người dùng");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, [userData, userToken]);
+
   const handleCheckout = async () => {
     const amenitiesRequest = amenityList.map((amenity) => ({
       id: amenity.id,
@@ -156,16 +189,13 @@ function Checkout() {
   };
 
   useEffect(() => {
-    // Handle deep links when the app is already open
     const handleUrl = (event) => {
       const { url } = event;
       handleDeepLink(url);
     };
 
-    // Add event listener for URL changes
     Linking.addEventListener("url", handleUrl);
 
-    // Check for initial URL that launched the app
     Linking.getInitialURL().then((url) => {
       if (url) {
         handleDeepLink(url);
@@ -173,37 +203,53 @@ function Checkout() {
     });
 
     return () => {
-      // Clean up event listener
       Linking.removeEventListener("url", handleUrl);
     };
   }, [handleDeepLink]);
 
-  // Function to handle deep links
   const handleDeepLink = useCallback(
     (url) => {
-      if (url && url.includes("success")) {
-        try {
-          // Extract parameters from URL
-          const queryString = url.split("?")[1];
-          const urlParams = new URLSearchParams(queryString);
-          const params = {};
+      if (!url) return;
 
-          // Convert URLSearchParams to a regular object
-          urlParams.forEach((value, key) => {
-            params[key] = value;
-          });
+      const lowerUrl = url.toLowerCase();
+      const queryString = url.includes("?") ? url.split("?")[1] : "";
+      const urlParams = new URLSearchParams(queryString);
+      const params = {};
 
-          // Navigate to success screen with parameters
-          navigation.navigate("SuccessPage", params);
-        } catch (error) {
-          // If there's an error parsing the URL, navigate to success page with minimal params
-          navigation.navigate("SuccessPage", { status: "PAID" });
-        }
-      } else if (url && url.includes("cancel")) {
-        navigation.navigate("FailPage");
+      urlParams.forEach((value, key) => {
+        params[key] = value;
+      });
+
+      // Success scenario
+      const isSuccess =
+        lowerUrl.includes("success=true") ||
+        lowerUrl.includes("status=success") ||
+        lowerUrl.includes("status=paid") ||
+        lowerUrl.includes("result=success") ||
+        lowerUrl.includes("result=paid") ||
+        lowerUrl.includes("success");
+
+      // Cancel or failure scenario
+      const isCancelled =
+        lowerUrl.includes("cancel") ||
+        lowerUrl.includes("status=cancel") ||
+        lowerUrl.includes("fail") ||
+        lowerUrl.includes("status=failed");
+
+      if (isSuccess) {
+        navigation.navigate("SuccessPage", {
+          ...params,
+          status: "PAID",
+          cancel: false,
+        });
+      } else if (isCancelled) {
+        navigation.navigate("FailPage", {
+          OrderCode: bookingInfo.orderCode,
+          BookingId: bookingInfo.bookingId,
+        });
       }
     },
-    [navigation]
+    [navigation, bookingInfo]
   );
 
   if (loading) {
@@ -240,37 +286,62 @@ function Checkout() {
         ref={webViewRef}
         source={{ uri: checkoutUrl }}
         onNavigationStateChange={(navState) => {
-          // PayOS typically redirects to a success URL after payment
-          if (
-            navState.url.includes("result") ||
-            navState.url.includes("success") ||
-            navState.url.includes("callback") ||
-            navState.url.includes("return")
-          ) {
-            // Check if the URL contains success indicators
-            const isSuccess =
-              navState.url.includes("success=true") ||
-              navState.url.includes("status=success") ||
-              navState.url.includes("status=PAID") ||
-              navState.url.toLowerCase().includes("success");
+          const url = navState.url.toLowerCase();
 
-            if (isSuccess && bookingInfo) {
-              // Navigate to success screen with booking information
-              navigation.navigate("SuccessPage", {
-                OrderCode: bookingInfo.orderCode,
-                BookingId: bookingInfo.bookingId,
-                status: "PAID",
-                cancel: false,
-              });
-            }
+          const isSuccess =
+            url.includes("success=true") ||
+            url.includes("status=success") ||
+            url.includes("status=paid") ||
+            url.includes("success") ||
+            url.includes("result=paid");
+
+          const isCancelled =
+            url.includes("cancel") ||
+            url.includes("status=cancel") ||
+            url.includes("fail") ||
+            url.includes("status=failed");
+
+          if (isSuccess && bookingInfo) {
+            navigation.navigate("SuccessPage", {
+              OrderCode: bookingInfo.orderCode,
+              BookingId: bookingInfo.bookingId,
+              status: "PAID",
+              cancel: false,
+            });
+          } else if (isCancelled) {
+            navigation.navigate("FailPage", {
+              OrderCode: bookingInfo.orderCode,
+              BookingId: bookingInfo.bookingId,
+            });
           }
         }}
         onShouldStartLoadWithRequest={(request) => {
-          // Handle redirects to custom URL schemes or success pages
+          const url = request.url.toLowerCase();
+
+          // ✅ Handle cancel from mobile://cancel?... response
+          if (url.startsWith("mobile://cancel")) {
+            navigation.navigate("FailPage", {
+              OrderCode: bookingInfo.orderCode,
+              BookingId: bookingInfo.bookingId,
+            });
+            return false;
+          }
+
           if (
-            request.url.startsWith("mobile://") ||
-            (request.url.includes("result") &&
-              request.url.toLowerCase().includes("success"))
+            url.includes("cancel") ||
+            url.includes("fail") ||
+            url.includes("status=cancel")
+          ) {
+            navigation.navigate("FailPage", {
+              OrderCode: bookingInfo.orderCode,
+              BookingId: bookingInfo.bookingId,
+            });
+            return false;
+          }
+
+          if (
+            url.startsWith("mobile://success") || // Some custom success scheme
+            (url.includes("result") && url.includes("success"))
           ) {
             if (bookingInfo) {
               navigation.navigate("SuccessPage", {
@@ -280,56 +351,43 @@ function Checkout() {
                 cancel: false,
               });
             }
-            return false; // Prevent WebView from loading this URL
+            return false;
           }
-          return true; // Allow all other URLs to load
+
+          return true;
         }}
         injectedJavaScript={`
           (function() {
-            // Listen for payment success events
-            function checkForSuccess() {
-              const successElements = document.querySelectorAll('.success-message, .payment-success, .transaction-complete');
-              if (successElements.length > 0) {
-                window.ReactNativeWebView.postMessage(JSON.stringify({
-                  type: 'payment_success'
-                }));
-              }
-              
-              // Check URL for success indicators
-              if (window.location.href.includes('success') || 
-                  window.location.href.includes('result') ||
-                  window.location.href.includes('complete')) {
-                window.ReactNativeWebView.postMessage(JSON.stringify({
-                  type: 'payment_success',
-                  url: window.location.href
-                }));
-              }
+            function sendCancelMessage() {
+              window.ReactNativeWebView.postMessage(JSON.stringify({
+                type: 'payment_cancel',
+                reason: 'User confirmed cancel'
+              }));
             }
-            
-            // Run checks periodically
-            setInterval(checkForSuccess, 1000);
-            
-            // Also check on page load
-            window.addEventListener('load', checkForSuccess);
-            
-            // Monitor URL changes
-            var oldPushState = history.pushState;
-            history.pushState = function(state, title, url) {
-              if (url) {
-                window.ReactNativeWebView.postMessage(JSON.stringify({
-                  type: 'url_change',
-                  url: url
-                }));
-                
-                if (url.includes('success') || url.includes('result')) {
-                  window.ReactNativeWebView.postMessage(JSON.stringify({
-                    type: 'payment_success',
-                    url: url
-                  }));
+        
+            function observeAndBindCancelButton() {
+              const observer = new MutationObserver(() => {
+                // Find the modal by checking for the "HỦY THANH TOÁN" title
+                const cancelModal = Array.from(document.querySelectorAll("div"))
+                  .find(div => div.innerText && div.innerText.includes("HỦY THANH TOÁN"));
+        
+                if (cancelModal) {
+                  const confirmBtn = Array.from(cancelModal.querySelectorAll("button"))
+                    .find(btn => btn.innerText.includes("Xác nhận hủy"));
+        
+                  if (confirmBtn && !confirmBtn.dataset.bound) {
+                    confirmBtn.dataset.bound = "true";
+                    confirmBtn.addEventListener("click", function() {
+                      sendCancelMessage();
+                    });
+                  }
                 }
-              }
-              return oldPushState.apply(history, arguments);
-            };
+              });
+        
+              observer.observe(document.body, { childList: true, subtree: true });
+            }
+        
+            observeAndBindCancelButton();
           })();
         `}
         onMessage={(event) => {
@@ -343,24 +401,14 @@ function Checkout() {
                 status: "PAID",
                 cancel: false,
               });
-            }
-
-            if (
-              data.type === "url_change" &&
-              data.url &&
-              (data.url.includes("success") || data.url.includes("result"))
-            ) {
-              if (bookingInfo) {
-                navigation.navigate("SuccessPage", {
-                  OrderCode: bookingInfo.orderCode,
-                  BookingId: bookingInfo.bookingId,
-                  status: "PAID",
-                  cancel: false,
-                });
-              }
+            } else if (data.type === "payment_cancel") {
+              navigation.navigate("FailPage", {
+                OrderCode: bookingInfo.orderCode,
+                BookingId: bookingInfo.bookingId,
+              });
             }
           } catch (error) {
-            // Ignore parsing errors
+            console.log("WebView message parse error:", error);
           }
         }}
       />

@@ -157,8 +157,17 @@ const SpaceNearYou = () => {
               <View style={styles.listItemFooter}>
                 <Text style={styles.listItemPrice}>
                   {space.prices.length > 1
-                    ? `${formatCurrency(space.prices[0].price)} - ${formatCurrency(space.prices[1].price)}`
-                    : `${formatCurrency(space.prices[0]?.price)}`}
+                    ? `${formatCurrency(
+                        space.prices.find((price) => price.category === "Giờ")
+                          ?.price
+                      )} - ${formatCurrency(
+                        space.prices.find((price) => price.category === "Ngày")
+                          ?.price
+                      )}`
+                    : `${formatCurrency(
+                        space.prices.find((price) => price.category === "Giờ")
+                          ?.price
+                      )}`}
                 </Text>
                 <View style={styles.listItemRating}>
                   <Icon name="star" size={16} color="#FFD700" />

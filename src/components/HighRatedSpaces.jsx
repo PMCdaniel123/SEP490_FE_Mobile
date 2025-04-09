@@ -66,7 +66,9 @@ const HighRatedSpaces = () => {
               ? `${formatCurrency(Math.min(...item.prices.map((p) => p.price)))} - ${formatCurrency(
                   Math.max(...item.prices.map((p) => p.price))
                 )}`
-              : `${formatCurrency(item.prices[0]?.price)}`}
+              : `${formatCurrency(
+                  item.prices.find((price) => price.category === "Giờ")?.price
+                )}`}
           </Text>
           <View style={styles.ratingContainer}>
             <Icon name="star" size={16} color="#FFD700" />

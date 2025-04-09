@@ -150,7 +150,9 @@ const WorkSpaces = ({ navigation }) => {
         <View style={styles.gridItemFooter}>
           <Text style={styles.gridItemPrice}>
             {item.prices && item.prices.length > 0
-              ? formatCurrency(item.prices[0].price)
+              ? formatCurrency(
+                  item.prices.find((price) => price.category === "Giờ")?.price
+                )
               : "Liên hệ"}
           </Text>
           <TouchableOpacity style={styles.bookmarkButton}>
@@ -202,11 +204,15 @@ const WorkSpaces = ({ navigation }) => {
         <View style={styles.listItemFooter}>
           <Text style={styles.listItemPrice}>
             {item.prices && item.prices.length > 1
-              ? `${formatCurrency(item.prices[0].price)} - ${formatCurrency(
-                  item.prices[1].price
+              ? `${formatCurrency(
+                  item.prices.find((price) => price.category === "Giờ")?.price
+                )} - ${formatCurrency(
+                  item.prices.find((price) => price.category === "Ngày")?.price
                 )}`
               : item.prices && item.prices.length === 1
-                ? formatCurrency(item.prices[0]?.price)
+                ? formatCurrency(
+                    item.prices.find((price) => price.category === "Giờ")?.price
+                  )
                 : "Liên hệ"}
           </Text>
         </View>

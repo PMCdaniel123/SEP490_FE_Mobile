@@ -102,8 +102,14 @@ const Recommendations = () => {
         <View style={styles.listItemFooter}>
           <Text style={styles.listItemPrice}>
             {item.prices.length > 1
-              ? `${formatCurrency(item.prices[0].price)} - ${formatCurrency(item.prices[1].price)}`
-              : formatCurrency(item.prices[0]?.price)}
+              ? `${formatCurrency(
+                  item.prices.find((price) => price.category === "Giờ")?.price
+                )} - ${formatCurrency(
+                  item.prices.find((price) => price.category === "Ngày")?.price
+                )}`
+              : formatCurrency(
+                  item.prices.find((price) => price.category === "Giờ")?.price
+                )}
           </Text>
           <View style={styles.listItemRating}>
             <Icon name="star" size={16} color="#FFD700" />
@@ -127,8 +133,8 @@ const Recommendations = () => {
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Đề xuất dành cho bạn</Text>
         <TouchableOpacity onPress={() => navigation.navigate("WorkSpaces")}>
-  <Text style={styles.seeAllText}>Xem tất cả</Text>
-</TouchableOpacity>
+          <Text style={styles.seeAllText}>Xem tất cả</Text>
+        </TouchableOpacity>
       </View>
 
       <FlatList

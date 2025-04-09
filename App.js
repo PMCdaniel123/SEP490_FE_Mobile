@@ -4,7 +4,10 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Icon from "react-native-vector-icons/FontAwesome";
-import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import Home from "./src/screens/Home";
 import WorkspaceDetail from "./src/screens/WorkspaceDetail";
 import ProfileScreen from "./src/screens/Profile";
@@ -26,6 +29,40 @@ import AllReview from "./src/screens/AllReview";
 import SearchScreen from "./src/screens/SearchScreen";
 import WalletScreen from "./src/screens/WalletScreen";
 
+import * as Linking from "expo-linking";
+import SuccessScreen from "./src/screens/SuccessScreen";
+import FailScreen from "./src/screens/FailScreen";
+
+// Set up deep linking configuration
+const prefix = Linking.createURL("/");
+const linking = {
+  prefixes: [prefix, "mobile://", "https://workhive.com"],
+  config: {
+    screens: {
+      HomeStack: {
+        screens: {
+          SuccessPage: {
+            path: "success",
+            parse: {
+              OrderCode: (OrderCode) => OrderCode,
+              BookingId: (BookingId) => BookingId,
+              status: (status) => status,
+            },
+          },
+          FailPage: {
+            path: "cancel",
+            parse: {
+              OrderCode: (OrderCode) => OrderCode,
+              BookingId: (BookingId) => BookingId,
+              status: (status) => status,
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 const AuthStack = createNativeStackNavigator();
@@ -33,19 +70,19 @@ const AuthStack = createNativeStackNavigator();
 const ProfileStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="ProfileMain" component={ProfileScreen} />
-    <Stack.Screen 
-      name="ProfileDetail" 
-      component={ProfileDetail} 
+    <Stack.Screen
+      name="ProfileDetail"
+      component={ProfileDetail}
       options={{ tabBarVisible: false }}
     />
-    <Stack.Screen 
-      name="YourReview" 
-      component={YourReviewScreen} 
+    <Stack.Screen
+      name="YourReview"
+      component={YourReviewScreen}
       options={{ tabBarVisible: false }}
     />
-    <Stack.Screen 
-      name="Wallet" 
-      component={WalletScreen} 
+    <Stack.Screen
+      name="Wallet"
+      component={WalletScreen}
       options={{ tabBarVisible: false }}
     />
   </Stack.Navigator>
@@ -54,29 +91,39 @@ const ProfileStack = () => (
 const HomeStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="HomeMain" component={Home} />
-    <Stack.Screen 
-      name="WorkspaceDetail" 
-      component={WorkspaceDetail} 
+    <Stack.Screen
+      name="WorkspaceDetail"
+      component={WorkspaceDetail}
       options={{ tabBarVisible: false }}
     />
-    <Stack.Screen 
-      name="AllReview" 
-      component={AllReview} 
+    <Stack.Screen
+      name="AllReview"
+      component={AllReview}
       options={{ tabBarVisible: false }}
     />
-    <Stack.Screen 
-      name="Notification" 
-      component={NotificationScreen} 
+    <Stack.Screen
+      name="Notification"
+      component={NotificationScreen}
       options={{ tabBarVisible: false }}
     />
-    <Stack.Screen 
-      name="WorkSpaces" 
-      component={WorkSpaces} 
+    <Stack.Screen
+      name="WorkSpaces"
+      component={WorkSpaces}
       options={{ tabBarVisible: false }}
     />
-    <Stack.Screen 
-      name="Checkout" 
-      component={Checkout} 
+    <Stack.Screen
+      name="Checkout"
+      component={Checkout}
+      options={{ tabBarVisible: false }}
+    />
+    <Stack.Screen
+      name="SuccessPage"
+      component={SuccessScreen}
+      options={{ tabBarVisible: false }}
+    />
+    <Stack.Screen
+      name="FailPage"
+      component={FailScreen}
       options={{ tabBarVisible: false }}
     />
   </Stack.Navigator>
@@ -85,19 +132,19 @@ const HomeStack = () => (
 const SearchStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="SearchMain" component={SearchScreen} />
-    <Stack.Screen 
-      name="WorkspaceDetail" 
-      component={WorkspaceDetail} 
+    <Stack.Screen
+      name="WorkspaceDetail"
+      component={WorkspaceDetail}
       options={{ tabBarVisible: false }}
     />
-    <Stack.Screen 
-      name="AllReview" 
-      component={AllReview} 
+    <Stack.Screen
+      name="AllReview"
+      component={AllReview}
       options={{ tabBarVisible: false }}
     />
-    <Stack.Screen 
-      name="Checkout" 
-      component={Checkout} 
+    <Stack.Screen
+      name="Checkout"
+      component={Checkout}
       options={{ tabBarVisible: false }}
     />
   </Stack.Navigator>
@@ -128,33 +175,34 @@ const AuthScreens = () => (
 
 const TabNavigator = () => {
   const insets = useSafeAreaInsets();
-  
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarStyle: {
           elevation: 5,
-          backgroundColor: '#ffffff',
-          height: Platform.OS === 'ios' ? 60 + insets.bottom : 65,
-          paddingBottom: Platform.OS === 'ios' ? insets.bottom : 0,
+          backgroundColor: "#ffffff",
+          height: Platform.OS === "ios" ? 60 + insets.bottom : 65,
+          paddingBottom: Platform.OS === "ios" ? insets.bottom : 0,
           ...styles.shadow,
           display:
-            (route.name === 'Đặt chỗ' &&
-              route.state?.routes[route.state.index]?.name === 'BookingDetail') ||
-            (route.name === 'Tìm kiếm' &&
-              route.state?.routes[route.state.index]?.name === 'Checkout') ||
+            (route.name === "Đặt chỗ" &&
+              route.state?.routes[route.state.index]?.name ===
+                "BookingDetail") ||
+            (route.name === "Tìm kiếm" &&
+              route.state?.routes[route.state.index]?.name === "Checkout") ||
             (route.state && route.state.index > 0)
-              ? 'none'
-              : 'flex',
+              ? "none"
+              : "flex",
           borderTopWidth: 1,
-          borderTopColor: '#f0f0f0',
+          borderTopColor: "#f0f0f0",
         },
-        tabBarActiveTintColor: '#835101',
-        tabBarInactiveTintColor: '#999',
+        tabBarActiveTintColor: "#835101",
+        tabBarInactiveTintColor: "#999",
         tabBarLabelStyle: {
           fontSize: 12,
-          fontWeight: '500',
-          marginBottom: Platform.OS === 'ios' ? 0 : 5,
+          fontWeight: "500",
+          marginBottom: Platform.OS === "ios" ? 0 : 5,
         },
         tabBarIconStyle: {
           marginTop: 5,
@@ -163,7 +211,7 @@ const TabNavigator = () => {
         tabBarHideOnKeyboard: true,
         tabBarShowLabel: true,
         tabBarAllowFontScaling: false,
-        tabBarPressColor: 'rgba(131, 81, 1, 0.1)',
+        tabBarPressColor: "rgba(131, 81, 1, 0.1)",
       })}
     >
       <Tab.Screen
@@ -219,7 +267,7 @@ const AppNavigator = () => {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       {userToken ? <TabNavigator /> : <AuthScreens />}
     </NavigationContainer>
   );

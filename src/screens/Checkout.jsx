@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useRef, useCallback } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -8,6 +8,8 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Linking,
+  Alert,
 } from "react-native";
 import { AuthContext } from "../contexts/AuthContext";
 import { useNavigation } from "@react-navigation/native";
@@ -21,6 +23,7 @@ import dayjs from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import { RadioButton } from "react-native-paper";
+import { WebView } from "react-native-webview";
 
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
@@ -31,13 +34,23 @@ function Checkout() {
   const [userProfile, setUserProfile] = useState(null);
   const [workspace, setWorkspace] = useState(null);
   const [loading, setLoading] = useState(true);
-  const { state } = useCart();
-  const { workspaceId, startTime, endTime, beverageList, amenityList, total } =
-    state;
+  const { state, dispatch } = useCart();
+  const {
+    workspaceId,
+    startTime,
+    endTime,
+    beverageList,
+    amenityList,
+    total,
+    category,
+  } = state;
   const [promotion, setPromotion] = useState(null);
   const [promotionList, setPromotionList] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("1");
+  const [checkoutUrl, setCheckoutUrl] = useState(null);
+  const [bookingInfo, setBookingInfo] = useState(null);
+  const webViewRef = useRef(null);
 
   useEffect(() => {
     if (!workspaceId) {
@@ -127,6 +140,118 @@ function Checkout() {
     fetchUserProfile();
   }, [userData, userToken]);
 
+  const handleCheckout = async () => {
+    const amenitiesRequest = amenityList.map((amenity) => ({
+      id: amenity.id,
+      quantity: amenity.quantity,
+    }));
+    const beveragesRequest = beverageList.map((beverage) => ({
+      id: beverage.id,
+      quantity: beverage.quantity,
+    }));
+    const request = {
+      userId: Number(userData?.sub),
+      workspaceId: Number(workspaceId),
+      startDate: startTime,
+      endDate: endTime,
+      amenities: amenitiesRequest,
+      beverages: beveragesRequest,
+      promotionCode: promotion?.code || "",
+      price: total,
+      workspaceTimeCategory: category,
+    };
+    setLoading(true);
+    try {
+      const response = await axios.post(
+        `http://35.78.210.59:8080/users/bookingformobile`,
+        {
+          ...request,
+        }
+      );
+
+      // Store booking information for later use
+      const bookingInfo = {
+        bookingId: response.data.bookingId,
+        orderCode: response.data.orderCode,
+        status: response.data.status,
+      };
+
+      // Save to local state for use after payment
+      setBookingInfo(bookingInfo);
+
+      dispatch({ type: "CLEAR_CART" });
+      setCheckoutUrl(response.data.checkoutUrl);
+    } catch (error) {
+      alert(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const handleUrl = (event) => {
+      const { url } = event;
+      handleDeepLink(url);
+    };
+
+    Linking.addEventListener("url", handleUrl);
+
+    Linking.getInitialURL().then((url) => {
+      if (url) {
+        handleDeepLink(url);
+      }
+    });
+
+    return () => {
+      Linking.removeEventListener("url", handleUrl);
+    };
+  }, [handleDeepLink]);
+
+  const handleDeepLink = useCallback(
+    (url) => {
+      if (!url) return;
+
+      const lowerUrl = url.toLowerCase();
+      const queryString = url.includes("?") ? url.split("?")[1] : "";
+      const urlParams = new URLSearchParams(queryString);
+      const params = {};
+
+      urlParams.forEach((value, key) => {
+        params[key] = value;
+      });
+
+      // Success scenario
+      const isSuccess =
+        lowerUrl.includes("success=true") ||
+        lowerUrl.includes("status=success") ||
+        lowerUrl.includes("status=paid") ||
+        lowerUrl.includes("result=success") ||
+        lowerUrl.includes("result=paid") ||
+        lowerUrl.includes("success");
+
+      // Cancel or failure scenario
+      const isCancelled =
+        lowerUrl.includes("cancel") ||
+        lowerUrl.includes("status=cancel") ||
+        lowerUrl.includes("fail") ||
+        lowerUrl.includes("status=failed");
+
+      if (isSuccess) {
+        navigation.navigate("SuccessPage", {
+          ...params,
+          status: "PAID",
+          cancel: false,
+        });
+      } else if (isCancelled) {
+        navigation.navigate("FailPage", {
+          OrderCode: bookingInfo.orderCode,
+          BookingId: bookingInfo.bookingId,
+        });
+      }
+    },
+    [navigation, bookingInfo]
+  );
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -155,7 +280,140 @@ function Checkout() {
     </View>
   );
 
-  return (
+  return checkoutUrl ? (
+    <>
+      <WebView
+        ref={webViewRef}
+        source={{ uri: checkoutUrl }}
+        onNavigationStateChange={(navState) => {
+          const url = navState.url.toLowerCase();
+
+          const isSuccess =
+            url.includes("success=true") ||
+            url.includes("status=success") ||
+            url.includes("status=paid") ||
+            url.includes("success") ||
+            url.includes("result=paid");
+
+          const isCancelled =
+            url.includes("cancel") ||
+            url.includes("status=cancel") ||
+            url.includes("fail") ||
+            url.includes("status=failed");
+
+          if (isSuccess && bookingInfo) {
+            navigation.navigate("SuccessPage", {
+              OrderCode: bookingInfo.orderCode,
+              BookingId: bookingInfo.bookingId,
+              status: "PAID",
+              cancel: false,
+            });
+          } else if (isCancelled) {
+            navigation.navigate("FailPage", {
+              OrderCode: bookingInfo.orderCode,
+              BookingId: bookingInfo.bookingId,
+            });
+          }
+        }}
+        onShouldStartLoadWithRequest={(request) => {
+          const url = request.url.toLowerCase();
+
+          // ✅ Handle cancel from mobile://cancel?... response
+          if (url.startsWith("mobile://cancel")) {
+            navigation.navigate("FailPage", {
+              OrderCode: bookingInfo.orderCode,
+              BookingId: bookingInfo.bookingId,
+            });
+            return false;
+          }
+
+          if (
+            url.includes("cancel") ||
+            url.includes("fail") ||
+            url.includes("status=cancel")
+          ) {
+            navigation.navigate("FailPage", {
+              OrderCode: bookingInfo.orderCode,
+              BookingId: bookingInfo.bookingId,
+            });
+            return false;
+          }
+
+          if (
+            url.startsWith("mobile://success") || // Some custom success scheme
+            (url.includes("result") && url.includes("success"))
+          ) {
+            if (bookingInfo) {
+              navigation.navigate("SuccessPage", {
+                OrderCode: bookingInfo.orderCode,
+                BookingId: bookingInfo.bookingId,
+                status: "PAID",
+                cancel: false,
+              });
+            }
+            return false;
+          }
+
+          return true;
+        }}
+        injectedJavaScript={`
+          (function() {
+            function sendCancelMessage() {
+              window.ReactNativeWebView.postMessage(JSON.stringify({
+                type: 'payment_cancel',
+                reason: 'User confirmed cancel'
+              }));
+            }
+        
+            function observeAndBindCancelButton() {
+              const observer = new MutationObserver(() => {
+                // Find the modal by checking for the "HỦY THANH TOÁN" title
+                const cancelModal = Array.from(document.querySelectorAll("div"))
+                  .find(div => div.innerText && div.innerText.includes("HỦY THANH TOÁN"));
+        
+                if (cancelModal) {
+                  const confirmBtn = Array.from(cancelModal.querySelectorAll("button"))
+                    .find(btn => btn.innerText.includes("Xác nhận hủy"));
+        
+                  if (confirmBtn && !confirmBtn.dataset.bound) {
+                    confirmBtn.dataset.bound = "true";
+                    confirmBtn.addEventListener("click", function() {
+                      sendCancelMessage();
+                    });
+                  }
+                }
+              });
+        
+              observer.observe(document.body, { childList: true, subtree: true });
+            }
+        
+            observeAndBindCancelButton();
+          })();
+        `}
+        onMessage={(event) => {
+          try {
+            const data = JSON.parse(event.nativeEvent.data);
+
+            if (data.type === "payment_success" && bookingInfo) {
+              navigation.navigate("SuccessPage", {
+                OrderCode: bookingInfo.orderCode,
+                BookingId: bookingInfo.bookingId,
+                status: "PAID",
+                cancel: false,
+              });
+            } else if (data.type === "payment_cancel") {
+              navigation.navigate("FailPage", {
+                OrderCode: bookingInfo.orderCode,
+                BookingId: bookingInfo.bookingId,
+              });
+            }
+          } catch (error) {
+            console.log("WebView message parse error:", error);
+          }
+        }}
+      />
+    </>
+  ) : (
     <>
       <ScrollView style={{ flex: 1 }}>
         <View style={styles.header}>
@@ -305,7 +563,10 @@ function Checkout() {
           </RadioButton.Group>
         </View>
 
-        <TouchableOpacity style={styles.checkoutButton}>
+        <TouchableOpacity
+          style={styles.checkoutButton}
+          onPress={handleCheckout}
+        >
           <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 16 }}>
             Thanh toán
           </Text>

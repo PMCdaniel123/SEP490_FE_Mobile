@@ -56,7 +56,6 @@ const WorkspaceDetail = ({ route }) => {
           `http://35.78.210.59:8080/workspaces/${id}`
         );
         const workspaceData = response.data.getWorkSpaceByIdResult;
-        console.log("Facilities count:", workspaceData.facilities?.length);
         setWorkspaceDetail(workspaceData);
 
         if (workspaceData.googleMapUrl) {
@@ -81,8 +80,10 @@ const WorkspaceDetail = ({ route }) => {
         dispatch({
           type: "SET_WORKSPACE_ID",
           payload: {
-            workspaceId: id,
-            price: workspaceData.prices[1].price,
+            workspaceId: id + "",
+            price: workspaceData.prices.find(
+              (price) => price.category === "Ngày"
+            )?.price,
             priceType: "2",
           },
         });
@@ -189,7 +190,11 @@ const WorkspaceDetail = ({ route }) => {
           <View style={styles.priceContainer}>
             <Text style={styles.priceLabel}>Giá từ</Text>
             <Text style={styles.price}>
-              {formatCurrency(workspaceDetail?.prices[0].price)}
+              {formatCurrency(
+                workspaceDetail?.prices.find(
+                  (price) => price.category === "Giờ"
+                )?.price
+              )}
             </Text>
             <Text style={styles.priceUnit}>/giờ</Text>
           </View>
@@ -386,7 +391,11 @@ const WorkspaceDetail = ({ route }) => {
                 <Text style={styles.priceType}>Theo giờ:</Text>
                 <View>
                   <Text style={styles.priceValue}>
-                    {formatCurrency(workspaceDetail?.prices[0].price)}
+                    {formatCurrency(
+                      workspaceDetail?.prices.find(
+                        (price) => price.category === "Giờ"
+                      )?.price
+                    )}
                   </Text>
                   <Text style={styles.priceNote}>(chưa hỗ trợ)</Text>
                 </View>
@@ -394,7 +403,11 @@ const WorkspaceDetail = ({ route }) => {
               <View style={styles.priceRow}>
                 <Text style={styles.priceType}>Theo ngày:</Text>
                 <Text style={styles.priceValue}>
-                  {formatCurrency(workspaceDetail?.prices[1].price)}
+                  {formatCurrency(
+                    workspaceDetail?.prices.find(
+                      (price) => price.category === "Ngày"
+                    )?.price
+                  )}
                 </Text>
               </View>
             </View>

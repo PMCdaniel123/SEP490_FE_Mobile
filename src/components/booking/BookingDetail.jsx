@@ -5,6 +5,7 @@ import SelectedAmenities from "../amenities/SelectedAmenities";
 import SelectedBeverages from "../beverages/SelectedBeverages";
 import { useNavigation } from "@react-navigation/native";
 import DateRangePicker from "../times/DateRangePicker";
+import { useEffect } from "react";
 
 function BookingDetail({ openTime, closeTime, workspaceId }) {
   const { state, dispatch } = useCart();
@@ -16,9 +17,17 @@ function BookingDetail({ openTime, closeTime, workspaceId }) {
     dispatch({ type: "CALCULATE_TOTAL" });
   };
 
+  useEffect(() => {
+    dispatch({ type: "CALCULATE_TOTAL" });
+  }, [dispatch]);
+
   return (
     <View style={styles.infoContainer}>
-      <DateRangePicker openTime={openTime} closeTime={closeTime} workspaceId={workspaceId} />
+      <DateRangePicker
+        openTime={openTime}
+        closeTime={closeTime}
+        workspaceId={workspaceId}
+      />
       <TouchableOpacity
         onPress={clearAll}
         style={{

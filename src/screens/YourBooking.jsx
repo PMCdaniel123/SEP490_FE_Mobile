@@ -98,11 +98,11 @@ const BookingScreen = () => {
   const getStatusText = (status) => {
     switch (status) {
       case "Success":
-        return "Giao dịch thành công";
+        return "Đặt chỗ thành công";
       case "Pending":
         return "Đang chờ xử lý";
-      case "Fail":
-        return "Giao dịch thất bại";
+      case "Cancelled":
+        return "Đặt chỗ đã hủy";
       default:
         return "Không xác định";
     }
@@ -114,7 +114,7 @@ const BookingScreen = () => {
         return "#4CAF50";
       case "Pending":
         return "#FFC107";
-      case "Fail":
+      case "Cancelled":
         return "#F44336";
       default:
         return "#757575";
@@ -227,17 +227,17 @@ const BookingScreen = () => {
           <TouchableOpacity
             style={[
               styles.tabButton,
-              activeTab === "Fail" && styles.activeTabButton,
+              activeTab === "Cancelled" && styles.activeTabButton,
             ]}
-            onPress={() => setActiveTab("Fail")}
+            onPress={() => setActiveTab("Cancelled")}
           >
             <Text
               style={[
                 styles.tabText,
-                activeTab === "Fail" && styles.activeTabText,
+                activeTab === "Cancelled" && styles.activeTabText,
               ]}
             >
-              Thất bại
+              Đã hủy
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -264,7 +264,7 @@ const BookingScreen = () => {
             <Text style={styles.emptyText}>
               {activeTab === "Success"
                 ? "Bạn chưa có lịch sử đặt chỗ thành công nào"
-                : activeTab === "Fail"
+                : activeTab === "Cancelled"
                   ? "Bạn chưa có lịch sử đặt chỗ thất bại nào"
                   : "Bạn đã đánh giá tất cả không gian"}
             </Text>

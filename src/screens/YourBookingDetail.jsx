@@ -40,13 +40,26 @@ const BookingDetailScreen = ({ route }) => {
     return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + "đ";
   };
 
+  const getStatusText = (status) => {
+    switch (status) {
+      case "Success":
+        return "Đặt chỗ thành công";
+      case "Pending":
+        return "Đang chờ xử lý";
+      case "Cancelled":
+        return "Đặt chỗ đã hủy";
+      default:
+        return "Không xác định";
+    }
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case "Success":
         return "#4CAF50";
       case "Pending":
         return "#FFC107";
-      case "Fail":
+      case "Cancelled":
         return "#F44336";
       default:
         return "#757575";
@@ -132,7 +145,7 @@ const BookingDetailScreen = ({ route }) => {
               { backgroundColor: getStatusColor(booking.booking_Status) },
             ]}
           >
-            <Text style={styles.statusText}>{booking.booking_Status}</Text>
+            <Text style={styles.statusText}> {getStatusText(booking.booking_Status)}</Text>
           </View>
           <Text style={styles.bookingId}>
             Mã đặt chỗ: #{booking.booking_Id}

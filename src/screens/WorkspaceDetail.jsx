@@ -187,6 +187,7 @@ const WorkspaceDetail = ({ route }) => {
         <Animated.View style={{ transform: [{ scale: headerHeight }] }}>
           <ImageList
             images={workspaceDetail?.images}
+            workspaceId={id}
             onBackPress={handleBackPress}
             onHomePress={goToHome}
           />
@@ -456,7 +457,7 @@ const WorkspaceDetail = ({ route }) => {
           style={styles.floatingButton}
           onPress={() => setActiveTab("booking")}
         >
-          <Text style={styles.floatingButtonText}>Đặt chỗ</Text>
+          <Text style={styles.floatingButtonText}>Đặt ngay</Text>
         </TouchableOpacity>
       )}
     </SafeAreaView>
@@ -836,6 +837,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+    paddingHorizontal: 12,
   },
 });
 

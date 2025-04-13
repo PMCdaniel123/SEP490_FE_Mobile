@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { StyleSheet, View, ActivityIndicator, Platform } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -70,99 +70,39 @@ const AuthStack = createNativeStackNavigator();
 const ProfileStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="ProfileMain" component={ProfileScreen} />
-    <Stack.Screen
-      name="ProfileDetail"
-      component={ProfileDetail}
-      options={{ tabBarVisible: false }}
-    />
-    <Stack.Screen
-      name="YourReview"
-      component={YourReviewScreen}
-      options={{ tabBarVisible: false }}
-    />
-    <Stack.Screen
-      name="Wallet"
-      component={WalletScreen}
-      options={{ tabBarVisible: false }}
-    />
+    <Stack.Screen name="ProfileDetail" component={ProfileDetail} />
+    <Stack.Screen name="YourReview" component={YourReviewScreen} />
+    <Stack.Screen name="Wallet" component={WalletScreen} />
   </Stack.Navigator>
 );
 
 const HomeStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="HomeMain" component={Home} />
-    <Stack.Screen
-      name="WorkspaceDetail"
-      component={WorkspaceDetail}
-      options={{ tabBarVisible: false }}
-    />
-    <Stack.Screen
-      name="AllReview"
-      component={AllReview}
-      options={{ tabBarVisible: false }}
-    />
-    <Stack.Screen
-      name="Notification"
-      component={NotificationScreen}
-      options={{ tabBarVisible: false }}
-    />
-    <Stack.Screen
-      name="WorkSpaces"
-      component={WorkSpaces}
-      options={{ tabBarVisible: false }}
-    />
-    <Stack.Screen
-      name="Checkout"
-      component={Checkout}
-      options={{ tabBarVisible: false }}
-    />
-    <Stack.Screen
-      name="SuccessPage"
-      component={SuccessScreen}
-      options={{ tabBarVisible: false }}
-    />
-    <Stack.Screen
-      name="FailPage"
-      component={FailScreen}
-      options={{ tabBarVisible: false }}
-    />
+    <Stack.Screen name="WorkspaceDetail" component={WorkspaceDetail} />
+    <Stack.Screen name="AllReview" component={AllReview} />
+    <Stack.Screen name="Notification" component={NotificationScreen} />
+    <Stack.Screen name="WorkSpaces" component={WorkSpaces} />
+    <Stack.Screen name="Checkout" component={Checkout} />
+    <Stack.Screen name="SuccessPage" component={SuccessScreen} />
+    <Stack.Screen name="FailPage" component={FailScreen} />
   </Stack.Navigator>
 );
 
 const SearchStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="SearchMain" component={SearchScreen} />
-    <Stack.Screen
-      name="WorkspaceDetail"
-      component={WorkspaceDetail}
-      options={{ tabBarVisible: false }}
-    />
-    <Stack.Screen
-      name="AllReview"
-      component={AllReview}
-      options={{ tabBarVisible: false }}
-    />
-    <Stack.Screen
-      name="Checkout"
-      component={Checkout}
-      options={{ tabBarVisible: false }}
-    />
+    <Stack.Screen name="WorkspaceDetail" component={WorkspaceDetail} />
+    <Stack.Screen name="AllReview" component={AllReview} />
+    <Stack.Screen name="Checkout" component={Checkout} />
   </Stack.Navigator>
 );
 
 const BookingStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="YourBooking" component={YourBooking} />
-    <Stack.Screen
-      name="BookingDetail"
-      component={BookingDetailScreen}
-      options={{ tabBarVisible: false }}
-    />
-    <Stack.Screen
-      name="ReviewScreen"
-      component={ReviewScreen}
-      options={{ tabBarVisible: false }}
-    />
+    <Stack.Screen name="BookingDetail" component={BookingDetailScreen} />
+    <Stack.Screen name="ReviewScreen" component={ReviewScreen} />
   </Stack.Navigator>
 );
 
@@ -173,46 +113,65 @@ const AuthScreens = () => (
   </AuthStack.Navigator>
 );
 
+const getScreensWithHiddenTabBar = () => [
+  // Home Stack
+  "WorkspaceDetail", "AllReview", "Notification", "WorkSpaces", "Checkout", "SuccessPage", "FailPage",
+  // Search Stack
+  "WorkspaceDetail", "AllReview", "Checkout", 
+  // Booking Stack
+  "BookingDetail", "ReviewScreen",
+  // Profile Stack
+  "ProfileDetail", "YourReview", "Wallet"
+];
+
 const TabNavigator = () => {
   const insets = useSafeAreaInsets();
 
   return (
     <Tab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarStyle: {
-          elevation: 5,
-          backgroundColor: "#ffffff",
-          height: Platform.OS === "ios" ? 60 + insets.bottom : 65,
-          paddingBottom: Platform.OS === "ios" ? insets.bottom : 0,
-          ...styles.shadow,
-          display:
-            (route.name === "Đặt chỗ" &&
-              route.state?.routes[route.state.index]?.name ===
-                "BookingDetail") ||
-            (route.name === "Tìm kiếm" &&
-              route.state?.routes[route.state.index]?.name === "Checkout") ||
-            (route.state && route.state.index > 0)
-              ? "none"
-              : "flex",
-          borderTopWidth: 1,
-          borderTopColor: "#f0f0f0",
-        },
-        tabBarActiveTintColor: "#835101",
-        tabBarInactiveTintColor: "#999",
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: "500",
-          marginBottom: Platform.OS === "ios" ? 0 : 5,
-        },
-        tabBarIconStyle: {
-          marginTop: 5,
-        },
-        headerShown: false,
-        tabBarHideOnKeyboard: true,
-        tabBarShowLabel: true,
-        tabBarAllowFontScaling: false,
-        tabBarPressColor: "rgba(131, 81, 1, 0.1)",
-      })}
+      screenOptions={({ route, navigation }) => {
+        const state = navigation.getState();
+        const currentTab = state.routes[state.index];
+        const currentStack = currentTab.state;
+        
+        // Get the current screen name in the active stack
+        let currentScreenName = "";
+        if (currentStack) {
+          const stackIndex = currentStack.index;
+          const currentStackRoute = currentStack.routes[stackIndex];
+          currentScreenName = currentStackRoute.name;
+        }
+        
+        const isHidden = getScreensWithHiddenTabBar().includes(currentScreenName);
+        
+        return {
+          tabBarStyle: {
+            elevation: 5,
+            backgroundColor: "#ffffff",
+            height: Platform.OS === "ios" ? 60 + insets.bottom : 65,
+            paddingBottom: Platform.OS === "ios" ? insets.bottom : 0,
+            ...styles.shadow,
+            display: isHidden ? "none" : "flex",
+            borderTopWidth: 1,
+            borderTopColor: "#f0f0f0",
+          },
+          tabBarActiveTintColor: "#835101",
+          tabBarInactiveTintColor: "#999",
+          tabBarLabelStyle: {
+            fontSize: 12,
+            fontWeight: "500",
+            marginBottom: Platform.OS === "ios" ? 0 : 5,
+          },
+          tabBarIconStyle: {
+            marginTop: 5,
+          },
+          headerShown: false,
+          tabBarHideOnKeyboard: true,
+          tabBarShowLabel: true,
+          tabBarAllowFontScaling: false,
+          tabBarPressColor: "rgba(131, 81, 1, 0.1)",
+        };
+      }}
     >
       <Tab.Screen
         name="Trang chủ"

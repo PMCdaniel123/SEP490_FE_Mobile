@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -10,20 +10,12 @@ import {
   Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation, useIsFocused } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const BookingDetailScreen = ({ route }) => {
   const { booking } = route.params;
   const navigation = useNavigation();
-  const isFocused = useIsFocused();
-  useEffect(() => {
-    if (isFocused) {
-      navigation.getParent()?.setOptions({ tabBarStyle: { display: "none" } });
-    } else {
-      navigation.getParent()?.setOptions({ tabBarStyle: { display: "flex" } });
-    }
-  }, [isFocused]);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);

@@ -7,6 +7,7 @@ import {
   StyleSheet,
   FlatList,
   ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
@@ -23,30 +24,37 @@ const Recommendations = () => {
   const [recommendedSpaces, setRecommendedSpaces] = useState([]);
   const [categories, setCategories] = useState(["Tất cả"]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("Tất cả");
   const navigation = useNavigation();
 
+  const fetchRecommendedSpaces = async () => {
+    try {
+      const response = await axios.get("http://35.78.210.59:8080/workspaces");
+      const workspaces = response.data.workspaces || [];
+      setRecommendedSpaces(workspaces);
+
+      const uniqueCategories = [
+        "Tất cả",
+        ...new Set(workspaces.map((space) => space.category)),
+      ];
+      setCategories(uniqueCategories);
+    } catch (error) {
+      alert("Error fetching recommended spaces:", error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchRecommendedSpaces = async () => {
-      try {
-        const response = await axios.get("http://35.78.210.59:8080/workspaces");
-        const workspaces = response.data.workspaces || [];
-        setRecommendedSpaces(workspaces);
-
-        const uniqueCategories = [
-          "Tất cả",
-          ...new Set(workspaces.map((space) => space.category)),
-        ];
-        setCategories(uniqueCategories);
-      } catch (error) {
-        alert("Error fetching recommended spaces:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchRecommendedSpaces();
   }, []);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchRecommendedSpaces();
+  };
 
   const filteredSpaces =
     selectedCategory === "Tất cả"
@@ -120,7 +128,7 @@ const Recommendations = () => {
     </TouchableOpacity>
   );
 
-  if (loading) {
+  if (loading && !refreshing) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#835101" />
@@ -152,6 +160,13 @@ const Recommendations = () => {
           renderItem={renderSpaceItem}
           keyExtractor={(item) => item.id.toString()}
           scrollEnabled={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={["#835101"]}
+            />
+          }
         />
       ) : (
         <View style={styles.emptyContainer}>

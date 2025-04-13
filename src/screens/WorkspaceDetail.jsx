@@ -9,6 +9,7 @@ import {
   Image,
   Animated,
   Linking,
+  Platform,
 } from "react-native";
 import axios from "axios";
 import ImageList from "../components/ImageList";
@@ -124,6 +125,10 @@ const WorkspaceDetail = ({ route }) => {
     navigation.goBack();
   };
 
+  const goToHome = () => {
+    navigation.navigate('HomeMain');
+  };
+
   const openGoogleMaps = (url) => {
     if (!url) {
       alert("Không có thông tin bản đồ cho không gian này");
@@ -183,6 +188,7 @@ const WorkspaceDetail = ({ route }) => {
           <ImageList
             images={workspaceDetail?.images}
             onBackPress={handleBackPress}
+            onHomePress={goToHome}
           />
         </Animated.View>
 
@@ -444,6 +450,15 @@ const WorkspaceDetail = ({ route }) => {
           />
         )}
       </Animated.ScrollView>
+
+      {activeTab === "details" && (
+        <TouchableOpacity
+          style={styles.floatingButton}
+          onPress={() => setActiveTab("booking")}
+        >
+          <Text style={styles.floatingButtonText}>Đặt chỗ</Text>
+        </TouchableOpacity>
+      )}
     </SafeAreaView>
   );
 };
@@ -802,6 +817,25 @@ const styles = StyleSheet.create({
   noMapText: {
     color: "#999",
     marginTop: 8,
+  },
+  floatingButton: {
+    position: "absolute",
+    bottom: 20,
+    right: 20,
+    backgroundColor: "#835101",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 30,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
+  },
+  floatingButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
 

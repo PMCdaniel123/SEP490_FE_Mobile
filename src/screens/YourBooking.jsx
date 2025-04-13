@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   Alert,
   Platform,
+  RefreshControl,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
@@ -22,6 +23,7 @@ const BookingScreen = () => {
   const insets = useSafeAreaInsets();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const { userData, userToken } = useContext(AuthContext);
   const navigation = useNavigation();
   const [activeTab, setActiveTab] = useState("Success");
@@ -78,6 +80,12 @@ const BookingScreen = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchBookingHistory();
+    setRefreshing(false);
   };
 
   const formatDate = (dateString) => {
@@ -192,12 +200,24 @@ const BookingScreen = () => {
   }
 
   // Filter bookings based on the active tab
-  const filteredBookings =
+  const filteredBookings = 
     activeTab === "Chưa đánh giá"
-      ? bookings.filter(
-          (item) => item.booking_Status === "Success" && item.isReview === 0
-        )
-      : bookings.filter((item) => item.booking_Status === activeTab);
+      ? bookings
+          .filter(
+            (item) => item.booking_Status === "Success" && item.isReview === 0
+          )
+          .sort(
+            (b, a) =>
+              new Date(b.booking_CreatedAt).getTime() -
+              new Date(a.booking_CreatedAt).getTime()
+          )
+      : bookings
+          .filter((item) => item.booking_Status === activeTab)
+          .sort(
+            (b, a) =>
+              new Date(b.booking_CreatedAt).getTime() -
+              new Date(a.booking_CreatedAt).getTime()
+          );
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
@@ -276,6 +296,9 @@ const BookingScreen = () => {
             keyExtractor={(item) => item.booking_Id.toString()}
             contentContainerStyle={styles.listContainer}
             showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
           />
         )}
       </View>

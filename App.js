@@ -123,7 +123,7 @@ const getScreensWithHiddenTabBar = () => [
   // Booking Stack
   "BookingDetail", "ReviewScreen",
   // Profile Stack
-  "ProfileDetail", "YourReview", "Wallet"
+  "ProfileDetail", "YourReview", "Wallet", "Terms",
 ];
 
 const TabNavigator = () => {

@@ -14,6 +14,7 @@ import ProfileScreen from "./src/screens/Profile";
 import ProfileDetail from "./src/screens/ProfileDetail";
 import NotificationScreen from "./src/screens/Notification";
 import LoginScreen from "./src/screens/LoginScreen";
+import Terms from "./src/screens/Terms";
 
 // Context
 import { AuthContext, AuthProvider } from "./src/contexts/AuthContext";
@@ -73,6 +74,7 @@ const ProfileStack = () => (
     <Stack.Screen name="ProfileDetail" component={ProfileDetail} />
     <Stack.Screen name="YourReview" component={YourReviewScreen} />
     <Stack.Screen name="Wallet" component={WalletScreen} />
+    <Stack.Screen name="Terms" component={Terms} />
   </Stack.Navigator>
 );
 

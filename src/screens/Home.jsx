@@ -5,7 +5,7 @@ import {
   Text,
   Image,
   TouchableOpacity,
-  ScrollView,
+  FlatList,
   StyleSheet,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -57,8 +57,15 @@ const HomeScreen = () => {
     fetchUserProfile();
   }, [userData, userToken]);
 
-  return (
-    <SafeAreaView style={styles.container}>
+  // Data for our FlatList sections
+  const sections = [
+    { id: 'highRated', component: HighRatedSpaces },
+    { id: 'recommendations', component: Recommendations },
+    { id: 'nearYou', component: SpaceNearYou },
+  ];
+
+  const renderHeader = () => (
+    <>
       <View style={styles.header}>
         <View style={styles.userInfo}>
           <Image
@@ -113,17 +120,32 @@ const HomeScreen = () => {
         </Text>
         <Icon name="chevron-right" size={24} color="#000" />
       </TouchableOpacity>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* High Rated Spaces */}
-        <HighRatedSpaces />
-        {/* Recommendations */}
-        <Recommendations />
-        <SpaceNearYou />
-      </ScrollView>
+    </>
+  );
+
+  const renderSectionItem = ({ item }) => {
+    const Component = item.component;
+    return <Component />;
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <FlatList
+        ListHeaderComponent={renderHeader}
+        data={sections}
+        renderItem={renderSectionItem}
+        keyExtractor={(item) => item.id}
+        showsVerticalScrollIndicator={false}
+      />
     </SafeAreaView>
   );
 };
+
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff'
+  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",

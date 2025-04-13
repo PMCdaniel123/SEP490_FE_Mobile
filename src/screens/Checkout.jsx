@@ -189,21 +189,23 @@ function Checkout() {
   };
 
   useEffect(() => {
-    const handleUrl = (event) => {
-      const { url } = event;
-      handleDeepLink(url);
-    };
+    // Fix for Linking API - using the subscription pattern instead of event listeners
+    const subscription = Linking.addEventListener('url', ({ url }) => {
+      if (url) {
+        handleDeepLink(url);
+      }
+    });
 
-    Linking.addEventListener("url", handleUrl);
-
+    // Check for initial URL
     Linking.getInitialURL().then((url) => {
       if (url) {
         handleDeepLink(url);
       }
     });
 
+    // Return cleanup function that removes the event listener
     return () => {
-      Linking.removeEventListener("url", handleUrl);
+      subscription.remove();
     };
   }, [handleDeepLink]);
 
@@ -515,7 +517,7 @@ function Checkout() {
             <Text>
               {promotion
                 ? promotion.code + " - " + promotion.discount + "%"
-                : ""}
+                : "Không áp dụng"}
             </Text>
           </View>
           <View style={styles.rowBetwween}>
@@ -608,22 +610,36 @@ function Checkout() {
                     setModalVisible(false);
                   }}
                 >
-                  <View style={styles.promotionHeaderContainer}>
-                    <Text style={styles.promotionCode}>{item.code}</Text>
-                    <Text style={{ fontSize: 16, color: "#835101" }}>
-                      {item.discount}%
-                    </Text>
+                  <View style={styles.promotionCard}>
+                    <View style={styles.promotionLeftBorder}></View>
+                    <View style={styles.promotionContent}>
+                      <View style={styles.promotionHeaderContainer}>
+                        <Text style={styles.promotionCode}>{item.code}</Text>
+                        <View style={styles.discountBadge}>
+                          <Text style={styles.discountText}>
+                           Giảm {item.discount}%
+                          </Text>
+                        </View>
+                      </View>
+                      <View style={styles.promotionDivider} />
+                      <View style={styles.promotionFooter}>
+                        <Ionicons name="time-outline" size={12} color="#666" />
+                        <Text style={styles.validityText}>
+                          Thời hạn: {dayjs(item.startDate).format("DD/MM/YYYY")} -{" "}
+                          {dayjs(item.endDate).format("DD/MM/YYYY")}
+                        </Text>
+                      </View>
+                    </View>
                   </View>
-                  <Text style={{ fontSize: 12, color: "#888" }}>
-                    ({dayjs(item.startDate).format("HH:mm DD/MM/YYYY")} -{" "}
-                    {dayjs(item.endDate).format("HH:mm DD/MM/YYYY")})
-                  </Text>
                 </TouchableOpacity>
               ))
             ) : (
-              <Text style={{ fontSize: 14, color: "#888" }}>
-                Không có khuyến mãi nào.
-              </Text>
+              <View style={styles.emptyPromotionContainer}>
+                <Ionicons name="ticket-outline" size={48} color="#ccc" />
+                <Text style={styles.emptyPromotionText}>
+                  Không có khuyến mãi nào.
+                </Text>
+              </View>
             )}
           </View>
         </BlurView>
@@ -795,7 +811,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 12,
     right: 12,
-    backgroundColor: "#FF4D4D",
+    backgroundColor: "#835101",
     width: 30,
     height: 30,
     borderRadius: 15,
@@ -812,6 +828,62 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     color: "#333",
+  },
+  promotionCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    overflow: "hidden",
+    marginVertical: 6,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  promotionLeftBorder: {
+    width: 4,
+    backgroundColor: "#835101",
+  },
+  promotionContent: {
+    flex: 1,
+    padding: 12,
+  },
+  discountBadge: {
+    backgroundColor: "#835101",
+    borderRadius: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  discountText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "bold",
+  },
+  promotionDivider: {
+    height: 1,
+    backgroundColor: "#ccc",
+    marginVertical: 8,
+  },
+  promotionFooter: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  validityText: {
+    fontSize: 12,
+    color: "#666",
+  },
+  emptyPromotionContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 20,
+  },
+  emptyPromotionText: {
+    fontSize: 14,
+    color: "#888",
+    marginTop: 10,
   },
 });
 

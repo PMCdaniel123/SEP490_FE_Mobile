@@ -177,7 +177,7 @@ const ProfileScreen = () => {
             onPress={() => navigation.navigate("YourReview")}
           />
           <MenuItem icon="question-circle" text="Hỗ trợ" onPress={() => {}} />
-          <MenuItem icon="file-text" text="Điều khoản" onPress={() => {}} />
+          <MenuItem icon="file-text" text="Điều khoản" onPress={() => navigation.navigate("Terms")} />
         </View>
 
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>

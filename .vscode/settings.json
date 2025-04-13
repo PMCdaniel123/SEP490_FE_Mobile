@@ -17,6 +17,8 @@
         "userReview",
         "searchFunction",
         "userWallet",
-        "checkOut"
+        "checkOut",
+        "Terms Screen",
+        "cancelBooking"
     ]
 }

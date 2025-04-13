@@ -14,8 +14,7 @@ const validationSchema = Yup.object().shape({
     .oneOf(['Nam', 'Nữ', 'Khác'], 'Vui lòng chọn giới tính')
     .required('Giới tính là bắt buộc'),
   password: Yup.string()
-    .min(8, 'Mật khẩu phải có ít nhất 8 ký tự')
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, 'Mật khẩu phải chứa chữ hoa, chữ thường, số và ký tự đặc biệt')
+    .min(6, 'Mật khẩu phải có ít nhất 6 ký tự')
     .required('Mật khẩu là bắt buộc'),
 });
 export default validationSchema;

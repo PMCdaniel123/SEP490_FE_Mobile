@@ -21,7 +21,7 @@ function ReviewList({ workspaceId }) {
     const fetchReviews = async () => {
       try {
         const response = await axios.get(
-          `http://35.78.210.59:8080/users/rating/getallratingbyworkspaceid/${workspaceId}`
+          `https://workhive.info.vn:8443/users/rating/getallratingbyworkspaceid/${workspaceId}`
         );
         const formattedReviews =
           response.data.ratingByWorkspaceIdDTOs?.sort(

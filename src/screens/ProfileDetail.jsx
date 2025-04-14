@@ -40,7 +40,7 @@ const ProfileDetail = ({ route, navigation }) => {
     setLoading(true);
     try {
       const response = await axios.patch(
-        "http://35.78.210.59:8080/users/update",
+        "https://workhive.info.vn:8443/users/update",
         {
           userId: userData.sub,
           name: user.name,
@@ -134,7 +134,7 @@ const ProfileDetail = ({ route, navigation }) => {
         });
 
         const response = await axios.post(
-          "http://35.78.210.59:8080/images/upload",
+          "https://workhive.info.vn:8443/images/upload",
           formData,
           {
             headers: {
@@ -249,17 +249,17 @@ const ProfileDetail = ({ route, navigation }) => {
         />
       </View>
       {isEditing && (
-       <TouchableOpacity
-       style={styles.saveButton}
-       onPress={handleSave}
-       disabled={loading}
-     >
-       {loading ? (
-         <ActivityIndicator color="#fff" />
-       ) : (
-         <Text style={styles.saveButtonText}>Lưu thay đổi</Text>
-       )}
-     </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.saveButton}
+          onPress={handleSave}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.saveButtonText}>Lưu thay đổi</Text>
+          )}
+        </TouchableOpacity>
       )}
 
       <CustomDatePicker

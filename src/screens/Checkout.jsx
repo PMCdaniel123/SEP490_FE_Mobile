@@ -61,7 +61,7 @@ function Checkout() {
     const fetchWorkspaceDetails = async () => {
       try {
         const response = await axios.get(
-          `http://35.78.210.59:8080/workspaces/${workspaceId}`
+          `https://workhive.info.vn:8443/workspaces/${workspaceId}`
         );
         setWorkspace(response.data?.getWorkSpaceByIdResult || null);
       } catch (error) {
@@ -78,7 +78,7 @@ function Checkout() {
   const fetchPromotions = async ({ workspaceId }) => {
     try {
       const response = await axios.get(
-        `http://35.78.210.59:8080/workspaces/${workspaceId}/promotions`
+        `https://workhive.info.vn:8443/workspaces/${workspaceId}/promotions`
       );
       const now = dayjs();
       const formattedDate = (
@@ -116,7 +116,7 @@ function Checkout() {
 
       try {
         const response = await axios.get(
-          `http://35.78.210.59:8080/users/${userData.sub}`,
+          `https://workhive.info.vn:8443/users/${userData.sub}`,
           {
             headers: {
               Authorization: `Bearer ${userToken}`,
@@ -163,7 +163,7 @@ function Checkout() {
     setLoading(true);
     try {
       const response = await axios.post(
-        `http://35.78.210.59:8080/users/bookingformobile`,
+        `https://workhive.info.vn:8443/users/bookingformobile`,
         {
           ...request,
         }
@@ -190,7 +190,7 @@ function Checkout() {
 
   useEffect(() => {
     // Fix for Linking API - using the subscription pattern instead of event listeners
-    const subscription = Linking.addEventListener('url', ({ url }) => {
+    const subscription = Linking.addEventListener("url", ({ url }) => {
       if (url) {
         handleDeepLink(url);
       }
@@ -410,7 +410,7 @@ function Checkout() {
               });
             }
           } catch (error) {
-            console.log("WebView message parse error:", error);
+            alert("WebView message parse error:", error);
           }
         }}
       />
@@ -617,7 +617,7 @@ function Checkout() {
                         <Text style={styles.promotionCode}>{item.code}</Text>
                         <View style={styles.discountBadge}>
                           <Text style={styles.discountText}>
-                           Giảm {item.discount}%
+                            Giảm {item.discount}%
                           </Text>
                         </View>
                       </View>
@@ -625,8 +625,8 @@ function Checkout() {
                       <View style={styles.promotionFooter}>
                         <Ionicons name="time-outline" size={12} color="#666" />
                         <Text style={styles.validityText}>
-                          Thời hạn: {dayjs(item.startDate).format("DD/MM/YYYY")} -{" "}
-                          {dayjs(item.endDate).format("DD/MM/YYYY")}
+                          Thời hạn: {dayjs(item.startDate).format("DD/MM/YYYY")}{" "}
+                          - {dayjs(item.endDate).format("DD/MM/YYYY")}
                         </Text>
                       </View>
                     </View>

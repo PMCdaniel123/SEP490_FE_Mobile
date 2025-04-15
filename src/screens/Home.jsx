@@ -33,7 +33,7 @@ const HomeScreen = () => {
 
       try {
         const response = await axios.get(
-          `http://35.78.210.59:8080/users/${userData.sub}`,
+          `https://workhive.info.vn:8443/users/${userData.sub}`,
           {
             headers: {
               Authorization: `Bearer ${userToken}`,
@@ -59,9 +59,9 @@ const HomeScreen = () => {
 
   // Data for our FlatList sections
   const sections = [
-    { id: 'highRated', component: HighRatedSpaces },
-    { id: 'recommendations', component: Recommendations },
-    { id: 'nearYou', component: SpaceNearYou },
+    { id: "highRated", component: HighRatedSpaces },
+    { id: "recommendations", component: Recommendations },
+    { id: "nearYou", component: SpaceNearYou },
   ];
 
   const renderHeader = () => (
@@ -144,7 +144,7 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff'
+    backgroundColor: "#fff",
   },
   header: {
     flexDirection: "row",

@@ -27,7 +27,7 @@ function BeverageList({ ownerId }) {
         setLoading(true);
         setError(null);
         const response = await axios.get(
-          `http://35.78.210.59:8080/beverages/Owner/${ownerId}`
+          `https://workhive.info.vn:8443/beverages/Owner/${ownerId}`
         );
         const beverages = response.data.beverages || [];
         setBeverageList(beverages);
@@ -104,7 +104,6 @@ function BeverageList({ ownerId }) {
             <Text style={styles.countText}>{beverageList?.length || 0}</Text>
           </View>
         </View>
-       
       </View>
 
       <FlatList

@@ -18,7 +18,7 @@ function AmenityList({ ownerId }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showAll, setShowAll] = useState(false);
-  
+
   const fadeAnim = useMemo(() => new Animated.Value(0), []);
 
   useEffect(() => {
@@ -27,7 +27,7 @@ function AmenityList({ ownerId }) {
         setLoading(true);
         setError(null);
         const response = await axios.get(
-          `http://35.78.210.59:8080/amenities/Owner/${ownerId}`
+          `https://workhive.info.vn:8443/amenities/Owner/${ownerId}`
         );
         const amenities = response.data.amenities || [];
         setAmenityList(amenities);
@@ -120,7 +120,7 @@ function AmenityList({ ownerId }) {
           </TouchableOpacity>
         )}
       </View>
-      
+
       <FlatList
         data={displayedAmenities}
         renderItem={renderAmenityItem}

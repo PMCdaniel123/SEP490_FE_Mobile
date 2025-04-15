@@ -104,43 +104,40 @@ const BookingDetailScreen = ({ route }) => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        "http://35.78.210.59:8080/users/cancelbooking",
+        "https://workhive.info.vn:8443/users/cancelbooking",
         { bookingId: bookingData.booking_Id },
         { headers: { Authorization: `Bearer ${userToken}` } }
       );
-      
+
       if (response.status === 200) {
         Alert.alert(
           "Hủy đặt chỗ thành công",
           "Đơn đặt chỗ của bạn đã được hủy. Nếu được hoàn tiền, số tiền sẽ được hoàn về ví của bạn trong vòng 7 ngày làm việc.",
           [
-            { 
-              text: "OK", 
+            {
+              text: "OK",
               onPress: () => {
                 setIsCancelBookingModal(false);
                 navigation.goBack();
-              }
-            }
+              },
+            },
           ]
         );
       } else {
         Alert.alert("Lỗi", "Không thể hủy đặt chỗ. Vui lòng thử lại sau.");
       }
     } catch (error) {
-      const errorMessage = error.response?.data?.message || "Đã xảy ra lỗi khi hủy đặt chỗ";
+      const errorMessage =
+        error.response?.data?.message || "Đã xảy ra lỗi khi hủy đặt chỗ";
       Alert.alert("Lỗi", errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
 
-  
-
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
-      <ScrollView
-        style={styles.container}
-      >
+      <ScrollView style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
@@ -185,7 +182,10 @@ const BookingDetailScreen = ({ route }) => {
               { backgroundColor: getStatusColor(bookingData.booking_Status) },
             ]}
           >
-            <Text style={styles.statusText}> {getStatusText(bookingData.booking_Status)}</Text>
+            <Text style={styles.statusText}>
+              {" "}
+              {getStatusText(bookingData.booking_Status)}
+            </Text>
           </View>
           <Text style={styles.bookingId}>
             Mã đặt chỗ: #{bookingData.booking_Id}
@@ -212,7 +212,9 @@ const BookingDetailScreen = ({ route }) => {
 
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Loại không gian:</Text>
-            <Text style={styles.detailValue}>{bookingData.workspace_Category}</Text>
+            <Text style={styles.detailValue}>
+              {bookingData.workspace_Category}
+            </Text>
           </View>
 
           <View style={styles.detailRow}>
@@ -224,7 +226,9 @@ const BookingDetailScreen = ({ route }) => {
 
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Diện tích:</Text>
-            <Text style={styles.detailValue}>{bookingData.workspace_Area} m²</Text>
+            <Text style={styles.detailValue}>
+              {bookingData.workspace_Area} m²
+            </Text>
           </View>
 
           <View style={styles.detailRow}>
@@ -249,7 +253,9 @@ const BookingDetailScreen = ({ route }) => {
           {bookingData.promotion_Code && (
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Mã khuyến mãi:</Text>
-              <Text style={styles.detailValue}>{bookingData.promotion_Code}</Text>
+              <Text style={styles.detailValue}>
+                {bookingData.promotion_Code}
+              </Text>
             </View>
           )}
 
@@ -298,25 +304,27 @@ const BookingDetailScreen = ({ route }) => {
         </View>
 
         {/* Review Button */}
-        {bookingData.booking_Status === "Success" && bookingData.isReview === 0 && (
-          <TouchableOpacity
-            style={styles.reviewButton}
-            onPress={() =>
-              navigation.navigate("ReviewScreen", {
-                bookingId: bookingData.booking_Id,
-                workspaceName: bookingData.workspace_Name,
-                licenseAddress: bookingData.license_Address,
-                capacity: bookingData.workspace_Capacity,
-                area: bookingData.workspace_Area,
-                category: bookingData.workspace_Category,
-                workspaceImage: bookingData.bookingHistoryWorkspaceImages[0]?.imageUrl, // Pass the first image URL
-              })
-            }
-          >
-            <Text style={styles.reviewButtonText}>Đánh giá</Text>
-          </TouchableOpacity>
-        )}
-        
+        {bookingData.booking_Status === "Success" &&
+          bookingData.isReview === 0 && (
+            <TouchableOpacity
+              style={styles.reviewButton}
+              onPress={() =>
+                navigation.navigate("ReviewScreen", {
+                  bookingId: bookingData.booking_Id,
+                  workspaceName: bookingData.workspace_Name,
+                  licenseAddress: bookingData.license_Address,
+                  capacity: bookingData.workspace_Capacity,
+                  area: bookingData.workspace_Area,
+                  category: bookingData.workspace_Category,
+                  workspaceImage:
+                    bookingData.bookingHistoryWorkspaceImages[0]?.imageUrl, // Pass the first image URL
+                })
+              }
+            >
+              <Text style={styles.reviewButtonText}>Đánh giá</Text>
+            </TouchableOpacity>
+          )}
+
         {/* Rebooking Button */}
         {bookingData.booking_Status === "Success" && (
           <TouchableOpacity style={styles.rebookButton}>
@@ -325,15 +333,15 @@ const BookingDetailScreen = ({ route }) => {
         )}
 
         {/* Cancel Booking Button - Only show for upcoming bookings that haven't started yet */}
-        {bookingData.booking_Status === "Success" && 
+        {bookingData.booking_Status === "Success" &&
           dayjs(bookingData.booking_StartDate).diff(dayjs(), "hour") > 0 && (
-          <TouchableOpacity 
-            style={styles.cancelButton}
-            onPress={() => setIsCancelBookingModal(true)}
-          >
-            <Text style={styles.cancelButtonText}>Hủy đặt chỗ</Text>
-          </TouchableOpacity>
-        )}
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => setIsCancelBookingModal(true)}
+            >
+              <Text style={styles.cancelButtonText}>Hủy đặt chỗ</Text>
+            </TouchableOpacity>
+          )}
       </ScrollView>
 
       {/* Cancel Booking Confirmation Modal */}
@@ -364,15 +372,31 @@ const BookingDetailScreen = ({ route }) => {
                   1. Điều kiện hủy và hoàn tiền
                 </Text>
                 <View style={styles.policyItem}>
-                  <Ionicons name="checkmark-circle" size={16} color="#835101" style={styles.policyIcon} />
+                  <Ionicons
+                    name="checkmark-circle"
+                    size={16}
+                    color="#835101"
+                    style={styles.policyIcon}
+                  />
                   <Text style={styles.policyText}>
-                    <Text style={styles.policyHighlight}>Hủy trước ít nhất 8 giờ</Text> so với thời gian đặt chỗ bắt đầu: Hoàn 100% giá trị đặt chỗ.
+                    <Text style={styles.policyHighlight}>
+                      Hủy trước ít nhất 8 giờ
+                    </Text>{" "}
+                    so với thời gian đặt chỗ bắt đầu: Hoàn 100% giá trị đặt chỗ.
                   </Text>
                 </View>
                 <View style={styles.policyItem}>
-                  <Ionicons name="close-circle" size={16} color="#835101" style={styles.policyIcon} />
+                  <Ionicons
+                    name="close-circle"
+                    size={16}
+                    color="#835101"
+                    style={styles.policyIcon}
+                  />
                   <Text style={styles.policyText}>
-                    <Text style={styles.policyHighlight}>Hủy sau thời hạn 8 giờ:</Text> Không hỗ trợ hoàn tiền.
+                    <Text style={styles.policyHighlight}>
+                      Hủy sau thời hạn 8 giờ:
+                    </Text>{" "}
+                    Không hỗ trợ hoàn tiền.
                   </Text>
                 </View>
               </View>
@@ -382,17 +406,29 @@ const BookingDetailScreen = ({ route }) => {
                   2. Quy trình hoàn tiền
                 </Text>
                 <View style={styles.policyItem}>
-                  <Ionicons name="wallet" size={16} color="#835101" style={styles.policyIcon} />
+                  <Ionicons
+                    name="wallet"
+                    size={16}
+                    color="#835101"
+                    style={styles.policyIcon}
+                  />
                   <Text style={styles.policyText}>
                     Tiền hoàn trả sẽ được chuyển về{" "}
-                    <Text style={styles.policyHighlight}>Ví WorkHive</Text> trong vòng{" "}
+                    <Text style={styles.policyHighlight}>Ví WorkHive</Text>{" "}
+                    trong vòng{" "}
                     <Text style={styles.policyHighlight}>7 ngày làm việc</Text>.
                   </Text>
                 </View>
                 <View style={styles.policyItem}>
-                  <Ionicons name="time" size={16} color="#835101" style={styles.policyIcon} />
+                  <Ionicons
+                    name="time"
+                    size={16}
+                    color="#835101"
+                    style={styles.policyIcon}
+                  />
                   <Text style={styles.policyText}>
-                    Thời gian hoàn tiền có thể thay đổi tùy theo quy trình xử lý nhà cung cấp dịch vụ thanh toán.
+                    Thời gian hoàn tiền có thể thay đổi tùy theo quy trình xử lý
+                    nhà cung cấp dịch vụ thanh toán.
                   </Text>
                 </View>
               </View>
@@ -402,9 +438,15 @@ const BookingDetailScreen = ({ route }) => {
                   3. Lưu ý quan trọng
                 </Text>
                 <View style={styles.policyItem}>
-                  <Ionicons name="information-circle" size={16} color="#835101" style={styles.policyIcon} />
+                  <Ionicons
+                    name="information-circle"
+                    size={16}
+                    color="#835101"
+                    style={styles.policyIcon}
+                  />
                   <Text style={styles.policyText}>
-                    Thời gian hủy được tính dựa trên thời điểm bắt đầu sử dụng dịch vụ, không phải thời điểm đặt chỗ.
+                    Thời gian hủy được tính dựa trên thời điểm bắt đầu sử dụng
+                    dịch vụ, không phải thời điểm đặt chỗ.
                   </Text>
                 </View>
               </View>
@@ -422,14 +464,19 @@ const BookingDetailScreen = ({ route }) => {
                 <Text style={styles.modalCancelButtonText}>Đóng</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.modalConfirmButton, isLoading && styles.disabledButton]}
+                style={[
+                  styles.modalConfirmButton,
+                  isLoading && styles.disabledButton,
+                ]}
                 disabled={isLoading}
                 onPress={handleCancelBooking}
               >
                 {isLoading ? (
                   <ActivityIndicator size="small" color="#fff" />
                 ) : (
-                  <Text style={styles.modalConfirmButtonText}>Xác nhận hủy</Text>
+                  <Text style={styles.modalConfirmButtonText}>
+                    Xác nhận hủy
+                  </Text>
                 )}
               </TouchableOpacity>
             </View>

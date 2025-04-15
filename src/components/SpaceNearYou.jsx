@@ -29,7 +29,9 @@ const SpaceNearYou = () => {
   const fetchSpacesNearYou = async () => {
     try {
       // Simulating API call - replace with actual API endpoint when available
-      const response = await axios.get("http://35.78.210.59:8080/workspaces");
+      const response = await axios.get(
+        "https://workhive.info.vn:8443/workspaces"
+      );
       setSpacesNearYou(response.data.workspaces || []);
     } catch (error) {
       alert("Error fetching nearby spaces:", error);
@@ -52,9 +54,7 @@ const SpaceNearYou = () => {
     <TouchableOpacity
       key={item.id}
       style={styles.listItemCard}
-      onPress={() =>
-        navigation.navigate("WorkspaceDetail", { id: item.id })
-      }
+      onPress={() => navigation.navigate("WorkspaceDetail", { id: item.id })}
     >
       <Image
         source={{ uri: item.images[0]?.imgUrl }}
@@ -72,15 +72,12 @@ const SpaceNearYou = () => {
           <Text style={styles.listItemPrice}>
             {item.prices.length > 1
               ? `${formatCurrency(
-                  item.prices.find((price) => price.category === "Giờ")
-                    ?.price
+                  item.prices.find((price) => price.category === "Giờ")?.price
                 )} - ${formatCurrency(
-                  item.prices.find((price) => price.category === "Ngày")
-                    ?.price
+                  item.prices.find((price) => price.category === "Ngày")?.price
                 )}`
               : `${formatCurrency(
-                  item.prices.find((price) => price.category === "Giờ")
-                    ?.price
+                  item.prices.find((price) => price.category === "Giờ")?.price
                 )}`}
           </Text>
           <View style={styles.listItemRating}>

@@ -16,7 +16,10 @@ import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import { AuthContext } from "../contexts/AuthContext";
 import { useNavigation, useIsFocused } from "@react-navigation/native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 const BookingScreen = () => {
   const isFocused = useIsFocused();
@@ -35,11 +38,11 @@ const BookingScreen = () => {
           display: "flex",
           elevation: 5,
           backgroundColor: "#ffffff",
-          height: Platform.OS === 'ios' ? 60 + (insets.bottom || 0) : 65,
-          paddingBottom: Platform.OS === 'ios' ? (insets.bottom || 0) : 0,
+          height: Platform.OS === "ios" ? 60 + (insets.bottom || 0) : 65,
+          paddingBottom: Platform.OS === "ios" ? insets.bottom || 0 : 0,
           ...styles.shadow,
           borderTopWidth: 1,
-          borderTopColor: '#f0f0f0',
+          borderTopColor: "#f0f0f0",
         },
       });
     }
@@ -57,7 +60,7 @@ const BookingScreen = () => {
   const fetchBookingHistory = async () => {
     try {
       const response = await axios.get(
-        `http://35.78.210.59:8080/users/booking/historybookings?UserId=${userData.sub}`,
+        `https://workhive.info.vn:8443/users/booking/historybookings?UserId=${userData.sub}`,
         {
           headers: {
             Authorization: `Bearer ${userToken}`,
@@ -200,7 +203,7 @@ const BookingScreen = () => {
   }
 
   // Filter bookings based on the active tab
-  const filteredBookings = 
+  const filteredBookings =
     activeTab === "Chưa đánh giá"
       ? bookings
           .filter(

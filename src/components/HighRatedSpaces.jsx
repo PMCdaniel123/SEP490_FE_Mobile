@@ -29,7 +29,7 @@ const HighRatedSpaces = () => {
   const fetchHighRatedSpaces = async () => {
     try {
       const response = await axios.get(
-        "http://35.78.210.59:8080/users/searchbyrate"
+        "https://workhive.info.vn:8443/users/searchbyrate"
       );
       setHighRatedSpaces(response.data.workspaces || []);
     } catch (error) {

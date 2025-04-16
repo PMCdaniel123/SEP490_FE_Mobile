@@ -126,7 +126,23 @@ const WorkspaceDetail = ({ route }) => {
   };
 
   const goToHome = () => {
-    navigation.navigate("HomeMain");
+    const state = navigation.getState();
+    
+    // Find which tab/stack we're currently in
+    const currentRoute = state.routes[0];
+    const currentRouteName = currentRoute.name;
+    
+    // If we're in BookingStack, reset it before navigating away
+    if (currentRouteName === "Đặt chỗ") {
+      // Reset the BookingStack to its initial route
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'YourBooking' }],
+      });
+    }
+    
+    // Navigate to home tab
+    navigation.navigate("Trang chủ", { screen: "HomeMain" });
   };
 
   const openGoogleMaps = (url) => {

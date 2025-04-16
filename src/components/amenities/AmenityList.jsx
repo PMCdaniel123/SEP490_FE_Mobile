@@ -17,7 +17,6 @@ function AmenityList({ ownerId }) {
   const [amenityList, setAmenityList] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showAll, setShowAll] = useState(false);
 
   const fadeAnim = useMemo(() => new Animated.Value(0), []);
 
@@ -91,9 +90,6 @@ function AmenityList({ ownerId }) {
     </Animated.View>
   );
 
-  const displayedAmenities = showAll ? amenityList : amenityList?.slice(0, 5);
-  const hasMoreAmenities = amenityList?.length > 5;
-
   return (
     <View style={styles.container}>
       <View style={styles.sectionHeader}>
@@ -104,35 +100,15 @@ function AmenityList({ ownerId }) {
             <Text style={styles.countText}>{amenityList?.length || 0}</Text>
           </View>
         </View>
-        {hasMoreAmenities && (
-          <TouchableOpacity
-            style={styles.toggleButton}
-            onPress={() => setShowAll(!showAll)}
-          >
-            <Text style={styles.toggleButtonText}>
-              {showAll ? "Thu gọn" : "Xem tất cả"}
-            </Text>
-            <MaterialIcons
-              name={showAll ? "keyboard-arrow-up" : "keyboard-arrow-down"}
-              size={20}
-              color="#835101"
-            />
-          </TouchableOpacity>
-        )}
       </View>
 
       <FlatList
-        data={displayedAmenities}
+        data={amenityList}
         renderItem={renderAmenityItem}
         keyExtractor={(item) => item.id.toString()}
-        horizontal={!showAll}
+        horizontal={true}
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={[
-          styles.listContainer,
-          showAll && styles.gridContainer,
-        ]}
-        numColumns={showAll ? 2 : 1}
-        key={showAll ? "grid" : "list"}
+        contentContainerStyle={styles.listContainer}
       />
     </View>
   );
@@ -172,21 +148,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "bold",
   },
-  toggleButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  toggleButtonText: {
-    color: "#835101",
-    fontSize: 14,
-    fontWeight: "600",
-  },
   listContainer: {
     paddingVertical: 8,
-  },
-  gridContainer: {
-    gap: 12,
   },
   loadingContainer: {
     height: 200,

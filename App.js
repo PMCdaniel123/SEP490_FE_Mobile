@@ -105,6 +105,8 @@ const BookingStack = () => (
     <Stack.Screen name="YourBooking" component={YourBooking} />
     <Stack.Screen name="BookingDetail" component={BookingDetailScreen} />
     <Stack.Screen name="ReviewScreen" component={ReviewScreen} />
+    <Stack.Screen name="WorkspaceDetail" component={WorkspaceDetail} />
+    <Stack.Screen name="Checkout" component={Checkout} />
   </Stack.Navigator>
 );
 
@@ -121,7 +123,7 @@ const getScreensWithHiddenTabBar = () => [
   // Search Stack
   "WorkspaceDetail", "AllReview", "Checkout", 
   // Booking Stack
-  "BookingDetail", "ReviewScreen",
+  "BookingDetail", "ReviewScreen", "WorkspaceDetail", "Checkout",
   // Profile Stack
   "ProfileDetail", "YourReview", "Wallet", "Terms",
 ];

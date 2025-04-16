@@ -210,14 +210,14 @@ const BookingScreen = () => {
             (item) => item.booking_Status === "Success" && item.isReview === 0
           )
           .sort(
-            (b, a) =>
+            (a, b) =>
               new Date(b.booking_CreatedAt).getTime() -
               new Date(a.booking_CreatedAt).getTime()
           )
       : bookings
           .filter((item) => item.booking_Status === activeTab)
           .sort(
-            (b, a) =>
+            (a, b) =>
               new Date(b.booking_CreatedAt).getTime() -
               new Date(a.booking_CreatedAt).getTime()
           );

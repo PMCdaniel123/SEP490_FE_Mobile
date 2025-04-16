@@ -17,7 +17,6 @@ function BeverageList({ ownerId }) {
   const [beverageList, setBeverageList] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showAll, setShowAll] = useState(false);
 
   const fadeAnim = useMemo(() => new Animated.Value(0), []);
 
@@ -91,9 +90,6 @@ function BeverageList({ ownerId }) {
     </Animated.View>
   );
 
-  const displayedBeverages = showAll ? beverageList : beverageList?.slice(0, 5);
-  const hasMoreBeverages = beverageList?.length > 5;
-
   return (
     <View style={styles.container}>
       <View style={styles.sectionHeader}>
@@ -107,17 +103,12 @@ function BeverageList({ ownerId }) {
       </View>
 
       <FlatList
-        data={displayedBeverages}
+        data={beverageList}
         renderItem={renderBeverageItem}
         keyExtractor={(item) => item.id.toString()}
-        horizontal={!showAll}
+        horizontal={true}
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={[
-          styles.listContainer,
-          showAll && styles.gridContainer,
-        ]}
-        numColumns={showAll ? 2 : 1}
-        key={showAll ? "grid" : "list"}
+        contentContainerStyle={styles.listContainer}
       />
     </View>
   );
@@ -160,9 +151,6 @@ const styles = StyleSheet.create({
 
   listContainer: {
     paddingVertical: 8,
-  },
-  gridContainer: {
-    gap: 12,
   },
   loadingContainer: {
     height: 200,

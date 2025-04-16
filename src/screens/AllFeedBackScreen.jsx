@@ -4,11 +4,12 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  FlatList,
   ActivityIndicator,
   ScrollView,
   Image,
   SafeAreaView,
+  Dimensions,
+  StatusBar,
 } from "react-native";
 import { AuthContext } from "../contexts/AuthContext";
 import Icon from "react-native-vector-icons/FontAwesome";
@@ -16,6 +17,8 @@ import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
+
+const { width } = Dimensions.get("window");
 
 const AllFeedBackScreen = () => {
   const navigation = useNavigation();
@@ -29,11 +32,12 @@ const AllFeedBackScreen = () => {
   const [existingFeedback, setExistingFeedback] = useState(null);
   const [ownerResponse, setOwnerResponse] = useState(null);
   const [loadingResponse, setLoadingResponse] = useState(false);
+  const [activeTab, setActiveTab] = useState('feedbacks'); // 'feedbacks' or 'details'
 
   useEffect(() => {
     fetchFeedbackBookings();
   }, [userData, userToken]);
-  
+
   const fetchFeedbackBookings = async () => {
     if (!userData?.sub) {
       setLoading(false);
@@ -144,6 +148,7 @@ const AllFeedBackScreen = () => {
     setSelectedBooking(booking);
     setExistingFeedback(null);
     setOwnerResponse(null);
+    setActiveTab('details'); // Always switch to details tab when selecting a booking
 
     if (!booking.feedbackIds?.length) {
       setFeedbackIds([]);
@@ -231,18 +236,26 @@ const AllFeedBackScreen = () => {
     
     return (
       <View style={styles.feedbackCard}>
-        <View style={styles.feedbackHeader}>
+        <View style={styles.feedbackCardHeader}>
+          <Text style={styles.feedbackCardTitle}>Phản hồi của bạn</Text>
           <Text style={styles.feedbackDate}>
             {dayjs(feedback.createdAt).format("DD/MM/YYYY HH:mm")}
           </Text>
         </View>
+        
+        <View style={styles.separator} />
         
         <View style={styles.feedbackContent}>
           <Text style={styles.contentLabel}>Không gian làm việc:</Text>
           <Text style={styles.contentText}>{feedback.workspaceName}</Text>
         </View>
         
-        <View style={styles.separator} />
+        {feedback.title && (
+          <View style={styles.feedbackContent}>
+            <Text style={styles.contentLabel}>Tiêu đề:</Text>
+            <Text style={styles.contentText}>{feedback.title}</Text>
+          </View>
+        )}
         
         <View style={styles.feedbackContent}>
           <Text style={styles.contentLabel}>Nội dung phản hồi:</Text>
@@ -254,11 +267,12 @@ const AllFeedBackScreen = () => {
             <Text style={styles.contentLabel}>Hình ảnh đính kèm:</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {feedback.imageUrls.map((url, index) => (
-                <Image
-                  key={index}
-                  source={{ uri: url }}
-                  style={styles.feedbackImage}
-                />
+                <TouchableOpacity key={index}>
+                  <Image
+                    source={{ uri: url }}
+                    style={styles.feedbackImage}
+                  />
+                </TouchableOpacity>
               ))}
             </ScrollView>
           </View>
@@ -272,12 +286,14 @@ const AllFeedBackScreen = () => {
     
     return (
       <View style={styles.responseCard}>
-        <View style={styles.responseHeader}>
+        <View style={styles.responseCardHeader}>
+          <Icon name="reply" size={16} color="#0B6E4F" style={styles.responseIcon} />
           <Text style={styles.responseHeaderText}>Phản hồi từ chủ không gian</Text>
-          <Text style={styles.responseDate}>
-            {dayjs(response.createdAt).format("DD/MM/YYYY HH:mm")}
-          </Text>
         </View>
+        
+        <Text style={styles.responseDate}>
+          {dayjs(response.createdAt).format("DD/MM/YYYY HH:mm")}
+        </Text>
         
         <View style={styles.separator} />
         
@@ -286,182 +302,220 @@ const AllFeedBackScreen = () => {
     );
   };
 
-  const BookingItem = ({ item, isSelected }) => (
-    <TouchableOpacity
-      style={[styles.bookingItem, isSelected && styles.selectedBookingItem]}
-      onPress={() => handleBookingSelect(item)}
-    >
-      <View>
-        <Text style={styles.bookingName} numberOfLines={1}>
-          {item.workspaceName}
-        </Text>
-        <Text style={styles.bookingDate}>
-          {dayjs(item.startDate).format("DD/MM/YYYY")}
-        </Text>
-      </View>
-      <View style={[
-        styles.statusBadge, 
-        item.hasOwnerResponse ? styles.respondedBadge : styles.pendingBadge
-      ]}>
-        <Text style={styles.statusText}>
-          {item.hasOwnerResponse ? "Đã phản hồi" : "Chưa phản hồi"}
-        </Text>
-      </View>
-    </TouchableOpacity>
-  );
+  const BookingItem = ({ item }) => {
+    const hasResponse = item.hasOwnerResponse;
+    
+    return (
+      <TouchableOpacity
+        style={styles.bookingItem}
+        onPress={() => handleBookingSelect(item)}
+        activeOpacity={0.7}
+      >
+        <View style={styles.bookingItemContent}>
+          <View style={styles.bookingTopRow}>
+            <Text style={styles.bookingName} numberOfLines={1}>
+              {item.workspaceName}
+            </Text>
+            <View style={[
+              styles.statusBadge, 
+              hasResponse ? styles.respondedBadge : styles.pendingBadge
+            ]}>
+              <Text style={[
+                styles.statusText,
+                hasResponse ? styles.respondedText : styles.pendingText
+              ]}>
+                {hasResponse ? "Đã phản hồi" : "Chưa phản hồi"}
+              </Text>
+            </View>
+          </View>
+          
+          <View style={styles.bookingBottomRow}>
+            <View style={styles.bookingInfo}>
+              <Icon name="calendar" size={12} color="#666666" style={styles.bookingItemIcon} />
+              <Text style={styles.bookingDate}>
+                {dayjs(item.startDate).format("DD/MM/YYYY")}
+              </Text>
+            </View>
+            
+            <View style={styles.bookingInfo}>
+              <Icon name="comments" size={12} color="#666666" style={styles.bookingItemIcon} />
+              <Text style={styles.bookingFeedbackCount}>
+                {item.feedbackIds?.length || 0} phản hồi
+              </Text>
+            </View>
+          </View>
+        </View>
+        <Icon name="chevron-right" size={16} color="#CCCCCC" />
+      </TouchableOpacity>
+    );
+  };
 
   const FeedbackTabs = () => {
     if (!feedbackIds || feedbackIds.length <= 1) return null;
     
     return (
-      <ScrollView 
-        horizontal 
-        showsHorizontalScrollIndicator={false} 
-        style={styles.tabsContainer}
-      >
-        {feedbackIds.map((feedback, index) => (
-          <TouchableOpacity
-            key={feedback.id}
-            style={[
-              styles.tabItem,
-              selectedFeedbackId === feedback.id && styles.activeTabItem
-            ]}
-            onPress={() => handleFeedbackSelect(feedback.id)}
-          >
-            <Text 
+      <View style={styles.feedbackTabsContainer}>
+        <Text style={styles.feedbackTabsTitle}>Phản hồi của bạn:</Text>
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false} 
+          style={styles.tabsScrollContainer}
+        >
+          {feedbackIds.map((feedback, index) => (
+            <TouchableOpacity
+              key={feedback.id}
               style={[
-                styles.tabText,
-                selectedFeedbackId === feedback.id && styles.activeTabText
+                styles.tabItem,
+                selectedFeedbackId === feedback.id && styles.activeTabItem
               ]}
+              onPress={() => handleFeedbackSelect(feedback.id)}
             >
-              Phản hồi {index + 1}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+              <Text 
+                style={[
+                  styles.tabText,
+                  selectedFeedbackId === feedback.id && styles.activeTabText
+                ]}
+              >
+                Phản hồi {index + 1}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
     );
   };
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#835101" />
-        <Text style={styles.loadingText}>Đang tải phản hồi...</Text>
-      </View>
+      <SafeAreaView style={styles.container}>
+        <StatusBar backgroundColor="#FFFFFF" barStyle="dark-content" />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#835101" />
+          <Text style={styles.loadingText}>Đang tải phản hồi...</Text>
+        </View>
+      </SafeAreaView>
     );
   }
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar backgroundColor="#FFFFFF" barStyle="dark-content" />
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="chevron-left" size={24} color="#000000" />
+        <TouchableOpacity 
+          style={styles.backButton} 
+          onPress={() => {
+            if (activeTab === 'details' && selectedBooking) {
+              // Go back to the feedback list when in detail view
+              setActiveTab('feedbacks');
+            } else {
+              // Go back to previous screen when in feedback list
+              navigation.goBack();
+            }
+          }}
+        >
+          <Icon name="chevron-left" size={18} color="#000" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Phản hồi dịch vụ</Text>
-        <View style={{ width: 24 }} />
+        <Text style={styles.headerTitle}>
+          {activeTab === 'feedbacks' ? 'Phản hồi dịch vụ' : 'Chi tiết phản hồi'}
+        </Text>
+        <View style={{ width: 40 }} />
       </View>
-
-      <Text style={styles.subTitle}>
-        Xem lại các phản hồi bạn đã gửi và phản hồi từ chủ không gian
-      </Text>
-
-      <View style={styles.contentContainer}>
-        {/* Booking list section */}
-        <View style={styles.bookingsSection}>
-          <Text style={styles.sectionTitle}>Danh sách phản hồi đã gửi</Text>
-          
-          {bookings.length === 0 ? (
-            <View style={styles.emptyStateContainer}>
-              <Icon name="exclamation-circle" size={40} color="#CCCCCC" />
-              <Text style={styles.emptyStateText}>Không có phản hồi nào</Text>
-            </View>
-          ) : (
-            <FlatList
-              data={bookings}
-              renderItem={({ item }) => (
-                <BookingItem 
-                  item={item} 
-                  isSelected={selectedBooking?.id === item.id}
-                />
-              )}
-              keyExtractor={(item) => item.id.toString()}
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.bookingsList}
-            />
-          )}
+      
+      {activeTab === 'feedbacks' && (
+        <View style={styles.tabContent}>
+          <ScrollView showsVerticalScrollIndicator={false}>
+            {bookings.length === 0 ? (
+              <View style={styles.emptyStateContainer}>
+                <Icon name="comments-o" size={60} color="#DDDDDD" />
+                <Text style={styles.emptyStateTitle}>Chưa có phản hồi nào</Text>
+                <Text style={styles.emptyStateText}>
+                  Bạn chưa có phản hồi nào cho các đặt chỗ trước đây
+                </Text>
+              </View>
+            ) : (
+              <View style={styles.bookingListContainer}>
+                {bookings.map((item) => (
+                  <BookingItem key={item.id.toString()} item={item} />
+                ))}
+              </View>
+            )}
+          </ScrollView>
         </View>
-
-        {/* Feedback details section */}
-        <View style={styles.detailsSection}>
-          {selectedBooking ? (
-            <>
-              <FeedbackTabs />
-              
-              {existingFeedback ? (
-                <ScrollView style={styles.detailsScrollView}>
-                  <View style={styles.infoBox}>
-                    <Text style={styles.infoTitle}>Thông tin phản hồi</Text>
-                    <View style={styles.infoContent}>
-                      <Text style={styles.infoLabel}>Mã đặt chỗ:</Text>
-                      <Text style={styles.infoValue}>#{selectedBooking.id}</Text>
-                    </View>
-                    {existingFeedback.title && (
-                      <View style={styles.infoContent}>
-                        <Text style={styles.infoLabel}>Tiêu đề:</Text>
-                        <Text style={styles.infoValue}>{existingFeedback.title}</Text>
-                      </View>
-                    )}
-                  </View>
-
-                  <FeedbackCard feedback={existingFeedback} />
-                  
-                  {loadingResponse ? (
-                    <View style={styles.loadingResponseContainer}>
-                      <ActivityIndicator size="small" color="#835101" />
-                      <Text style={styles.loadingResponseText}>Đang tải phản hồi...</Text>
-                    </View>
-                  ) : ownerResponse ? (
-                    <OwnerResponseCard response={ownerResponse} />
-                  ) : (
-                    <View style={styles.pendingResponseCard}>
-                      <Text style={styles.pendingResponseTitle}>Trạng thái phản hồi</Text>
-                      <View style={styles.separator} />
-                      <Text style={styles.pendingResponseText}>
-                        Chưa phản hồi
-                      </Text>
-                      <View style={styles.noteContainer}>
-                        <Icon name="exclamation-circle" size={16} color="#EAB308" />
-                        <Text style={styles.noteText}>
-                          Phản hồi của bạn đang được xem xét. Chúng tôi sẽ trả lời trong vòng 24 giờ.
-                        </Text>
-                      </View>
-                    </View>
-                  )}
-                </ScrollView>
-              ) : feedbackIds.length === 0 ? (
-                <View style={styles.emptyStateContainer}>
-                  <Icon name="comment-o" size={40} color="#CCCCCC" />
-                  <Text style={styles.emptyStateText}>
-                    Không có phản hồi nào cho đặt chỗ này
+      )}
+      
+      {activeTab === 'details' && (
+        <View style={styles.tabContent}>
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <View style={styles.bookingSummary}>
+              <Text style={styles.bookingSummaryTitle}>{selectedBooking.workspaceName}</Text>
+              <View style={styles.bookingSummaryDetails}>
+                <View style={styles.summaryItem}>
+                  <Icon name="calendar" size={14} color="#666666" />
+                  <Text style={styles.summaryText}>
+                    {dayjs(selectedBooking.startDate).format("DD/MM/YYYY")}
                   </Text>
                 </View>
-              ) : (
-                <View style={styles.loadingContainer}>
-                  <ActivityIndicator size="small" color="#835101" />
-                  <Text style={styles.loadingText}>Đang tải chi tiết...</Text>
+                <View style={styles.summaryItem}>
+                  <Icon name="hashtag" size={14} color="#666666" />
+                  <Text style={styles.summaryText}>
+                    Mã đặt chỗ: {selectedBooking.id}
+                  </Text>
                 </View>
-              )}
-            </>
-          ) : (
-            <View style={styles.emptyStateContainer}>
-              <Icon name="hand-pointer-o" size={40} color="#CCCCCC" />
-              <Text style={styles.emptyStateText}>
-                Chọn một đặt chỗ để xem phản hồi
-              </Text>
+              </View>
             </View>
-          )}
+            
+            <FeedbackTabs />
+            
+            {existingFeedback ? (
+              <View style={styles.feedbackDetailsContainer}>
+                <FeedbackCard feedback={existingFeedback} />
+                
+                {loadingResponse ? (
+                  <View style={styles.loadingResponseContainer}>
+                    <ActivityIndicator size="small" color="#835101" />
+                    <Text style={styles.loadingResponseText}>Đang tải phản hồi từ chủ không gian...</Text>
+                  </View>
+                ) : ownerResponse ? (
+                  <OwnerResponseCard response={ownerResponse} />
+                ) : (
+                  <View style={styles.pendingResponseCard}>
+                    <View style={styles.pendingResponseHeader}>
+                      <Icon name="clock-o" size={16} color="#F59E0B" />
+                      <Text style={styles.pendingResponseTitle}>Đang chờ phản hồi</Text>
+                    </View>
+                    
+                    <View style={styles.separator} />
+                    
+                    <Text style={styles.pendingResponseText}>
+                      Phản hồi của bạn đang được xem xét. Chủ không gian làm việc sẽ trả lời trong thời gian sớm nhất.
+                    </Text>
+                    
+                    <View style={styles.responseTimeEstimate}>
+                      <Icon name="info-circle" size={14} color="#835101" />
+                      <Text style={styles.responseTimeText}>
+                        Thời gian phản hồi thông thường: 24 giờ
+                      </Text>
+                    </View>
+                  </View>
+                )}
+              </View>
+            ) : feedbackIds.length === 0 ? (
+              <View style={styles.emptyStateContainer}>
+                <Icon name="comment-o" size={50} color="#DDDDDD" />
+                <Text style={styles.emptyStateTitle}>Không có phản hồi</Text>
+                <Text style={styles.emptyStateText}>
+                  Đặt chỗ này chưa có phản hồi nào
+                </Text>
+              </View>
+            ) : (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="small" color="#835101" />
+                <Text style={styles.loadingText}>Đang tải chi tiết phản hồi...</Text>
+              </View>
+            )}
+          </ScrollView>
         </View>
-      </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -469,97 +523,95 @@ const AllFeedBackScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#F8F9FA",
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 20,
-    paddingTop: 50,
-    paddingBottom: 10,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 16,
     backgroundColor: "#FFFFFF",
+    borderBottomWidth: 1,
+    borderBottomColor: "#EEEEEE",
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#F5F5F5",
   },
   headerTitle: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#000000",
-  },
-  subTitle: {
-    fontSize: 14,
-    color: "#666666",
-    paddingHorizontal: 20,
-    marginBottom: 20,
-  },
-  contentContainer: {
-    flex: 1,
-    flexDirection: "column",
-  },
-  bookingsSection: {
-    backgroundColor: "#FFFFFF",
-    padding: 15,
-    borderRadius: 8,
-    marginHorizontal: 15,
-    marginBottom: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
-    maxHeight: "30%",
-  },
-  detailsSection: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-    padding: 15,
-    borderRadius: 8,
-    marginHorizontal: 15,
-    marginBottom: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  sectionTitle: {
     fontSize: 18,
-    fontWeight: "600",
+    fontWeight: "700",
     color: "#333333",
-    marginBottom: 10,
   },
-  bookingsList: {
-    paddingVertical: 5,
+  tabContent: {
+    flex: 1,
+    backgroundColor: "#F8F9FA",
+  },
+  bookingListContainer: {
+    padding: 12,
   },
   bookingItem: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 8,
-    backgroundColor: "#F8F9FA",
-    borderWidth: 1,
-    borderColor: "#E1E1E1",
+    padding: 16,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    marginBottom: 12,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
   },
-  selectedBookingItem: {
-    backgroundColor: "#FFF8E1",
-    borderColor: "#FFCC80",
+  bookingItemContent: {
+    flex: 1,
+  },
+  bookingTopRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  bookingBottomRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  bookingInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: 16,
+  },
+  bookingItemIcon: {
+    marginRight: 6,
   },
   bookingName: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#835101",
-    maxWidth: 200,
+    color: "#333333",
+    flex: 1,
+    marginRight: 8,
   },
   bookingDate: {
-    fontSize: 12,
+    fontSize: 13,
     color: "#666666",
-    marginTop: 4,
+  },
+  bookingFeedbackCount: {
+    fontSize: 13,
+    color: "#666666",
   },
   statusBadge: {
-    paddingHorizontal: 8,
+    paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 4,
+    borderRadius: 16,
+    minWidth: 90,
+    alignItems: "center",
   },
   respondedBadge: {
     backgroundColor: "#E6F7EC",
@@ -570,166 +622,223 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 12,
     fontWeight: "500",
+  },
+  respondedText: {
+    color: "#0B6E4F",
+  },
+  pendingText: {
+    color: "#F59E0B",
+  },
+  bookingSummary: {
+    padding: 16,
+    backgroundColor: "#FFFFFF",
+    marginHorizontal: 12,
+    marginTop: 12,
+    marginBottom: 8,
+    borderRadius: 12,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  bookingSummaryTitle: {
+    fontSize: 16,
+    fontWeight: "700",
     color: "#333333",
+    marginBottom: 8,
   },
-  detailsScrollView: {
-    flex: 1,
-  },
-  tabsContainer: {
+  bookingSummaryDetails: {
     flexDirection: "row",
-    marginBottom: 15,
+    flexWrap: "wrap",
+  },
+  summaryItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: 16,
+    marginBottom: 4,
+  },
+  summaryText: {
+    fontSize: 13,
+    color: "#666666",
+    marginLeft: 6,
+  },
+  feedbackTabsContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 4,
+  },
+  feedbackTabsTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#333333",
+    marginBottom: 8,
+  },
+  tabsScrollContainer: {
+    flexGrow: 0,
+    marginBottom: 8,
   },
   tabItem: {
-    paddingVertical: 10,
+    paddingVertical: 8,
     paddingHorizontal: 16,
     marginRight: 10,
     borderRadius: 20,
-    backgroundColor: "#F8F9FA",
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#EEEEEE",
   },
   activeTabItem: {
     backgroundColor: "#835101",
   },
   tabText: {
-    fontSize: 14,
+    fontSize: 13,
     color: "#666666",
   },
   activeTabText: {
-    fontWeight: "600",
     color: "#FFFFFF",
   },
-  infoBox: {
-    backgroundColor: "#F2F2F2",
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 15,
-  },
-  infoTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#835101",
-    marginBottom: 10,
-  },
-  infoContent: {
-    flexDirection: "row",
-    marginBottom: 5,
-  },
-  infoLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#333333",
-  },
-  infoValue: {
-    fontSize: 14,
-    color: "#555555",
-    marginLeft: 5,
+  feedbackDetailsContainer: {
+    paddingHorizontal: 12,
+    paddingBottom: 20,
   },
   feedbackCard: {
-    backgroundColor: "#F8F9FA",
-    borderRadius: 8,
-    padding: 15,
-    marginBottom: 15,
+    padding: 16,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    marginBottom: 16,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
   },
-  feedbackHeader: {
-    marginBottom: 10,
-  },
-  feedbackDate: {
-    fontSize: 12,
-    color: "#666666",
-    textAlign: "right",
-  },
-  feedbackContent: {
-    marginBottom: 10,
-  },
-  contentLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#333333",
-    marginBottom: 5,
-  },
-  contentText: {
-    fontSize: 14,
-    color: "#555555",
-  },
-  descriptionText: {
-    fontSize: 14,
-    color: "#555555",
-    lineHeight: 20,
-  },
-  separator: {
-    height: 1,
-    backgroundColor: "#E1E1E1",
-    marginVertical: 10,
-  },
-  imagesContainer: {
-    marginTop: 5,
-  },
-  feedbackImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 4,
-    marginRight: 10,
-  },
-  responseCard: {
-    backgroundColor: "#E6F7EC",
-    borderRadius: 8,
-    padding: 15,
-    marginBottom: 15,
-  },
-  responseHeader: {
+  feedbackCardHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginBottom: 12,
   },
-  responseHeaderText: {
-    fontSize: 14,
+  feedbackCardTitle: {
+    fontSize: 15,
     fontWeight: "600",
     color: "#333333",
+  },
+  feedbackDate: {
+    fontSize: 12,
+    color: "#888888",
+  },
+  feedbackContent: {
+    marginBottom: 12,
+  },
+  contentLabel: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#333333",
+    marginBottom: 4,
+  },
+  contentText: {
+    fontSize: 14,
+    color: "#666666",
+  },
+  descriptionText: {
+    fontSize: 14,
+    color: "#666666",
+    lineHeight: 20,
+  },
+  imagesContainer: {
+    marginTop: 12,
+  },
+  feedbackImage: {
+    width: width * 0.25,
+    height: width * 0.25,
+    borderRadius: 8,
+    marginRight: 8,
+    marginTop: 8,
+  },
+  responseCard: {
+    padding: 16,
+    backgroundColor: "#E6F7EC",
+    borderRadius: 12,
+    marginBottom: 16,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 1,
+    elevation: 1,
+  },
+  responseCardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  responseIcon: {
+    marginRight: 8,
+  },
+  responseHeaderText: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#0B6E4F",
   },
   responseDate: {
     fontSize: 12,
     color: "#666666",
+    marginBottom: 8,
   },
   responseText: {
     fontSize: 14,
-    color: "#555555",
+    color: "#333333",
     lineHeight: 20,
   },
   pendingResponseCard: {
-    backgroundColor: "#FFF3EA",
-    borderRadius: 8,
-    padding: 15,
-    marginBottom: 15,
+    padding: 16,
+    backgroundColor: "#FFF7ED",
+    borderRadius: 12,
+    marginBottom: 16,
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 1,
+    elevation: 1,
+  },
+  pendingResponseHeader: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   pendingResponseTitle: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: "600",
-    color: "#333333",
+    color: "#F59E0B",
+    marginLeft: 8,
   },
   pendingResponseText: {
     fontSize: 14,
-    color: "#555555",
-    marginBottom: 10,
+    color: "#666666",
+    lineHeight: 20,
+    marginBottom: 16,
   },
-  noteContainer: {
+  responseTimeEstimate: {
     flexDirection: "row",
-    backgroundColor: "#FFFBEB",
-    padding: 10,
+    alignItems: "center",
+    backgroundColor: "#FFEED0",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#FEF3C7",
-    marginTop: 10,
   },
-  noteText: {
+  responseTimeText: {
     fontSize: 12,
-    color: "#92400E",
+    color: "#835101",
     marginLeft: 8,
-    flex: 1,
-    lineHeight: 18,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: "#EEEEEE",
+    marginVertical: 12,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    padding: 20,
   },
   loadingText: {
     fontSize: 14,
@@ -737,27 +846,33 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   loadingResponseContainer: {
-    flexDirection: "row",
+    padding: 24,
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
   },
   loadingResponseText: {
     fontSize: 14,
     color: "#666666",
-    marginLeft: 8,
+    marginTop: 10,
   },
   emptyStateContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
+    padding: 24,
+  },
+  emptyStateTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333333",
+    marginTop: 16,
+    marginBottom: 8,
   },
   emptyStateText: {
     fontSize: 14,
     color: "#666666",
-    marginTop: 10,
     textAlign: "center",
+    marginBottom: 20,
   },
 });
 

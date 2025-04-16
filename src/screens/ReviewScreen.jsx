@@ -60,7 +60,7 @@ const ReviewScreen = ({ route }) => {
         });
 
         const response = await axios.post(
-          "http://35.78.210.59:8080/images/upload",
+          "https://workhive.info.vn:8443/images/upload",
           formData,
           {
             headers: {
@@ -94,7 +94,7 @@ const ReviewScreen = ({ route }) => {
 
     try {
       const response = await axios.post(
-        "http://35.78.210.59:8080/users/booking/rating",
+        "https://workhive.info.vn:8443/users/booking/rating",
         {
           bookingId,
           rate,

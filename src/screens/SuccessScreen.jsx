@@ -22,7 +22,7 @@ const SuccessScreen = () => {
       const updateWorkspaceTimeStatus = async () => {
         try {
           await axios.put(
-            `http://35.78.210.59:8080/users/booking/updatetimestatus`,
+            `https://workhive.info.vn:8443/users/booking/updatetimestatus`,
             {
               bookingId: BookingId,
               orderCode: OrderCode,

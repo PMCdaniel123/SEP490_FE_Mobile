@@ -55,7 +55,7 @@ const DateRangePicker = ({ openTime, closeTime, workspaceId }) => {
     const fetchTimeList = async () => {
       try {
         const response = await axios.get(
-          `http://35.78.210.59:8080/users/booking/workspacetimes?WorkspaceId=${workspaceId}`
+          `https://workhive.info.vn:8443/users/booking/workspacetimes?WorkspaceId=${workspaceId}`
         );
         setLoading(false);
         const filterTimeList =

@@ -39,7 +39,9 @@ const WorkSpaces = ({ navigation }) => {
   const fetchSpaces = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("http://35.78.210.59:8080/workspaces");
+      const response = await axios.get(
+        "https://workhive.info.vn:8443/workspaces"
+      );
       const data = response.data.workspaces || [];
       setSpaces(data);
       setFilteredSpaces(data);

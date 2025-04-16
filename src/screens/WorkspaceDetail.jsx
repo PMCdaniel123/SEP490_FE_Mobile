@@ -54,7 +54,7 @@ const WorkspaceDetail = ({ route }) => {
     const fetchWorkspaceDetails = async () => {
       try {
         const response = await axios.get(
-          `http://35.78.210.59:8080/workspaces/${id}`
+          `https://workhive.info.vn:8443/workspaces/${id}`
         );
         const workspaceData = response.data.getWorkSpaceByIdResult;
         setWorkspaceDetail(workspaceData);
@@ -126,7 +126,7 @@ const WorkspaceDetail = ({ route }) => {
   };
 
   const goToHome = () => {
-    navigation.navigate('HomeMain');
+    navigation.navigate("HomeMain");
   };
 
   const openGoogleMaps = (url) => {

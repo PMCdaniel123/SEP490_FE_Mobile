@@ -31,7 +31,7 @@ const ProfileScreen = () => {
 
       try {
         const response = await axios.get(
-          `http://35.78.210.59:8080/users/${userData.sub}`,
+          `https://workhive.info.vn:8443/users/${userData.sub}`,
           {
             headers: {
               Authorization: `Bearer ${userToken}`,
@@ -162,7 +162,11 @@ const ProfileScreen = () => {
 
         {/* Settings Section */}
         <View style={styles.settingsSection}>
-          <MenuItem icon="credit-card" text="Ví WorkHive" onPress={() => navigation.navigate("Wallet")} />
+          <MenuItem
+            icon="credit-card"
+            text="Ví WorkHive"
+            onPress={() => navigation.navigate("Wallet")}
+          />
           <MenuItem
             icon="history"
             text="Lịch sử thanh toán"
@@ -177,7 +181,11 @@ const ProfileScreen = () => {
             onPress={() => navigation.navigate("YourReview")}
           />
           <MenuItem icon="question-circle" text="Hỗ trợ" onPress={() => {}} />
-          <MenuItem icon="file-text" text="Điều khoản" onPress={() => navigation.navigate("Terms")} />
+          <MenuItem
+            icon="file-text"
+            text="Điều khoản"
+            onPress={() => navigation.navigate("Terms")}
+          />
         </View>
 
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>

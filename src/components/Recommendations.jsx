@@ -30,7 +30,9 @@ const Recommendations = () => {
 
   const fetchRecommendedSpaces = async () => {
     try {
-      const response = await axios.get("http://35.78.210.59:8080/workspaces");
+      const response = await axios.get(
+        "https://workhive.info.vn:8443/workspaces"
+      );
       const workspaces = response.data.workspaces || [];
       setRecommendedSpaces(workspaces);
 

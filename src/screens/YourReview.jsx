@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useContext } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from "react";
 import {
   View,
   FlatList,
@@ -10,14 +10,14 @@ import {
   Alert,
   Modal,
   ActivityIndicator,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { AuthContext } from '../contexts/AuthContext';
-import axios from 'axios';
-import ImageViewer from 'react-native-image-zoom-viewer';
-import FilterModal from '../components/review/FilterModal';
-import ReviewItem from '../components/review/ReviewItem';
-import EditReviewModal from '../components/review/EditReviewModal';
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { AuthContext } from "../contexts/AuthContext";
+import axios from "axios";
+import ImageViewer from "react-native-image-zoom-viewer";
+import FilterModal from "../components/review/FilterModal";
+import ReviewItem from "../components/review/ReviewItem";
+import EditReviewModal from "../components/review/EditReviewModal";
 
 const YourReviewScreen = () => {
   const { userData, userToken } = useContext(AuthContext);
@@ -28,20 +28,20 @@ const YourReviewScreen = () => {
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [imageViewerVisible, setImageViewerVisible] = useState(false);
-  const [selectedImage, setSelectedImage] = useState('');
+  const [selectedImage, setSelectedImage] = useState("");
   const [currentReview, setCurrentReview] = useState(null);
   const [updatedRate, setUpdatedRate] = useState(0);
-  const [updatedComment, setUpdatedComment] = useState('');
+  const [updatedComment, setUpdatedComment] = useState("");
   const [updatedImages, setUpdatedImages] = useState([]);
   const [filters, setFilters] = useState({
     rating: 0,
-    timeRange: 'all',
-    sortBy: 'newest'
+    timeRange: "all",
+    sortBy: "newest",
   });
   const [tempFilters, setTempFilters] = useState({
     rating: 0,
-    timeRange: 'all',
-    sortBy: 'newest'
+    timeRange: "all",
+    sortBy: "newest",
   });
 
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
@@ -64,7 +64,7 @@ const YourReviewScreen = () => {
   const fetchUserReviews = useCallback(async () => {
     try {
       const response = await axios.get(
-        `http://35.78.210.59:8080/users/rating/getallratingbyuserid/${userData.sub}`,
+        `https://workhive.info.vn:8443/users/rating/getallratingbyuserid/${userData.sub}`,
         {
           headers: {
             Authorization: `Bearer ${userToken}`,
@@ -78,60 +78,54 @@ const YourReviewScreen = () => {
         Alert.alert("Thông báo", "Không có đánh giá nào được tìm thấy.");
       }
     } catch (error) {
-      Alert.alert(
-        "Lỗi",
-        "Không thể tải đánh giá. Vui lòng thử lại sau.",
-        [{ text: "OK" }]
-      );
+      Alert.alert("Lỗi", "Không thể tải đánh giá. Vui lòng thử lại sau.", [
+        { text: "OK" },
+      ]);
     } finally {
       setLoading(false);
     }
   }, [userData.sub, userToken]);
 
   const handleDeleteReview = async (ratingId) => {
-    Alert.alert(
-      "Xác nhận",
-      "Bạn có chắc chắn muốn xóa đánh giá này không?",
-      [
-        {
-          text: "Hủy",
-          style: "cancel"
-        },
-        {
-          text: "Xóa",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              const response = await axios.delete(
-                "http://35.78.210.59:8080/users/deleterating",
-                {
-                  headers: {
-                    'accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${userToken}`
-                  },
-                  data: {
-                    userId: userData.sub,
-                    ratingId: ratingId
-                  }
-                }
-              );
-
-              if (response.status === 200) {
-                Alert.alert("Thành công", "Đánh giá đã được xóa.");
-                fetchUserReviews();
+    Alert.alert("Xác nhận", "Bạn có chắc chắn muốn xóa đánh giá này không?", [
+      {
+        text: "Hủy",
+        style: "cancel",
+      },
+      {
+        text: "Xóa",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            const response = await axios.delete(
+              "https://workhive.info.vn:8443/users/deleterating",
+              {
+                headers: {
+                  accept: "application/json",
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${userToken}`,
+                },
+                data: {
+                  userId: userData.sub,
+                  ratingId: ratingId,
+                },
               }
-            } catch (error) {
-              Alert.alert(
-                "Lỗi",
-                "Không thể xóa đánh giá. Vui lòng thử lại sau.",
-                [{ text: "OK" }]
-              );
+            );
+
+            if (response.status === 200) {
+              Alert.alert("Thành công", "Đánh giá đã được xóa.");
+              fetchUserReviews();
             }
+          } catch (error) {
+            Alert.alert(
+              "Lỗi",
+              "Không thể xóa đánh giá. Vui lòng thử lại sau.",
+              [{ text: "OK" }]
+            );
           }
-        }
-      ]
-    );
+        },
+      },
+    ]);
   };
 
   const handleSaveReview = async () => {
@@ -141,20 +135,20 @@ const YourReviewScreen = () => {
         ratingId: currentReview.ratingId,
         rate: updatedRate,
         comment: updatedComment,
-        images: updatedImages.map(img => ({
-          url: img.url
-        }))
+        images: updatedImages.map((img) => ({
+          url: img.url,
+        })),
       };
 
       const response = await axios.patch(
-        'http://35.78.210.59:8080/users/updaterating',
+        "https://workhive.info.vn:8443/users/updaterating",
         requestData,
         {
           headers: {
-            'accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${userToken}`
-          }
+            accept: "application/json",
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
         }
       );
 
@@ -164,11 +158,9 @@ const YourReviewScreen = () => {
         fetchUserReviews();
       }
     } catch (error) {
-      Alert.alert(
-        "Lỗi",
-        "Không thể cập nhật đánh giá. Vui lòng thử lại sau.",
-        [{ text: "OK" }]
-      );
+      Alert.alert("Lỗi", "Không thể cập nhật đánh giá. Vui lòng thử lại sau.", [
+        { text: "OK" },
+      ]);
     }
   };
 
@@ -177,17 +169,17 @@ const YourReviewScreen = () => {
 
     // Apply rating filter
     if (filters.rating > 0) {
-      result = result.filter(review => review.rate === filters.rating);
+      result = result.filter((review) => review.rate === filters.rating);
     }
 
     // Apply time range filter
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-    if (filters.timeRange !== 'all') {
+    if (filters.timeRange !== "all") {
       switch (filters.timeRange) {
-        case 'today':
-          result = result.filter(review => {
+        case "today":
+          result = result.filter((review) => {
             const reviewDate = new Date(review.created_At);
             const reviewDay = new Date(
               reviewDate.getFullYear(),
@@ -197,18 +189,18 @@ const YourReviewScreen = () => {
             return reviewDay.getTime() === today.getTime();
           });
           break;
-        case 'week':
+        case "week":
           const weekAgo = new Date(today);
           weekAgo.setDate(weekAgo.getDate() - 7);
-          result = result.filter(review => {
+          result = result.filter((review) => {
             const reviewDate = new Date(review.created_At);
             return reviewDate >= weekAgo;
           });
           break;
-        case 'month':
+        case "month":
           const monthAgo = new Date(today);
           monthAgo.setMonth(monthAgo.getMonth() - 1);
-          result = result.filter(review => {
+          result = result.filter((review) => {
             const reviewDate = new Date(review.created_At);
             return reviewDate >= monthAgo;
           });
@@ -219,11 +211,11 @@ const YourReviewScreen = () => {
     // Apply sorting
     result.sort((a, b) => {
       switch (filters.sortBy) {
-        case 'newest':
+        case "newest":
           return new Date(b.created_At) - new Date(a.created_At);
-        case 'oldest':
+        case "oldest":
           return new Date(a.created_At) - new Date(b.created_At);
-        case 'rating':
+        case "rating":
           return b.rate - a.rate;
         default:
           return new Date(b.created_At) - new Date(a.created_At);
@@ -246,8 +238,8 @@ const YourReviewScreen = () => {
   const handleResetFilters = () => {
     const defaultFilters = {
       rating: 0,
-      timeRange: 'all',
-      sortBy: 'newest'
+      timeRange: "all",
+      sortBy: "newest",
     };
     setTempFilters(defaultFilters);
     setFilters(defaultFilters);
@@ -372,8 +364,8 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

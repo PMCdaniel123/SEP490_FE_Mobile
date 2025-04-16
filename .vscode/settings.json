@@ -19,6 +19,7 @@
         "userWallet",
         "checkOut",
         "Terms Screen",
-        "cancelBooking"
+        "cancelBooking",
+        "userFeedback"
     ]
 }

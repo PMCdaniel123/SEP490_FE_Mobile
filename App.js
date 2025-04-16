@@ -15,6 +15,7 @@ import ProfileDetail from "./src/screens/ProfileDetail";
 import NotificationScreen from "./src/screens/Notification";
 import LoginScreen from "./src/screens/LoginScreen";
 import Terms from "./src/screens/Terms";
+import AllFeedBackScreen from "./src/screens/AllFeedBackScreen";
 
 // Context
 import { AuthContext, AuthProvider } from "./src/contexts/AuthContext";
@@ -29,6 +30,7 @@ import YourReviewScreen from "./src/screens/YourReview";
 import AllReview from "./src/screens/AllReview";
 import SearchScreen from "./src/screens/SearchScreen";
 import WalletScreen from "./src/screens/WalletScreen";
+import FeedbackScreen from "./src/screens/FeedbackScreen";
 
 import * as Linking from "expo-linking";
 import SuccessScreen from "./src/screens/SuccessScreen";
@@ -75,6 +77,7 @@ const ProfileStack = () => (
     <Stack.Screen name="YourReview" component={YourReviewScreen} />
     <Stack.Screen name="Wallet" component={WalletScreen} />
     <Stack.Screen name="Terms" component={Terms} />
+    <Stack.Screen name="AllFeedBackScreen" component={AllFeedBackScreen} />
   </Stack.Navigator>
 );
 
@@ -107,6 +110,7 @@ const BookingStack = () => (
     <Stack.Screen name="ReviewScreen" component={ReviewScreen} />
     <Stack.Screen name="WorkspaceDetail" component={WorkspaceDetail} />
     <Stack.Screen name="Checkout" component={Checkout} />
+    <Stack.Screen name="FeedbackScreen" component={FeedbackScreen} />
   </Stack.Navigator>
 );
 
@@ -123,9 +127,9 @@ const getScreensWithHiddenTabBar = () => [
   // Search Stack
   "WorkspaceDetail", "AllReview", "Checkout", 
   // Booking Stack
-  "BookingDetail", "ReviewScreen", "WorkspaceDetail", "Checkout",
+  "BookingDetail", "ReviewScreen", "WorkspaceDetail", "Checkout", "FeedbackScreen",
   // Profile Stack
-  "ProfileDetail", "YourReview", "Wallet", "Terms",
+  "ProfileDetail", "YourReview", "Wallet", "Terms", "AllFeedBackScreen",
 ];
 
 const TabNavigator = () => {

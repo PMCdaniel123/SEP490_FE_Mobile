@@ -7,7 +7,6 @@ import {
   Image,
   StyleSheet,
   ActivityIndicator,
-  RefreshControl,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
@@ -23,31 +22,24 @@ const formatCurrency = (value) => {
 const HighRatedSpaces = () => {
   const [highRatedSpaces, setHighRatedSpaces] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation();
 
-  const fetchHighRatedSpaces = async () => {
-    try {
-      const response = await axios.get(
-        "https://workhive.info.vn:8443/users/searchbyrate"
-      );
-      setHighRatedSpaces(response.data.workspaces || []);
-    } catch (error) {
-      alert("Error fetching high-rated spaces:", error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchHighRatedSpaces = async () => {
+      try {
+        const response = await axios.get(
+          "https://workhive.info.vn:8443/users/searchbyrate"
+        );
+        setHighRatedSpaces(response.data.workspaces || []);
+      } catch (error) {
+        alert("Error fetching high-rated spaces:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchHighRatedSpaces();
   }, []);
-
-  const onRefresh = () => {
-    setRefreshing(true);
-    fetchHighRatedSpaces();
-  };
 
   const renderSpaceItem = ({ item }) => (
     <TouchableOpacity
@@ -87,7 +79,7 @@ const HighRatedSpaces = () => {
     </TouchableOpacity>
   );
 
-  if (loading && !refreshing) {
+  if (loading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#835101" />
@@ -110,13 +102,6 @@ const HighRatedSpaces = () => {
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.listContainer}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            colors={["#835101"]}
-          />
-        }
       />
     </View>
   );

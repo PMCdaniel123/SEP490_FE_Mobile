@@ -327,7 +327,16 @@ const BookingDetailScreen = ({ route }) => {
 
         {/* Rebooking Button */}
         {bookingData.booking_Status === "Success" && (
-          <TouchableOpacity style={styles.rebookButton}>
+          <TouchableOpacity 
+            style={styles.rebookButton}
+            onPress={() => {
+              // Navigate to the Home stack first, then to WorkspaceDetail
+              navigation.navigate("Trang chủ", { 
+                screen: "WorkspaceDetail", 
+                params: { id: bookingData.workspace_Id }
+              });
+            }}
+          >
             <Text style={styles.rebookButtonText}>Đặt lại</Text>
           </TouchableOpacity>
         )}

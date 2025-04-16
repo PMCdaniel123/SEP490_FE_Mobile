@@ -325,6 +325,21 @@ const BookingDetailScreen = ({ route }) => {
             </TouchableOpacity>
           )}
 
+        {/* Contact Button */}
+        {bookingData.booking_Status === "Success" && (
+          <TouchableOpacity
+            style={styles.contactButton}
+            onPress={() => 
+              navigation.navigate("FeedbackScreen", {
+                bookingId: bookingData.booking_Id,
+                workspaceName: bookingData.workspace_Name,
+              })
+            }
+          >
+            <Text style={styles.contactButtonText}>Liên hệ</Text>
+          </TouchableOpacity>
+        )}
+
         {/* Rebooking Button */}
         {bookingData.booking_Status === "Success" && (
           <TouchableOpacity 
@@ -716,6 +731,21 @@ const styles = StyleSheet.create({
   },
   reviewButtonText: {
     color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  contactButton: {
+    backgroundColor: "#FFFFFF",
+    marginHorizontal: 15,
+    marginTop: 10,
+    padding: 15,
+    borderRadius: 8,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#835101",
+  },
+  contactButtonText: {
+    color: "#835101",
     fontSize: 16,
     fontWeight: "600",
   },

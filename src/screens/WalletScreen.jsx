@@ -11,13 +11,12 @@ import {
   Modal,
   Image,
   Alert,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import Icon from "react-native-vector-icons/MaterialIcons";
-import FontAwesome from "react-native-vector-icons/FontAwesome";
-import { useNavigation } from "@react-navigation/native";
-import axios from "axios";
-import { AuthContext } from "../contexts/AuthContext";
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
+import { AuthContext } from '../contexts/AuthContext';
 
 const WalletScreen = () => {
   const navigation = useNavigation();
@@ -318,7 +317,7 @@ const WalletScreen = () => {
         <ScrollView style={styles.content}>
           <View style={styles.balanceCard}>
             <View style={styles.balanceHeader}>
-              <FontAwesome name="wallet" size={24} color="#835101" />
+              <Icon name="wallet" size={24} color="#835101" />
               <Text style={styles.balanceTitle}>Số dư ví</Text>
             </View>
             <Text style={styles.balanceAmount}>{formatCurrency(balance)}</Text>

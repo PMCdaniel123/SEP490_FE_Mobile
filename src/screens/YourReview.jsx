@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { AuthContext } from "../contexts/AuthContext";
+import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import ImageViewer from "react-native-image-zoom-viewer";
 import FilterModal from "../components/review/FilterModal";
@@ -20,6 +21,7 @@ import ReviewItem from "../components/review/ReviewItem";
 import EditReviewModal from "../components/review/EditReviewModal";
 
 const YourReviewScreen = () => {
+  const navigation = useNavigation();
   const { userData, userToken } = useContext(AuthContext);
   const [reviews, setReviews] = useState([]);
   const [filteredReviews, setFilteredReviews] = useState([]);
@@ -257,6 +259,12 @@ const YourReviewScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
+        <TouchableOpacity 
+          style={styles.backButton} 
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#000" />
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Đánh giá của bạn</Text>
         <TouchableOpacity
           style={styles.filterButton}
@@ -350,6 +358,14 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "600",
     color: "#000",
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#F5F7FA",
+    alignItems: "center",
+    justifyContent: "center",
   },
   filterButton: {
     width: 40,

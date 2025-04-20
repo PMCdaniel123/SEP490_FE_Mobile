@@ -13,6 +13,7 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import HighRatedSpaces from "../components/HighRatedSpaces";
 import Recommendations from "../components/Recommendations";
 import SpaceNearYou from "../components/SpaceNearYou";
+import TopBrands from "../components/TopBrands";
 import { useNavigation } from "@react-navigation/native";
 import { AuthContext } from "../contexts/AuthContext";
 import axios from "axios";
@@ -60,6 +61,7 @@ const HomeScreen = () => {
   // Data for our FlatList sections
   const sections = [
     { id: "highRated", component: HighRatedSpaces },
+    { id: "topBrands", component: TopBrands },
     { id: "recommendations", component: Recommendations },
     { id: "nearYou", component: SpaceNearYou },
   ];
@@ -96,9 +98,9 @@ const HomeScreen = () => {
           </View>
         </View>
         <View style={styles.headerIcons}>
-          <TouchableOpacity style={styles.iconButton}>
+          {/* <TouchableOpacity style={styles.iconButton}>
             <Icon name="search" size={24} color="#000" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity
             style={styles.iconButton}
             onPress={() => navigation.navigate("Notification")}

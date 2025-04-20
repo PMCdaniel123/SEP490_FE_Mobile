@@ -31,6 +31,9 @@ import AllReview from "./src/screens/AllReview";
 import SearchScreen from "./src/screens/SearchScreen";
 import WalletScreen from "./src/screens/WalletScreen";
 import FeedbackScreen from "./src/screens/FeedbackScreen";
+import AllHighRatedSpaces from "./src/screens/AllHighRatedSpaces";
+import AllOwners from "./src/screens/AllOwners";
+import OwnerDetail from "./src/screens/OwnerDetail";
 
 import * as Linking from "expo-linking";
 import SuccessScreen from "./src/screens/SuccessScreen";
@@ -88,9 +91,12 @@ const HomeStack = () => (
     <Stack.Screen name="AllReview" component={AllReview} />
     <Stack.Screen name="Notification" component={NotificationScreen} />
     <Stack.Screen name="WorkSpaces" component={WorkSpaces} />
+    <Stack.Screen name="AllHighRatedSpaces" component={AllHighRatedSpaces} />
+    <Stack.Screen name="AllOwners" component={AllOwners} />
     <Stack.Screen name="Checkout" component={Checkout} />
     <Stack.Screen name="SuccessPage" component={SuccessScreen} />
     <Stack.Screen name="FailPage" component={FailScreen} />
+    <Stack.Screen name="OwnerDetail" component={OwnerDetail} />
   </Stack.Navigator>
 );
 
@@ -100,6 +106,7 @@ const SearchStack = () => (
     <Stack.Screen name="WorkspaceDetail" component={WorkspaceDetail} />
     <Stack.Screen name="AllReview" component={AllReview} />
     <Stack.Screen name="Checkout" component={Checkout} />
+    <Stack.Screen name="OwnerDetail" component={OwnerDetail} />
   </Stack.Navigator>
 );
 
@@ -111,6 +118,7 @@ const BookingStack = () => (
     <Stack.Screen name="WorkspaceDetail" component={WorkspaceDetail} />
     <Stack.Screen name="Checkout" component={Checkout} />
     <Stack.Screen name="FeedbackScreen" component={FeedbackScreen} />
+    <Stack.Screen name="OwnerDetail" component={OwnerDetail} />
   </Stack.Navigator>
 );
 
@@ -123,9 +131,9 @@ const AuthScreens = () => (
 
 const getScreensWithHiddenTabBar = () => [
   // Home Stack
-  "WorkspaceDetail", "AllReview", "Notification", "WorkSpaces", "Checkout", "SuccessPage", "FailPage",
+  "WorkspaceDetail", "AllReview", "Notification", "WorkSpaces", "Checkout", "SuccessPage", "FailPage", "AllHighRatedSpaces", "AllOwners",
   // Search Stack
-  "WorkspaceDetail", "AllReview", "Checkout", 
+  "WorkspaceDetail", "AllReview", "Checkout", "OwnerDetail",
   // Booking Stack
   "BookingDetail", "ReviewScreen", "WorkspaceDetail", "Checkout", "FeedbackScreen",
   // Profile Stack

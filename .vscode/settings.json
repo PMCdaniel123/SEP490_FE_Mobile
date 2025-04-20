@@ -20,6 +20,8 @@
         "checkOut",
         "Terms Screen",
         "cancelBooking",
-        "userFeedback"
+        "userFeedback",
+        "ownerScreen",
+        "topBrand"
     ]
 }

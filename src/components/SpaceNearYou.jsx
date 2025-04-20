@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
   },
   listItemImage: {
     width: 100,
-    height: 100,
+    height: 120,
     resizeMode: "cover",
   },
   listItemInfo: {

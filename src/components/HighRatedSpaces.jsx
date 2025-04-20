@@ -41,6 +41,10 @@ const HighRatedSpaces = () => {
     fetchHighRatedSpaces();
   }, []);
 
+  const handleViewAll = () => {
+    navigation.navigate("AllHighRatedSpaces");
+  };
+
   const renderSpaceItem = ({ item }) => (
     <TouchableOpacity
       style={styles.spaceCard}
@@ -91,7 +95,7 @@ const HighRatedSpaces = () => {
     <View style={styles.sectionContainer}>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Không gian được đánh giá cao</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={handleViewAll}>
           <Text style={styles.seeAllText}>Xem tất cả</Text>
         </TouchableOpacity>
       </View>

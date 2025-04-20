@@ -141,7 +141,7 @@ const Recommendations = () => {
   return (
     <View style={styles.sectionContainer}>
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Đề xuất dành cho bạn</Text>
+        <Text style={styles.sectionTitle}>Tất cả các không gian</Text>
         <TouchableOpacity onPress={() => navigation.navigate("WorkSpaces")}>
           <Text style={styles.seeAllText}>Xem tất cả</Text>
         </TouchableOpacity>
@@ -172,7 +172,7 @@ const Recommendations = () => {
         />
       ) : (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>Không có không gian nào phù hợp</Text>
+          <Text style={styles.emptyText}>Không có dữ liệu</Text>
         </View>
       )}
     </View>
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: 110,
-    height: 110,
+    height: 120,
   },
   listItemImage: {
     width: "100%",

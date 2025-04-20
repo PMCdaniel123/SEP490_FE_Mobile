@@ -31,6 +31,7 @@ import AllReview from "./src/screens/AllReview";
 import SearchScreen from "./src/screens/SearchScreen";
 import WalletScreen from "./src/screens/WalletScreen";
 import FeedbackScreen from "./src/screens/FeedbackScreen";
+import AllHighRatedSpaces from "./src/screens/AllHighRatedSpaces";
 
 import * as Linking from "expo-linking";
 import SuccessScreen from "./src/screens/SuccessScreen";
@@ -88,6 +89,7 @@ const HomeStack = () => (
     <Stack.Screen name="AllReview" component={AllReview} />
     <Stack.Screen name="Notification" component={NotificationScreen} />
     <Stack.Screen name="WorkSpaces" component={WorkSpaces} />
+    <Stack.Screen name="AllHighRatedSpaces" component={AllHighRatedSpaces} />
     <Stack.Screen name="Checkout" component={Checkout} />
     <Stack.Screen name="SuccessPage" component={SuccessScreen} />
     <Stack.Screen name="FailPage" component={FailScreen} />
@@ -123,7 +125,7 @@ const AuthScreens = () => (
 
 const getScreensWithHiddenTabBar = () => [
   // Home Stack
-  "WorkspaceDetail", "AllReview", "Notification", "WorkSpaces", "Checkout", "SuccessPage", "FailPage",
+  "WorkspaceDetail", "AllReview", "Notification", "WorkSpaces", "Checkout", "SuccessPage", "FailPage", "AllHighRatedSpaces",
   // Search Stack
   "WorkspaceDetail", "AllReview", "Checkout", 
   // Booking Stack

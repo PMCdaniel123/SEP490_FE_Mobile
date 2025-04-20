@@ -96,9 +96,9 @@ const HomeScreen = () => {
           </View>
         </View>
         <View style={styles.headerIcons}>
-          <TouchableOpacity style={styles.iconButton}>
+          {/* <TouchableOpacity style={styles.iconButton}>
             <Icon name="search" size={24} color="#000" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity
             style={styles.iconButton}
             onPress={() => navigation.navigate("Notification")}

@@ -235,7 +235,10 @@ const WorkspaceDetail = ({ route }) => {
             <Text style={styles.address}>{workspaceDetail?.address}</Text>
           </View>
 
-          <TouchableOpacity style={styles.userInfo}>
+          <TouchableOpacity 
+            style={styles.userInfo}
+            onPress={() => navigation.navigate("OwnerDetail", { ownerId: workspaceDetail?.ownerId })}
+          >
             <Image
               source={require("../../assets/images/workspace2.jpg")}
               style={styles.avatar}
@@ -246,12 +249,12 @@ const WorkspaceDetail = ({ route }) => {
               </Text>
               <Text style={styles.hostLabel}>Chủ không gian</Text>
             </View>
-            {/* <MaterialIcons
+            <MaterialIcons
             name="chevron-right"
             size={24}
             color="#666"
             style={styles.chevron}
-          /> */}
+            />
           </TouchableOpacity>
         </Surface>
 

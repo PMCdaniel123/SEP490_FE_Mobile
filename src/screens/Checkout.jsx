@@ -507,7 +507,7 @@ function Checkout() {
             </View>
           )}
         </View>
-        <View style={styles.gap10SectionContainer}>
+        <View className={styles.gap10SectionContainer}>
           <View style={styles.rowBetwween}>
             <Text style={styles.boldText}>Tạm tính:</Text>
             <Text>{formatCurrency(total)}</Text>
@@ -606,8 +606,12 @@ function Checkout() {
                     borderColor: promotion?.code === item.code ? "#835101" : "",
                   }}
                   onPress={() => {
-                    setPromotion({ code: item.code, discount: item.discount });
-                    setModalVisible(false);
+                    if (item.workspaceID) {
+                      navigation.navigate("WorkspaceDetail", { id: item.workspaceID });
+                    } else {
+                      setPromotion({ code: item.code, discount: item.discount });
+                      setModalVisible(false);
+                    }
                   }}
                 >
                   <View style={styles.promotionCard}>

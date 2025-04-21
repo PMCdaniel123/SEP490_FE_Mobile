@@ -516,7 +516,7 @@ function Checkout() {
             <Text style={styles.boldText}>Mã khuyến mại:</Text>
             <Text>
               {promotion
-                ? promotion.code + " - " + promotion.discount + "%"
+                ? "- " + formatCurrency((promotion.discount / 100) * total)
                 : "Không áp dụng"}
             </Text>
           </View>
@@ -606,12 +606,11 @@ function Checkout() {
                     borderColor: promotion?.code === item.code ? "#835101" : "",
                   }}
                   onPress={() => {
-                    if (item.workspaceID) {
-                      navigation.navigate("WorkspaceDetail", { id: item.workspaceID });
-                    } else {
-                      setPromotion({ code: item.code, discount: item.discount });
-                      setModalVisible(false);
-                    }
+                    setPromotion({
+                      code: item.code,
+                      discount: item.discount,
+                    });
+                    setModalVisible(false);
                   }}
                 >
                   <View style={styles.promotionCard}>

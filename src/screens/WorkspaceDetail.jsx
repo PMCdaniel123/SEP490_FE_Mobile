@@ -41,8 +41,6 @@ const WorkspaceDetail = ({ route }) => {
   const { amenityList, beverageList, workspaceId, price } = state;
   const [numberItems, setNumberItems] = useState(0);
 
-  console.log(workspaceId, price);
-
   const [scrollY] = useState(new Animated.Value(0));
 
   const headerHeight = scrollY.interpolate({

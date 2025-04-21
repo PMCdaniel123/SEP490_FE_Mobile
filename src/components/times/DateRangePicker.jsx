@@ -98,6 +98,9 @@ const DateRangePicker = ({ openTime, closeTime, workspaceId }) => {
     });
 
     setMarkedDates((prev) => ({ ...prev, ...disabledDates }));
+  }, [timeList]);
+
+  useEffect(() => {
     dispatch({ type: "CLEAR_WORKSPACE_TIME" });
     if (openTime && closeTime && startDate && endDate) {
       dispatch({
@@ -112,7 +115,7 @@ const DateRangePicker = ({ openTime, closeTime, workspaceId }) => {
       });
       dispatch({ type: "CALCULATE_TOTAL" });
     }
-  }, [openTime, closeTime, startDate, endDate, dispatch, timeList]);
+  }, [openTime, closeTime, startDate, endDate, dispatch]);
 
   const handleDayPress = (day) => {
     const selectedDate = day.dateString;

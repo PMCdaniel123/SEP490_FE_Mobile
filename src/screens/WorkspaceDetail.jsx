@@ -38,8 +38,10 @@ const WorkspaceDetail = ({ route }) => {
   const [mapRegion, setMapRegion] = useState(null);
   const navigation = useNavigation();
   const { state, dispatch } = useCart();
-  const { amenityList, beverageList } = state;
+  const { amenityList, beverageList, workspaceId, price } = state;
   const [numberItems, setNumberItems] = useState(0);
+
+  console.log(workspaceId, price);
 
   const [scrollY] = useState(new Animated.Value(0));
 
@@ -127,20 +129,20 @@ const WorkspaceDetail = ({ route }) => {
 
   const goToHome = () => {
     const state = navigation.getState();
-    
+
     // Find which tab/stack we're currently in
     const currentRoute = state.routes[0];
     const currentRouteName = currentRoute.name;
-    
+
     // If we're in BookingStack, reset it before navigating away
     if (currentRouteName === "Đặt chỗ") {
       // Reset the BookingStack to its initial route
       navigation.reset({
         index: 0,
-        routes: [{ name: 'YourBooking' }],
+        routes: [{ name: "YourBooking" }],
       });
     }
-    
+
     // Navigate to home tab
     navigation.navigate("Trang chủ", { screen: "HomeMain" });
   };
@@ -235,9 +237,13 @@ const WorkspaceDetail = ({ route }) => {
             <Text style={styles.address}>{workspaceDetail?.address}</Text>
           </View>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.userInfo}
-            onPress={() => navigation.navigate("OwnerDetail", { ownerId: workspaceDetail?.ownerId })}
+            onPress={() =>
+              navigation.navigate("OwnerDetail", {
+                ownerId: workspaceDetail?.ownerId,
+              })
+            }
           >
             <Image
               source={require("../../assets/images/workspace2.jpg")}
@@ -250,10 +256,10 @@ const WorkspaceDetail = ({ route }) => {
               <Text style={styles.hostLabel}>Chủ không gian</Text>
             </View>
             <MaterialIcons
-            name="chevron-right"
-            size={24}
-            color="#666"
-            style={styles.chevron}
+              name="chevron-right"
+              size={24}
+              color="#666"
+              style={styles.chevron}
             />
           </TouchableOpacity>
         </Surface>

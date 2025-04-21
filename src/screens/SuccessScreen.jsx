@@ -17,26 +17,6 @@ const SuccessScreen = () => {
     navigation.navigate("Đặt chỗ", { screen: "YourBooking" });
   };
 
-  useEffect(() => {
-    if (OrderCode !== null && BookingId !== null) {
-      const updateWorkspaceTimeStatus = async () => {
-        try {
-          await axios.put(
-            `https://workhive.info.vn:8443/users/booking/updatetimestatus`,
-            {
-              bookingId: BookingId,
-              orderCode: OrderCode,
-            }
-          );
-        } catch (error) {
-          toast("Error updating workspace time status:", error);
-        }
-      };
-
-      updateWorkspaceTimeStatus();
-    }
-  }, [OrderCode, BookingId]);
-
   return (
     <View style={styles.container}>
       <View style={styles.successCard}>

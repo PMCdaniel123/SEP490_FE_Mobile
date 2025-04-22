@@ -189,12 +189,13 @@ const WalletScreen = () => {
               date: tx.created_At,
               paymentMethod: "Chuyển khoản ngân hàng",
               description: tx.description,
+              afterTransactionAmount: tx.afterTransactionAmount,
               status:
-                tx.status === "PAID"
+                tx.status === "PAID" || tx.status === "REFUND" || tx.status === "Active"
                   ? "Hoàn thành"
-                  : tx.status === "Active"
-                    ? "Hoàn tiền"
-                    : "Thất bại",
+                  : tx.status.toLowerCase().includes("fail")
+                    ? "Thất bại"
+                    : "Đang xử lý",
             };
           });
         setTransactions(formattedTransactions);

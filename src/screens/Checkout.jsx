@@ -284,10 +284,11 @@ function Checkout() {
         navigation.navigate("FailPage", {
           OrderCode: bookingInfo.orderCode,
           BookingId: bookingInfo.bookingId,
+          workspaceId: workspaceId
         });
       }
     },
-    [navigation, bookingInfo]
+    [navigation, bookingInfo, workspaceId]
   );
 
   if (loading) {
@@ -350,6 +351,7 @@ function Checkout() {
             navigation.navigate("FailPage", {
               OrderCode: bookingInfo.orderCode,
               BookingId: bookingInfo.bookingId,
+              workspaceId: workspaceId
             });
           }
         }}
@@ -361,6 +363,7 @@ function Checkout() {
             navigation.navigate("FailPage", {
               OrderCode: bookingInfo.orderCode,
               BookingId: bookingInfo.bookingId,
+              workspaceId: workspaceId
             });
             return false;
           }
@@ -373,6 +376,7 @@ function Checkout() {
             navigation.navigate("FailPage", {
               OrderCode: bookingInfo.orderCode,
               BookingId: bookingInfo.bookingId,
+              workspaceId: workspaceId
             });
             return false;
           }
@@ -443,6 +447,7 @@ function Checkout() {
               navigation.navigate("FailPage", {
                 OrderCode: bookingInfo.orderCode,
                 BookingId: bookingInfo.bookingId,
+                workspaceId: workspaceId
               });
             }
           } catch (error) {

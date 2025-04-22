@@ -12,14 +12,18 @@ import {
   Image,
   Alert,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import axios from 'axios';
 import { AuthContext } from '../contexts/AuthContext';
+import { WebView } from 'react-native-webview';
+import * as Linking from 'expo-linking';
 
 const WalletScreen = () => {
   const navigation = useNavigation();
+  const route = useRoute();
   const { userData, userToken } = useContext(AuthContext);
   const [balance, setBalance] = useState(0);
   const [amount, setAmount] = useState("");
@@ -30,8 +34,23 @@ const WalletScreen = () => {
   const [activeTab, setActiveTab] = useState("wallet");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
+  const [paymentWebViewVisible, setPaymentWebViewVisible] = useState(false);
+  const [paymentUrl, setPaymentUrl] = useState("");
+  const [orderCode, setOrderCode] = useState(null);
+  const [customerWalletId, setCustomerWalletId] = useState(null);
 
   const predefinedAmounts = [100000, 200000, 500000, 1000000];
+
+  // Refresh wallet when coming back to this screen with a refresh param
+  useEffect(() => {
+    if (route.params?.refresh) {
+      const refreshData = async () => {
+        await fetchBalance();
+        await fetchTransactions();
+      };
+      refreshData();
+    }
+  }, [route.params]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -41,6 +60,65 @@ const WalletScreen = () => {
 
     loadData();
   }, [userData, userToken, fetchBalance, fetchTransactions]);
+
+  // Handle deep links for payment callbacks
+  useEffect(() => {
+    const subscription = Linking.addEventListener('url', handleDeepLink);
+    return () => {
+      subscription.remove();
+    };
+  }, [handleDeepLink]);
+
+  const handleDeepLink = useCallback(async (event) => {
+    const { url } = event;
+    if (!url) return;
+
+    const lowerUrl = url.toLowerCase();
+
+    // Success case
+    if (lowerUrl.includes('mobile://success') || 
+        lowerUrl.includes('status=success') || 
+        lowerUrl.includes('status=paid')) {
+      
+      try {
+        const storedAmount = await AsyncStorage.getItem("amount");
+        setPaymentWebViewVisible(false);
+        
+        Alert.alert(
+          "Nạp tiền thành công",
+          `Bạn đã nạp thành công ${storedAmount} vào ví WorkHive`,
+          [{ text: "OK", onPress: () => {
+            fetchBalance();
+            fetchTransactions();
+          }}]
+        );
+        
+        await AsyncStorage.removeItem("customerWalletId");
+        await AsyncStorage.removeItem("orderCode");
+        await AsyncStorage.removeItem("amount");
+      } catch (error) {
+        console.error("Error handling success deeplink:", error);
+      }
+    }
+    
+    // Cancel/Failure case
+    if (lowerUrl.includes('mobile://cancel') || 
+        lowerUrl.includes('status=cancel') || 
+        lowerUrl.includes('cancel=true')) {
+      
+      setPaymentWebViewVisible(false);
+      
+      // Navigate to fail screen with wallet parameters
+      navigation.navigate("Trang chủ", {
+        screen: "FailPage",
+        params: {
+          source: 'wallet',
+          customerWalletId,
+          orderCode
+        }
+      });
+    }
+  }, [navigation, fetchBalance, fetchTransactions, customerWalletId, orderCode]);
 
   const fetchBalance = useCallback(async () => {
     if (!userData || !userData.sub) {
@@ -126,6 +204,36 @@ const WalletScreen = () => {
     setIsModalOpen(true);
   };
 
+  const handleWebViewNavigationStateChange = (newNavState) => {
+    const { url } = newNavState;
+    
+    // Handle mobile:// schemes
+    if (url && url.startsWith('mobile://')) {
+      handleDeepLink({ url });
+      return;
+    }
+    
+    // Success cases
+    if (url && (
+      url.toLowerCase().includes('success=true') ||
+      url.toLowerCase().includes('status=success') ||
+      url.toLowerCase().includes('status=paid')
+    )) {
+      handleDeepLink({ url });
+      return;
+    }
+    
+    // Cancel/Failure cases
+    if (url && (
+      url.toLowerCase().includes('cancel') ||
+      url.toLowerCase().includes('status=cancel') ||
+      url.toLowerCase().includes('fail')
+    )) {
+      handleDeepLink({ url });
+      return;
+    }
+  };
+
   const confirmDeposit = async () => {
     if (!selectedPaymentMethod) {
       Alert.alert("Lỗi", "Vui lòng chọn phương thức thanh toán");
@@ -133,24 +241,52 @@ const WalletScreen = () => {
     }
 
     setIsModalOpen(false);
+    setLoading(true);
 
-    // Simulate successful deposit for demo purposes
-    Alert.alert(
-      "Nạp tiền thành công",
-      `Bạn đã nạp thành công ${formatCurrency(rawAmount)} vào ví WorkHive`,
-      [
+    try {
+      // Create a properly formatted request payload with explicit string conversion of amount
+      const requestPayload = {
+        userId: Number(userData.sub),
+        amount: rawAmount.toString()  // Ensure amount is a string
+      };
+
+      console.log("Sending request with payload:", JSON.stringify(requestPayload));
+
+      const response = await axios.post(
+        `https://workhive.info.vn:8443/users/wallet/userdepositformobile`,
+        requestPayload,
         {
-          text: "OK",
-          onPress: () => {
-            // Refresh balance and transactions
-            fetchBalance();
-            fetchTransactions();
-            setAmount("");
-            setRawAmount(0);
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+            "Content-Type": "application/json",
           },
-        },
-      ]
-    );
+        }
+      );
+
+      console.log("API response received:", JSON.stringify(response.data));
+
+      if (response.data && response.data.checkoutUrl) {
+        await AsyncStorage.setItem("customerWalletId", String(response.data.customerWalletId || ""));
+        await AsyncStorage.setItem("orderCode", String(response.data.orderCode || ""));
+        await AsyncStorage.setItem("amount", String(rawAmount));
+        
+        // Set the state values for direct use in this component
+        setCustomerWalletId(response.data.customerWalletId);
+        setOrderCode(response.data.orderCode);
+        setPaymentUrl(response.data.checkoutUrl);
+        setPaymentWebViewVisible(true);
+      } else {
+        throw new Error("Phản hồi không hợp lệ từ máy chủ");
+      }
+    } catch (error) {
+      console.error("Lỗi khi nạp tiền:", error.response ? error.response.data : error.message);
+      Alert.alert(
+        "Lỗi",
+        "Có lỗi xảy ra khi nạp tiền. Vui lòng thử lại sau."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const formatCurrency = (value) => {
@@ -264,9 +400,143 @@ const WalletScreen = () => {
       </SafeAreaView>
     );
   }
+  
+  // Payment WebView Modal
+  const renderPaymentWebViewModal = () => (
+    <Modal
+      visible={paymentWebViewVisible}
+      animationType="slide"
+      onRequestClose={() => {
+        Alert.alert(
+          'Xác nhận hủy',
+          'Bạn có chắc chắn muốn hủy giao dịch này?',
+          [
+            { text: 'Không', style: 'cancel' },
+            { 
+              text: 'Có', 
+              onPress: () => {
+                setPaymentWebViewVisible(false);
+                navigation.navigate("Trang chủ", {
+                  screen: "FailPage",
+                  params: {
+                    source: 'wallet',
+                    customerWalletId,
+                    orderCode
+                  }
+                });
+              }
+            },
+          ]
+        );
+      }}
+    >
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity 
+            style={styles.backButton} 
+            onPress={() => {
+              Alert.alert(
+                'Xác nhận hủy',
+                'Bạn có chắc chắn muốn hủy giao dịch này?',
+                [
+                  { text: 'Không', style: 'cancel' },
+                  { 
+                    text: 'Có', 
+                    onPress: () => {
+                      setPaymentWebViewVisible(false);
+                      navigation.navigate("Trang chủ", {
+                        screen: "FailPage",
+                        params: {
+                          source: 'wallet',
+                          customerWalletId,
+                          orderCode
+                        }
+                      });
+                    }
+                  },
+                ]
+              );
+            }}
+          >
+            <Icon name="arrow-back" size={24} color="#000" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Thanh toán</Text>
+          <View style={{ width: 40 }} />
+        </View>
+        
+        {loading && (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#835101" />
+            <Text style={styles.loadingText}>Đang tải trang thanh toán...</Text>
+          </View>
+        )}
+        
+        <WebView
+          source={{ uri: paymentUrl }}
+          onNavigationStateChange={handleWebViewNavigationStateChange}
+          onLoadStart={() => setLoading(true)}
+          onLoad={() => setLoading(false)}
+          originWhitelist={['*', 'http://*', 'https://*', 'mobile://*']}
+          onShouldStartLoadWithRequest={(request) => {
+            // Handle mobile:// schemes explicitly
+            if (request.url.startsWith('mobile://')) {
+              // Process the URL directly here
+              handleDeepLink({ url: request.url });
+              // Return false to prevent WebView from trying to load this URL
+              return false;
+            }
+            // Allow all other URLs to load
+            return true;
+          }}
+          injectedJavaScript={`
+            (function() {
+              // Intercept all link clicks to handle mobile:// schemes
+              document.addEventListener('click', function(e) {
+                const anchor = e.target.closest('a');
+                if (anchor && anchor.href && anchor.href.startsWith('mobile://')) {
+                  e.preventDefault();
+                  window.ReactNativeWebView.postMessage(JSON.stringify({
+                    type: 'url_scheme',
+                    url: anchor.href
+                  }));
+                  return false;
+                }
+              }, true);
+
+              // Override window.open for mobile:// URLs
+              (function() {
+                const originalOpen = window.open;
+                window.open = function(url) {
+                  if (url && url.startsWith('mobile://')) {
+                    window.ReactNativeWebView.postMessage(JSON.stringify({
+                      type: 'url_scheme',
+                      url: url
+                    }));
+                    return true;
+                  }
+                  return originalOpen.apply(this, arguments);
+                };
+              })();
+            })();
+          `}
+          onMessage={(event) => {
+            try {
+              const data = JSON.parse(event.nativeEvent.data);
+              if (data.type === 'url_scheme' && data.url) {
+                handleDeepLink({ url: data.url });
+              }
+            } catch (error) {
+              console.error('WebView message parse error:', error);
+            }
+          }}
+        />
+      </SafeAreaView>
+    </Modal>
+  );
 
   return (
     <SafeAreaView style={styles.container}>
+      {renderPaymentWebViewModal()}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
@@ -447,7 +717,7 @@ const WalletScreen = () => {
           )}
         </View>
       )}
-
+{/* phuong thuc thanh toan */}
       <Modal
         visible={isModalOpen}
         transparent={true}
@@ -488,21 +758,6 @@ const WalletScreen = () => {
                 <Text style={styles.paymentMethodText}>
                   Chuyển khoản ngân hàng
                 </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.paymentMethodButton,
-                  selectedPaymentMethod === "Ví điện tử" &&
-                    styles.selectedPaymentMethod,
-                ]}
-                onPress={() => setSelectedPaymentMethod("Ví điện tử")}
-              >
-                <Image
-                  source={require("../../assets/images/zalopay.png")}
-                  style={styles.paymentMethodIcon}
-                />
-                <Text style={styles.paymentMethodText}>Ví điện tử</Text>
               </TouchableOpacity>
             </View>
 
@@ -843,12 +1098,12 @@ const styles = StyleSheet.create({
     color: "#835101",
   },
   paymentMethodsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+   
+
     marginBottom: 24,
   },
   paymentMethodButton: {
-    width: "48%",
+    width: "100%",
     borderWidth: 1,
     borderColor: "#ddd",
     borderRadius: 8,
@@ -860,7 +1115,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f8f1e7",
   },
   paymentMethodIcon: {
-    width: 60,
+    width: 190,
     height: 60,
     marginBottom: 8,
   },

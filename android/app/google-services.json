@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "522093403941",
+    "project_id": "workhive-5e0f7",
+    "storage_bucket": "workhive-5e0f7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:522093403941:android:700c4e317eb4f63a6ec4cc",
+        "android_client_info": {
+          "package_name": "com.cuongpham.x251203.mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD7UuEJOyG0IcnDtiofTygI2ytDjBGm3P0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -5,11 +5,11 @@
     "slug": "mobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/images/workhive.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/images/workhive.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -18,12 +18,19 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/images/workhive.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.cuongpham.x251203.mobile",
+      "googleServicesFile": "./android/app/google-services.json"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/images/workhive.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "72170c6f-9967-43a5-83ec-aae476b02c3b"
+      }
     }
   }
 }

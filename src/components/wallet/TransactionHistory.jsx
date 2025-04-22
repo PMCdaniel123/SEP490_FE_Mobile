@@ -3,32 +3,96 @@ import { View, Text, StyleSheet, FlatList } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const TransactionItem = ({ item, formatCurrency }) => {
-  const isIncoming = item.type === "deposit" || item.type === "refund";
+  // Determine transaction type from description
+  const getTransactionTypeAndIcon = () => {
+    const description = item.description?.toLowerCase() || "";
+    
+    if (description.includes("nạp tiền") || description.includes("deposit")) {
+      return {
+        icon: "arrow-downward",
+        color: "#4CAF50",
+        bgColor: "#E6F7ED",
+        text: "Nạp tiền"
+      };
+    } else if (description.includes("hoàn tiền") || description.includes("refund")) {
+      return {
+        icon: "replay",
+        color: "#FF9800",
+        bgColor: "#FFF3E0",
+        text: "Hoàn tiền"
+      };
+    } else if (description.includes("rút tiền") || description.includes("withdraw")) {
+      return {
+        icon: "arrow-upward",
+        color: "#2196F3",
+        bgColor: "#E3F2FD",
+        text: "Rút tiền"
+      };
+    } else {
+      return {
+        icon: "arrow-upward",
+        color: "#F44336",
+        bgColor: "#FFEBEE",
+        text: "Thanh toán"
+      };
+    }
+  };
+
+  // Format status based on API response
+  const getFormattedStatus = () => {
+    const status = item.status || "";
+    
+    if (status === "PAID" || status === "REFUND" || status === "Withdraw Success") {
+      return "Hoàn thành";
+    } else if (status.toLowerCase().includes("fail") || status.toLowerCase().includes("thất bại")) {
+      return "Thất bại";
+    } else {
+      return "Đang xử lý";
+    }
+  };
+
+  // Get status color like web version
+  const getStatusColor = () => {
+    const status = getFormattedStatus();
+    if (status === "Hoàn thành") {
+      return "#4CAF50"; // Green
+    } else if (status === "Đang xử lý") {
+      return "#2196F3"; // Blue
+    } else {
+      return "#F44336"; // Red
+    }
+  };
+
+  const transactionInfo = getTransactionTypeAndIcon();
+  const formattedStatus = getFormattedStatus();
+  const statusColor = getStatusColor();
+  
+  // Determine if this is an incoming transaction (adding money to wallet)
+  const isIncoming = transactionInfo.text === "Nạp tiền" || transactionInfo.text === "Hoàn tiền";
 
   return (
     <View style={styles.transactionItem}>
       <View
         style={[
           styles.transactionIcon,
-          { backgroundColor: isIncoming ? "#E6F7ED" : "#FFEBEE" },
+          { backgroundColor: transactionInfo.bgColor },
         ]}
       >
         <Icon
-          name={isIncoming ? "arrow-downward" : "arrow-upward"}
+          name={transactionInfo.icon}
           size={20}
-          color={isIncoming ? "#4CAF50" : "#F44336"}
+          color={transactionInfo.color}
         />
       </View>
       <View style={styles.transactionInfo}>
         <Text style={styles.transactionTitle}>
-          {item.type === "payment"
-            ? "Thanh toán"
-            : item.type === "refund"
-              ? "Hoàn tiền"
-              : "Nạp tiền"}
+          {transactionInfo.text}
+        </Text>
+        <Text style={styles.transactionDesc} numberOfLines={1}>
+          {item.description || "Giao dịch " + transactionInfo.text.toLowerCase()}
         </Text>
         <Text style={styles.transactionDate}>
-          {new Date(item.date).toLocaleDateString("vi-VN", {
+          {new Date(item.date || item.created_At).toLocaleDateString("vi-VN", {
             year: "numeric",
             month: "2-digit",
             day: "2-digit",
@@ -46,22 +110,25 @@ const TransactionItem = ({ item, formatCurrency }) => {
         >
           {isIncoming ? "+" : "-"} {formatCurrency(item.amount)}
         </Text>
+        {item.afterTransactionAmount !== undefined && (
+          <Text style={styles.balanceText}>
+            Số dư: {formatCurrency(item.afterTransactionAmount)}
+          </Text>
+        )}
         <View
           style={[
             styles.statusBadge,
-            {
-              backgroundColor:
-                item.status === "Hoàn thành" ? "#E6F7ED" : "#FFEBEE",
-            },
+            { backgroundColor: formattedStatus === "Hoàn thành" ? "#E6F7ED" : 
+                formattedStatus === "Đang xử lý" ? "#E3F2FD" : "#FFEBEE" },
           ]}
         >
           <Text
             style={[
               styles.statusText,
-              { color: item.status === "Hoàn thành" ? "#4CAF50" : "#F44336" },
+              { color: statusColor }
             ]}
           >
-            {item.status}
+            {formattedStatus}
           </Text>
         </View>
       </View>
@@ -118,11 +185,16 @@ const styles = StyleSheet.create({
   transactionTitle: {
     fontSize: 16,
     fontWeight: "500",
-    marginBottom: 4,
+    marginBottom: 2,
   },
-  transactionDate: {
+  transactionDesc: {
     fontSize: 14,
     color: "#666",
+    marginBottom: 2,
+  },
+  transactionDate: {
+    fontSize: 12,
+    color: "#888",
   },
   transactionAmount: {
     alignItems: "flex-end",
@@ -130,6 +202,11 @@ const styles = StyleSheet.create({
   amountText: {
     fontSize: 16,
     fontWeight: "600",
+    marginBottom: 2,
+  },
+  balanceText: {
+    fontSize: 12,
+    color: "#666",
     marginBottom: 4,
   },
   statusBadge: {

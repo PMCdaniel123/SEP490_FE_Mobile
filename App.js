@@ -20,6 +20,7 @@ import AllFeedBackScreen from "./src/screens/AllFeedBackScreen";
 // Context
 import { AuthContext, AuthProvider } from "./src/contexts/AuthContext";
 import RegisterScreen from "./src/screens/RegisterScreen";
+import ForgotPasswordScreen from "./src/screens/ForgotPasswordScreen";
 import WorkSpaces from "./src/screens/WorkSpaces";
 import { CartProvider } from "./src/contexts/CartContext";
 import Checkout from "./src/screens/Checkout";
@@ -126,6 +127,7 @@ const AuthScreens = () => (
   <AuthStack.Navigator screenOptions={{ headerShown: false }}>
     <AuthStack.Screen name="Login" component={LoginScreen} />
     <AuthStack.Screen name="Register" component={RegisterScreen} />
+    <AuthStack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
   </AuthStack.Navigator>
 );
 

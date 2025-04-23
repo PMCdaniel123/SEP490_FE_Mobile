@@ -62,7 +62,11 @@ const LoginScreen = ({ navigation }) => {
     
     if (result.success) {
     } else {
-      Alert.alert('Đăng nhập thất bại', result.message);
+      if (result.message === "Không tìm thấy người dùng") {
+        Alert.alert('Đăng nhập thất bại', 'Tài khoản, hoặc mật khẩu không đúng. Vui lòng kiểm tra lại thông tin đăng nhập hoặc đăng ký tài khoản mới');
+      } else {
+        Alert.alert('Đăng nhập thất bại', result.message);
+      }
     }
   };
 
@@ -130,7 +134,10 @@ const LoginScreen = ({ navigation }) => {
               </View>
             </View>
             
-            <TouchableOpacity style={styles.forgotPassword}>
+            <TouchableOpacity 
+              style={styles.forgotPassword}
+              onPress={() => navigation.navigate('ForgotPassword')}
+            >
               <Text style={styles.forgotPasswordText}>Quên mật khẩu?</Text>
             </TouchableOpacity>
             

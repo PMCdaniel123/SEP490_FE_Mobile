@@ -9,6 +9,7 @@ import {
   TextInput,
   Alert,
   ActivityIndicator,
+  Modal,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
@@ -26,6 +27,11 @@ const ProfileDetail = ({ route, navigation }) => {
   const [selectedMonth, setSelectedMonth] = useState(1);
   const [selectedYear, setSelectedYear] = useState(2000);
   const [loading, setLoading] = useState(false);
+  const [passwordModalVisible, setPasswordModalVisible] = useState(false);
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordLoading, setPasswordLoading] = useState(false);
 
   useEffect(() => {
     if (user.dateOfBirth) {
@@ -155,6 +161,56 @@ const ProfileDetail = ({ route, navigation }) => {
     }
   };
 
+  const handleChangePassword = async () => {
+
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      Alert.alert("Lỗi", "Vui lòng điền đầy đủ thông tin");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      Alert.alert("Lỗi", "Mật khẩu mới và xác nhận mật khẩu không khớp");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      Alert.alert("Lỗi", "Mật khẩu mới phải có ít nhất 6 ký tự");
+      return;
+    }
+
+    setPasswordLoading(true);
+    try {
+      const response = await axios.patch(
+        "https://workhive.info.vn:8443/users/updatepassword",
+        {
+          userId: userData.sub,
+          oldPassword: oldPassword,
+          newPassword: newPassword,
+          confirmPassword: confirmPassword
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setPasswordModalVisible(false);
+      
+      Alert.alert("Thành công", "Mật khẩu đã được cập nhật thành công");
+    } catch (error) {
+      console.error("Error updating password:", error);
+      const errorMessage = error.response?.data?.message || "Đã xảy ra lỗi khi cập nhật mật khẩu";
+      Alert.alert("Lỗi", errorMessage);
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -261,6 +317,86 @@ const ProfileDetail = ({ route, navigation }) => {
           )}
         </TouchableOpacity>
       )}
+
+      <TouchableOpacity 
+        style={styles.changePasswordButton}
+        onPress={() => setPasswordModalVisible(true)}
+      >
+        <Ionicons name="lock-closed" size={20} color="#fff" style={styles.passwordIcon} />
+        <Text style={styles.changePasswordText}>Đổi mật khẩu</Text>
+      </TouchableOpacity>
+
+      {/* Password Change Modal */}
+      <Modal
+        visible={passwordModalVisible}
+        transparent={true}
+        animationType="slide"
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Đổi mật khẩu</Text>
+            
+            <View style={styles.passwordInputContainer}>
+              <Text style={styles.passwordInputLabel}>Mật khẩu hiện tại</Text>
+              <TextInput
+                style={styles.passwordInput}
+                secureTextEntry
+                value={oldPassword}
+                onChangeText={setOldPassword}
+                placeholder="Nhập mật khẩu hiện tại"
+              />
+            </View>
+            
+            <View style={styles.passwordInputContainer}>
+              <Text style={styles.passwordInputLabel}>Mật khẩu mới</Text>
+              <TextInput
+                style={styles.passwordInput}
+                secureTextEntry
+                value={newPassword}
+                onChangeText={setNewPassword}
+                placeholder="Nhập mật khẩu mới (ít nhất 8 ký tự)"
+              />
+            </View>
+            
+            <View style={styles.passwordInputContainer}>
+              <Text style={styles.passwordInputLabel}>Xác nhận mật khẩu mới</Text>
+              <TextInput
+                style={styles.passwordInput}
+                secureTextEntry
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                placeholder="Xác nhận mật khẩu mới"
+              />
+            </View>
+            
+            <View style={styles.modalButtonContainer}>
+              <TouchableOpacity 
+                style={styles.cancelButton}
+                onPress={() => {
+                  setPasswordModalVisible(false);
+                  setOldPassword("");
+                  setNewPassword("");
+                  setConfirmPassword("");
+                }}
+              >
+                <Text style={styles.cancelButtonText}>Hủy</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={styles.confirmButton}
+                onPress={handleChangePassword}
+                disabled={passwordLoading}
+              >
+                {passwordLoading ? (
+                  <ActivityIndicator color="#fff" size="small" />
+                ) : (
+                  <Text style={styles.confirmButtonText}>Xác nhận</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       <CustomDatePicker
         isVisible={isDatePickerVisible}
@@ -400,6 +536,87 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   saveButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  changePasswordButton: {
+    backgroundColor: "#835101",
+    borderRadius: 10,
+    padding: 15,
+    margin: 20,
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+  changePasswordText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+    marginLeft: 10,
+  },
+  passwordIcon: {
+    marginRight: 10,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: "80%",
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 20,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  passwordInputContainer: {
+    marginBottom: 15,
+  },
+  passwordInputLabel: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 5,
+  },
+  passwordInput: {
+    fontSize: 16,
+    color: "#333",
+    borderBottomWidth: 1,
+    borderBottomColor: "#835101",
+    paddingBottom: 5,
+  },
+  modalButtonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 20,
+  },
+  cancelButton: {
+    backgroundColor: "#ccc",
+    borderRadius: 10,
+    padding: 10,
+    flex: 1,
+    alignItems: "center",
+    marginRight: 10,
+  },
+  cancelButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  confirmButton: {
+    backgroundColor: "#835101",
+    borderRadius: 10,
+    padding: 10,
+    flex: 1,
+    alignItems: "center",
+  },
+  confirmButtonText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",

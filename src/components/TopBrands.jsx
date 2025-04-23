@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
-import { MaterialCommunityIcons } from "@expo/vector-icons"; 
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import axios from "axios";
 
 const TopBrands = () => {
@@ -26,31 +26,26 @@ const TopBrands = () => {
         const response = await axios.get(
           "https://workhive.info.vn:8443/users/searchbyownername"
         );
-        
+
         const formattedData =
           response.data.workspaceOwnerByOwnerNameDTOs === null ||
           response.data.workspaceOwnerByOwnerNameDTOs === undefined
             ? []
             : response.data.workspaceOwnerByOwnerNameDTOs
                 .filter((item) => item.rateAverage >= 4)
-                .sort(
-                  (a, b) => b.numberOfBooking - a.numberOfBooking
-                )
-                .sort(
-                  (a, b) => b.rateAverage - a.rateAverage
-                )
+                .sort((a, b) => b.numberOfBooking - a.numberOfBooking)
+                .sort((a, b) => b.rateAverage - a.rateAverage)
                 .slice(0, 5);
-                
+
         setOwners(formattedData);
         setLoading(false);
-        
+
         // Fade in animation
         Animated.timing(fadeAnim, {
           toValue: 1,
           duration: 800,
           useNativeDriver: true,
         }).start();
-        
       } catch (error) {
         console.error("Error fetching top owners:", error);
         setLoading(false);
@@ -77,13 +72,17 @@ const TopBrands = () => {
         },
       ],
     };
-    
+
     return (
       <Animated.View style={animatedStyle}>
         <TouchableOpacity
           style={styles.ownerCard}
           activeOpacity={0.7}
-          onPress={() => navigation.navigate("OwnerDetail", { ownerId: item.workspaceOwnerId })}
+          onPress={() =>
+            navigation.navigate("OwnerDetail", {
+              ownerId: item.workspaceOwnerId,
+            })
+          }
         >
           {/* Background design with banner */}
           <View style={styles.cardHeader}>
@@ -91,19 +90,19 @@ const TopBrands = () => {
               source={require("../../assets/images/banner.png")}
               style={styles.bannerImage}
             />
-            
+
             {/* Avatar overlay */}
             <View style={styles.avatarContainer}>
               <Image
                 source={
-                  item.avatar 
-                    ? { uri: item.avatar } 
+                  item.avatar
+                    ? { uri: item.avatar }
                     : require("../../assets/images/owner.png")
                 }
                 style={styles.avatar}
               />
             </View>
-            
+
             {/* Brand badge */}
             <View style={styles.badgeContainer}>
               <View style={styles.badge}>
@@ -111,7 +110,7 @@ const TopBrands = () => {
               </View>
             </View>
           </View>
-          
+
           {/* Content */}
           <View style={styles.contentContainer}>
             <Text style={styles.ownerName} numberOfLines={1}>
@@ -123,17 +122,19 @@ const TopBrands = () => {
                 {item.licenseAddress}
               </Text>
             </View>
-            
+
             {/* Stats row */}
             <View style={styles.statsContainer}>
               <View style={styles.statCard}>
-                <Text style={styles.statValue}>{item.rateAverage.toFixed(1)}</Text>
+                <Text style={styles.statValue}>
+                  {item.rateAverage.toFixed(1)}
+                </Text>
                 <View style={styles.statIconContainer}>
                   <Icon name="star" size={16} color="#835101" />
                 </View>
                 <Text style={styles.statLabel}>sao</Text>
               </View>
-              
+
               <View style={styles.statCard}>
                 <Text style={styles.statValue}>{item.numberOfBooking}</Text>
                 <View style={styles.statIconContainer}>
@@ -141,7 +142,7 @@ const TopBrands = () => {
                 </View>
                 <Text style={styles.statLabel}>lượt đặt</Text>
               </View>
-              
+
               <View style={styles.statCard}>
                 <Text style={styles.statValue}>{item.numberOfWorkspace}</Text>
                 <View style={styles.statIconContainer}>
@@ -179,11 +180,7 @@ const TopBrands = () => {
           <MaterialCommunityIcons name="crown" size={24} color="#835101" />
           <Text style={styles.title}>Các thương hiệu hàng đầu</Text>
         </View>
-        <TouchableOpacity 
-          style={styles.viewAllButton} 
-          activeOpacity={0.7} 
-          onPress={handleViewAll}
-        >
+        <TouchableOpacity activeOpacity={0.7} onPress={handleViewAll}>
           <Text style={styles.viewAllText}>Xem tất cả</Text>
         </TouchableOpacity>
       </View>
@@ -213,17 +210,12 @@ const styles = StyleSheet.create({
   titleContainer: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
   },
   title: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#333",
     marginLeft: 8,
-  },
-  viewAllButton: {
-    paddingVertical: 4,
-    paddingHorizontal: 8,
   },
   viewAllText: {
     color: "#B25F00",

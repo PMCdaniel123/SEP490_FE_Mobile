@@ -38,8 +38,9 @@ const WorkspaceDetail = ({ route }) => {
   const [mapRegion, setMapRegion] = useState(null);
   const navigation = useNavigation();
   const { state, dispatch } = useCart();
-  const { amenityList, beverageList, workspaceId, price } = state;
+  const { amenityList, beverageList } = state;
   const [numberItems, setNumberItems] = useState(0);
+  const [reviews, setReviews] = useState([]);
 
   const [scrollY] = useState(new Animated.Value(0));
 
@@ -100,6 +101,25 @@ const WorkspaceDetail = ({ route }) => {
   }, [id, dispatch]);
 
   useEffect(() => {
+    setLoading(true);
+    const fetchReviews = async () => {
+      try {
+        const response = await axios.get(
+          `https://workhive.info.vn:8443/users/rating/getallratingbyworkspaceid/${id}`
+        );
+        const formattedReviews = response.data.ratingByWorkspaceIdDTOs || [];
+        setReviews(formattedReviews);
+      } catch (error) {
+        alert("Error fetching reviews:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReviews();
+  }, [id]);
+
+  useEffect(() => {
     setNumberItems(amenityList.length + beverageList.length);
   }, [amenityList, beverageList]);
 
@@ -110,6 +130,14 @@ const WorkspaceDetail = ({ route }) => {
       </View>
     );
   }
+
+  const averageRating =
+    reviews.length > 0
+      ? (
+          reviews.reduce((total, review) => total + review.rate, 0) /
+          reviews.length
+        ).toFixed(1)
+      : "0.0";
 
   if (!id) {
     return (
@@ -226,8 +254,10 @@ const WorkspaceDetail = ({ route }) => {
 
           <View style={styles.ratingContainer}>
             <AntDesign name="star" size={20} color="#FFD700" />
-            <Text style={styles.rating}>4.5</Text>
-            <Text style={styles.ratingCount}>(128 đánh giá)</Text>
+            <Text style={styles.rating}>{averageRating}</Text>
+            <Text style={styles.ratingCount}>
+              ({reviews.length} lượt đánh giá)
+            </Text>
           </View>
 
           <View style={styles.locationContainer}>
@@ -247,18 +277,17 @@ const WorkspaceDetail = ({ route }) => {
               source={require("../../assets/images/workspace2.jpg")}
               style={styles.avatar}
             />
-            <View>
-              <Text style={styles.licenseName}>
+            <View style={styles.userTextContainer}>
+              <Text
+                style={styles.licenseName}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
                 {workspaceDetail?.licenseName}
               </Text>
               <Text style={styles.hostLabel}>Chủ không gian</Text>
             </View>
-            <MaterialIcons
-              name="chevron-right"
-              size={24}
-              color="#666"
-              style={styles.chevron}
-            />
+            <MaterialIcons name="chevron-right" size={24} color="#666" />
           </TouchableOpacity>
         </Surface>
 
@@ -582,6 +611,10 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     marginRight: 12,
+  },
+  userTextContainer: {
+    flex: 1, // allows it to take available space
+    justifyContent: "center",
   },
   licenseName: {
     fontSize: 16,

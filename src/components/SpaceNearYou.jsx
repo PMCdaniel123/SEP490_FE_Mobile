@@ -142,7 +142,9 @@ const SpaceNearYou = () => {
     <View style={styles.sectionContainer}>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Không gian gần bạn</Text>
-        <TouchableOpacity onPress={() => navigation.navigate("NearbyWorkspace")}>
+        <TouchableOpacity
+          onPress={() => navigation.navigate("NearbyWorkspace")}
+        >
           <Text style={styles.seeAllText}>Xem tất cả</Text>
         </TouchableOpacity>
       </View>
@@ -235,7 +237,7 @@ const styles = StyleSheet.create({
   },
   listItemRatingText: {
     marginLeft: 4,
-    fontWeight: "bold",
+    fontSize: 12,
   },
   loadingContainer: {
     flex: 1,

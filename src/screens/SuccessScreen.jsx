@@ -1,47 +1,9 @@
-import { useRoute, useNavigation } from "@react-navigation/native";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ActivityIndicator,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
-import axios from "axios";
-import { usePushNotifications } from "../../usePushNotification";
+import { useNavigation } from "@react-navigation/native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import LottieView from "lottie-react-native";
 
 const SuccessScreen = () => {
-  const route = useRoute();
   const navigation = useNavigation();
-  const { OrderCode, BookingId } = route.params || {};
-  const { expoPushToken, notification } = usePushNotifications();
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    setLoading(true);
-    const handleNotification = async () => {
-      const data = {
-        fcmToken: expoPushToken?.data ?? "",
-        title: "Thanh toán thành công",
-        body: "Cảm ơn bạn đã sử dụng dịch vụ của WorkHive. Chúc bạn có những trải nghiệm thật tuyệt vời!!!",
-      };
-      console.log(data);
-      try {
-        await axios.post(
-          `https://workhive.info.vn:8443/sendnotificationformobile`,
-          {
-            ...data,
-          }
-        );
-        setLoading(false);
-      } catch (error) {
-        alert(error);
-        setLoading(false);
-      }
-    };
-    handleNotification();
-  }, [expoPushToken]);
 
   const handleGoHome = () => {
     navigation.navigate("HomeMain");
@@ -51,22 +13,14 @@ const SuccessScreen = () => {
     navigation.navigate("Đặt chỗ", { screen: "YourBooking" });
   };
 
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#835101" />
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
       <View style={styles.successCard}>
-        <Ionicons
-          name="checkmark-circle"
-          size={80}
-          color="#4CAF50"
-          style={styles.icon}
+        <LottieView
+          source={require("../../assets/animations/success.json")}
+          autoPlay
+          loop
+          style={styles.lottie}
         />
         <Text style={styles.title}>Thanh toán thành công!</Text>
 
@@ -88,10 +42,9 @@ const SuccessScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+  lottie: {
+    width: 200,
+    height: 200,
   },
   container: {
     flex: 1,
@@ -114,9 +67,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-  },
-  icon: {
-    marginBottom: 16,
   },
   title: {
     fontSize: 24,

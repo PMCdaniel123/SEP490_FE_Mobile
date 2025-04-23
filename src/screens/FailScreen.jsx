@@ -1,19 +1,19 @@
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { useEffect } from "react";
 import axios from "axios";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import LottieView from "lottie-react-native";
 
 const FailScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  const { OrderCode, BookingId, source, customerWalletId, workspaceId } = route.params || {};
-  
-  console.log("FailScreen received params:", JSON.stringify(route.params));
+  const { OrderCode, BookingId, source, customerWalletId, workspaceId } =
+    route.params || {};
 
   // Check if this is a wallet-related failure or a booking failure
-  const isWalletFailure = source === 'wallet' || (route.params && !BookingId && customerWalletId);
+  const isWalletFailure =
+    source === "wallet" || (route.params && !BookingId && customerWalletId);
 
   const handleGoHome = () => {
     navigation.navigate("HomeMain");
@@ -53,20 +53,20 @@ const FailScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.failCard}>
-        <Ionicons
-          name="close-circle"
-          size={80}
-          color="#FF3B30"
-          style={styles.icon}
+        <LottieView
+          source={require("../../assets/animations/error.json")}
+          autoPlay
+          loop
+          style={styles.lottie}
         />
         <Text style={styles.title}>Thanh toán thất bại!</Text>
-        
+
         {isWalletFailure && (
           <Text style={styles.message}>
             Nạp tiền vào ví WorkHive không thành công. Vui lòng thử lại sau.
           </Text>
         )}
-        
+
         {!isWalletFailure && (
           <Text style={styles.message}>
             Đặt chỗ không thành công. Vui lòng thử lại sau.
@@ -109,8 +109,9 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  icon: {
-    marginBottom: 16,
+  lottie: {
+    width: 200,
+    height: 200,
   },
   title: {
     fontSize: 24,

@@ -178,8 +178,6 @@ function Checkout() {
         ? `https://workhive.info.vn:8443/users/bookingbyworkhivewallet`
         : `https://workhive.info.vn:8443/users/bookingformobile`;
 
-      console.log("Using API endpoint:", apiUrl);
-
       const response = await axios.post(apiUrl, {
         ...request,
       });

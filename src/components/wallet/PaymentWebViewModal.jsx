@@ -75,6 +75,19 @@ const PaymentWebViewModal = ({
           onShouldStartLoadWithRequest={(request) => {
             // Handle mobile:// schemes explicitly
             if (request.url.startsWith('mobile://')) {
+              // Specific handling for mobile://cancel
+              if (request.url.startsWith('mobile://cancel')) {
+                onClose();
+                navigation.navigate("Trang chủ", {
+                  screen: "FailPage",
+                  params: {
+                    source: 'wallet',
+                    customerWalletId,
+                    orderCode
+                  }
+                });
+                return false;
+              }
               // Return false to prevent WebView from trying to load this URL
               return false;
             }

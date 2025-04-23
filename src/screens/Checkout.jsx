@@ -51,6 +51,8 @@ function Checkout() {
   const [checkoutUrl, setCheckoutUrl] = useState(null);
   const [bookingInfo, setBookingInfo] = useState(null);
   const webViewRef = useRef(null);
+  
+  const [confirmModalVisible, setConfirmModalVisible] = useState(false);
 
   useEffect(() => {
     if (!workspaceId) {
@@ -141,6 +143,16 @@ function Checkout() {
   }, [userData, userToken]);
 
   const handleCheckout = async () => {
+    if (paymentMethod === "2") {
+      setConfirmModalVisible(true);
+      return;
+    }
+    
+    proceedWithCheckout();
+  };
+
+
+  const proceedWithCheckout = async () => {
     const amenitiesRequest = amenityList.map((amenity) => ({
       id: amenity.id,
       quantity: amenity.quantity,
@@ -162,13 +174,37 @@ function Checkout() {
     };
     setLoading(true);
     try {
-      const response = await axios.post(
-        `https://workhive.info.vn:8443/users/bookingformobile`,
-        {
-          ...request,
-        }
-      );
 
+      const isWalletPayment = paymentMethod === "2";
+      const apiUrl = isWalletPayment
+        ? `https://workhive.info.vn:8443/users/bookingbyworkhivewallet`
+        : `https://workhive.info.vn:8443/users/bookingformobile`;
+      
+      console.log("Using API endpoint:", apiUrl);
+      
+      const response = await axios.post(apiUrl, {
+        ...request,
+      });
+
+
+      if (isWalletPayment) {
+        if (response.data && response.data.notification === "Ví của bạn đã bị khóa" && response.data.isLock === 1) {
+          Alert.alert("Lỗi thanh toán", "Ví của bạn hiện đang bị khóa do thực hiện yêu cầu rút tiền");
+          return;
+        }
+        
+        // Payment successful
+        dispatch({ type: "CLEAR_CART" });
+        navigation.navigate("SuccessPage", {
+          OrderCode: response.data.orderCode,
+          BookingId: response.data.bookingId,
+          status: "PAID",
+          cancel: false,
+        });
+        return;
+      }
+
+      // For regular payment methods
       // Store booking information for later use
       const bookingInfo = {
         bookingId: response.data.bookingId,
@@ -182,7 +218,7 @@ function Checkout() {
       dispatch({ type: "CLEAR_CART" });
       setCheckoutUrl(response.data.checkoutUrl);
     } catch (error) {
-      alert(error);
+      Alert.alert("Lỗi", error.response?.data?.message || "Đã xảy ra lỗi khi thanh toán");
     } finally {
       setLoading(false);
     }
@@ -248,10 +284,11 @@ function Checkout() {
         navigation.navigate("FailPage", {
           OrderCode: bookingInfo.orderCode,
           BookingId: bookingInfo.bookingId,
+          workspaceId: workspaceId
         });
       }
     },
-    [navigation, bookingInfo]
+    [navigation, bookingInfo, workspaceId]
   );
 
   if (loading) {
@@ -314,6 +351,7 @@ function Checkout() {
             navigation.navigate("FailPage", {
               OrderCode: bookingInfo.orderCode,
               BookingId: bookingInfo.bookingId,
+              workspaceId: workspaceId
             });
           }
         }}
@@ -325,6 +363,7 @@ function Checkout() {
             navigation.navigate("FailPage", {
               OrderCode: bookingInfo.orderCode,
               BookingId: bookingInfo.bookingId,
+              workspaceId: workspaceId
             });
             return false;
           }
@@ -337,6 +376,7 @@ function Checkout() {
             navigation.navigate("FailPage", {
               OrderCode: bookingInfo.orderCode,
               BookingId: bookingInfo.bookingId,
+              workspaceId: workspaceId
             });
             return false;
           }
@@ -407,6 +447,7 @@ function Checkout() {
               navigation.navigate("FailPage", {
                 OrderCode: bookingInfo.orderCode,
                 BookingId: bookingInfo.bookingId,
+                workspaceId: workspaceId
               });
             }
           } catch (error) {
@@ -644,6 +685,40 @@ function Checkout() {
                 </Text>
               </View>
             )}
+          </View>
+        </BlurView>
+      </Modal>
+
+      {/* Confirmation Modal for WorkHive Wallet */}
+      <Modal visible={confirmModalVisible} transparent animationType="fade">
+        <BlurView intensity={60} style={styles.blurView}>
+          <View style={styles.confirmationContainer}>
+            <Text style={styles.confirmationTitle}>Xác nhận thanh toán</Text>
+            <Text style={styles.confirmationText}>
+              Bạn có chắc chắn muốn thanh toán bằng WorkHive Wallet?
+            </Text>
+            <Text style={styles.priceText}>
+              Số tiền thanh toán: {formatCurrency(
+                promotion ? total - (promotion.discount / 100) * total : total
+              )}
+            </Text>
+            <View style={styles.confirmationButtons}>
+              <TouchableOpacity
+                style={styles.confirmButton}
+                onPress={() => {
+                  setConfirmModalVisible(false);
+                  proceedWithCheckout();
+                }}
+              >
+                <Text style={{ color: "#fff", fontWeight: "bold" }}>Xác nhận</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => setConfirmModalVisible(false)}
+              >
+                <Text style={{ color: "#835101", fontWeight: "bold" }}>Hủy</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </BlurView>
       </Modal>
@@ -887,6 +962,58 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#888",
     marginTop: 10,
+  },
+  // Add styles for confirmation modal
+  confirmationContainer: {
+    width: 320,
+    padding: 20,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 5,
+  },
+  confirmationTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 16,
+    color: "#835101",
+  },
+  confirmationText: {
+    textAlign: "center",
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  priceText: {
+    textAlign: "center",
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 20,
+  },
+  confirmationButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    gap: 12,
+  },
+  confirmButton: {
+    flex: 1,
+    backgroundColor: "#835101",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: "#fff",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#835101",
   },
 });
 

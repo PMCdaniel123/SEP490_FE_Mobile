@@ -39,6 +39,7 @@ import OwnerDetail from "./src/screens/OwnerDetail";
 import * as Linking from "expo-linking";
 import SuccessScreen from "./src/screens/SuccessScreen";
 import FailScreen from "./src/screens/FailScreen";
+import NearbyWorkspace from "./src/screens/NearbyWorkspace";
 
 // Set up deep linking configuration
 const prefix = Linking.createURL("/");
@@ -89,6 +90,7 @@ const HomeStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="HomeMain" component={Home} />
     <Stack.Screen name="WorkspaceDetail" component={WorkspaceDetail} />
+    <Stack.Screen name="NearbyWorkspace" component={NearbyWorkspace} />
     <Stack.Screen name="AllReview" component={AllReview} />
     <Stack.Screen name="Notification" component={NotificationScreen} />
     <Stack.Screen name="WorkSpaces" component={WorkSpaces} />

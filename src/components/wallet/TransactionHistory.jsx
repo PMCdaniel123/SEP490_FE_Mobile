@@ -249,7 +249,7 @@ const TransactionHistory = ({ transactions, formatCurrency }) => {
       const sortedTransactions = sortTransactionsByNewest(transactions);
       setFilteredTransactions(sortedTransactions);
     }
-  }, []);
+  }, [transactions]);
 
   if (transactions.length === 0) {
     return (

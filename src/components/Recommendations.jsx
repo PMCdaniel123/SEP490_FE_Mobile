@@ -121,10 +121,6 @@ const Recommendations = () => {
                   item.prices.find((price) => price.category === "Giờ")?.price
                 )}
           </Text>
-          <View style={styles.listItemRating}>
-            <Icon name="star" size={16} color="#FFD700" />
-            <Text style={styles.listItemRatingText}>{item.rating || 4.0}</Text>
-          </View>
         </View>
       </View>
     </TouchableOpacity>
@@ -273,19 +269,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
     color: "#835101",
-  },
-  listItemRating: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(255, 215, 0, 0.1)",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  listItemRatingText: {
-    marginLeft: 4,
-    fontWeight: "bold",
-    color: "#333",
   },
   emptyContainer: {
     height: 100,

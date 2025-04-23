@@ -128,12 +128,6 @@ const WorkSpaces = ({ navigation }) => {
             <Icon name="image-not-supported" size={24} color="#ccc" />
           </View>
         )}
-        <View style={styles.badgeContainer}>
-          <View style={styles.ratingBadge}>
-            <Icon name="star" size={12} color="#FFD700" />
-            <Text style={styles.ratingText}>{item.rating || 4.0}</Text>
-          </View>
-        </View>
       </View>
       <View style={styles.gridItemInfo}>
         <Text style={styles.gridItemLicense} numberOfLines={1}>
@@ -152,14 +146,15 @@ const WorkSpaces = ({ navigation }) => {
         <View style={styles.gridItemFooter}>
           <Text style={styles.gridItemPrice}>
             {item.prices && item.prices.length > 0
-              ? formatCurrency(
-                  item.prices.find((price) => price.category === "Giờ")?.price
-                )
+              ? `${formatCurrency(
+                  item.prices.find((price) => price.category === "Giờ")
+                    ?.price || item.prices[0].price
+                )} - ${formatCurrency(
+                  item.prices.find((price) => price.category === "Ngày")
+                    ?.price || item.prices[0].price
+                )}`
               : "Liên hệ"}
           </Text>
-          <TouchableOpacity style={styles.bookmarkButton}>
-            <Icon name="bookmark-border" size={16} color="#835101" />
-          </TouchableOpacity>
         </View>
       </View>
     </TouchableOpacity>
@@ -182,12 +177,6 @@ const WorkSpaces = ({ navigation }) => {
             <Icon name="image-not-supported" size={30} color="#ccc" />
           </View>
         )}
-        <View style={styles.badgeContainer}>
-          <View style={styles.listItemRating}>
-            <Icon name="star" size={14} color="#FFD700" />
-            <Text style={styles.listItemRatingText}>{item.rating || 4.0}</Text>
-          </View>
-        </View>
       </View>
       <View style={styles.listItemInfo}>
         <Text style={styles.listItemLicense} numberOfLines={1}>
@@ -452,21 +441,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#835101",
   },
-  listItemRating: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-  },
-  listItemRatingText: {
-    marginLeft: 4,
-    fontWeight: "bold",
-    color: "#fff",
-    fontSize: 12,
-  },
-  // Styles grid
   gridRow: {
     justifyContent: "space-between",
   },
@@ -522,35 +496,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#835101",
   },
-  ratingBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
-    paddingHorizontal: 6,
-    paddingVertical: 3,
-    borderRadius: 4,
-  },
-  ratingText: {
-    marginLeft: 3,
-    fontWeight: "bold",
-    color: "#fff",
-    fontSize: 10,
-  },
-  // Styles chung
   noImageContainer: {
     width: "100%",
     height: "100%",
     backgroundColor: "#f0f0f0",
     justifyContent: "center",
     alignItems: "center",
-  },
-  badgeContainer: {
-    position: "absolute",
-    top: 8,
-    right: 8,
-  },
-  bookmarkButton: {
-    padding: 4,
   },
   loadingContainer: {
     flex: 1,

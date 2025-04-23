@@ -7,11 +7,12 @@ import {
   StyleSheet,
   FlatList,
   ActivityIndicator,
-  RefreshControl,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import Icon2 from "react-native-vector-icons/FontAwesome6";
 import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
+import * as Location from "expo-location";
 
 const formatCurrency = (value) => {
   return new Intl.NumberFormat("vi-VN", {
@@ -24,44 +25,82 @@ const SpaceNearYou = () => {
   const navigation = useNavigation();
   const [spacesNearYou, setSpacesNearYou] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const [location, setLocation] = useState(null);
 
-  const fetchSpacesNearYou = async () => {
+  const getLocation = async () => {
+    setLoading(true);
     try {
-      // Simulating API call - replace with actual API endpoint when available
-      const response = await axios.get(
-        "https://workhive.info.vn:8443/workspaces"
-      );
-      setSpacesNearYou(response.data.workspaces || []);
+      // Request foreground location permissions
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setErrorMsg("Permission to access location was denied");
+        return null; // Return null to indicate failure
+      }
+
+      // Check if location services are enabled
+      let isLocationEnabled = await Location.hasServicesEnabledAsync();
+      if (!isLocationEnabled) {
+        Alert.alert(
+          "Location Services Disabled",
+          "Please enable location services in your device settings."
+        );
+        return null; // Return null to indicate failure
+      }
+
+      // Get the current location
+      let locationData = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+        timeInterval: 2000,
+      });
+      setLocation(locationData);
+      return locationData; // Return location data
     } catch (error) {
-      alert("Error fetching nearby spaces:", error);
+      setErrorMsg("Error fetching location: " + error.message);
+      return null; // Return null to indicate failure
     } finally {
       setLoading(false);
-      setRefreshing(false);
     }
   };
 
   useEffect(() => {
+    const fetchSpacesNearYou = async () => {
+      setLoading(true);
+      try {
+        const locationData = await getLocation();
+        if (!locationData) {
+          // If location is null, stop the function
+          setLoading(false);
+          return;
+        }
+        const url = `https://workhive.info.vn:8443/workspaces/nearby?lat=${locationData.coords.latitude}&lng=${locationData.coords.longitude}`;
+        const response = await axios.get(url);
+        setSpacesNearYou(response.data.workspaces || []);
+      } catch (error) {
+        alert("Error fetching nearby spaces:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchSpacesNearYou();
   }, []);
-
-  const onRefresh = () => {
-    setRefreshing(true);
-    fetchSpacesNearYou();
-  };
 
   const renderSpaceItem = ({ item }) => (
     <TouchableOpacity
       key={item.id}
       style={styles.listItemCard}
       onPress={() => navigation.navigate("WorkspaceDetail", { id: item.id })}
+      activeOpacity={0.8}
     >
-      <Image
-        source={{ uri: item.images[0]?.imgUrl }}
-        style={styles.listItemImage}
-      />
+      <View style={styles.imageContainer}>
+        <Image
+          source={{ uri: item.images[0]?.imgUrl }}
+          style={styles.listItemImage}
+        />
+      </View>
       <View style={styles.listItemInfo}>
-        <Text style={styles.listItemName}>{item.name}</Text>
+        <Text style={styles.listItemName} numberOfLines={1}>
+          {item.name}
+        </Text>
         <View style={styles.listItemLocation}>
           <Icon name="location-on" size={14} color="#666" />
           <Text style={styles.listItemLocationText} numberOfLines={2}>
@@ -81,15 +120,17 @@ const SpaceNearYou = () => {
                 )}`}
           </Text>
           <View style={styles.listItemRating}>
-            <Icon name="star" size={16} color="#FFD700" />
-            <Text style={styles.listItemRatingText}>{item.rate}</Text>
+            <Icon2 name="map-location-dot" size={16} color="#835101" />
+            <Text style={styles.listItemRatingText}>
+              {Number(item.distanceKm).toFixed(2)} km
+            </Text>
           </View>
         </View>
       </View>
     </TouchableOpacity>
   );
 
-  if (loading && !refreshing) {
+  if (loading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#835101" />
@@ -101,22 +142,15 @@ const SpaceNearYou = () => {
     <View style={styles.sectionContainer}>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Không gian gần bạn</Text>
-        <TouchableOpacity onPress={() => navigation.navigate("WorkSpaces")}>
+        <TouchableOpacity onPress={() => navigation.navigate("NearbyWorkspace")}>
           <Text style={styles.seeAllText}>Xem tất cả</Text>
         </TouchableOpacity>
       </View>
       <FlatList
-        data={spacesNearYou.slice(0, 5)}
+        data={spacesNearYou.slice(0, 4)}
         renderItem={renderSpaceItem}
         keyExtractor={(item) => item.id.toString()}
         showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            colors={["#835101"]}
-          />
-        }
       />
     </View>
   );
@@ -154,19 +188,25 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
   },
-  listItemImage: {
-    width: 100,
+  imageContainer: {
+    width: 110,
     height: 120,
+  },
+  listItemImage: {
+    width: "100%",
+    height: "100%",
     resizeMode: "cover",
   },
   listItemInfo: {
     flex: 1,
     padding: 12,
+    justifyContent: "space-between",
   },
   listItemName: {
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 4,
+    color: "#333",
   },
   listItemLocation: {
     flexDirection: "row",
@@ -187,6 +227,7 @@ const styles = StyleSheet.create({
   listItemPrice: {
     fontSize: 14,
     fontWeight: "bold",
+    color: "#835101",
   },
   listItemRating: {
     flexDirection: "row",

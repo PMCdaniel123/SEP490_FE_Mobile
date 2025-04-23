@@ -24,18 +24,25 @@
         "foregroundImage": "./assets/images/workhive.png",
         "backgroundColor": "#ffffff"
       },
-      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
-      },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ],
       "package": "com.cuongpham.x251203.mobile",
       "googleServicesFile": "./android/app/google-services.json"
-    },
-    "web": {
-      "favicon": "./assets/images/workhive.png"
     },
     "extra": {
       "eas": {
         "projectId": "72170c6f-9967-43a5-83ec-aae476b02c3b"
       }
+    }
+  },
+  "web": {
+    "favicon": "./assets/images/workhive.png"
+  },
+  "extra": {
+    "eas": {
+      "projectId": "72170c6f-9967-43a5-83ec-aae476b02c3b"
     }
   }
 }

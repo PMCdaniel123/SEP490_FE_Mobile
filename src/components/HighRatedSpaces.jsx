@@ -54,9 +54,6 @@ const HighRatedSpaces = () => {
         source={{ uri: item.images[0]?.imgUrl }}
         style={styles.spaceImage}
       />
-      <TouchableOpacity style={styles.favoriteButton}>
-        <Icon name="favorite-border" size={20} color="#FF5A5F" />
-      </TouchableOpacity>
       <View style={styles.spaceInfo}>
         <Text style={styles.spaceName} numberOfLines={1}>
           {item.name}
@@ -152,14 +149,6 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 160,
     resizeMode: "cover",
-  },
-  favoriteButton: {
-    position: "absolute",
-    top: 8,
-    right: 8,
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
-    borderRadius: 20,
-    padding: 6,
   },
   spaceInfo: {
     padding: 12,

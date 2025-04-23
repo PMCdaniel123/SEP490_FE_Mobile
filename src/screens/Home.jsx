@@ -154,6 +154,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
+    paddingTop: 24,
   },
   userInfo: {
     flexDirection: "row",

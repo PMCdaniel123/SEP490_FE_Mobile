@@ -51,7 +51,7 @@ function Checkout() {
   const [checkoutUrl, setCheckoutUrl] = useState(null);
   const [bookingInfo, setBookingInfo] = useState(null);
   const webViewRef = useRef(null);
-  
+
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
 
   useEffect(() => {
@@ -147,10 +147,9 @@ function Checkout() {
       setConfirmModalVisible(true);
       return;
     }
-    
+
     proceedWithCheckout();
   };
-
 
   const proceedWithCheckout = async () => {
     const amenitiesRequest = amenityList.map((amenity) => ({
@@ -174,25 +173,30 @@ function Checkout() {
     };
     setLoading(true);
     try {
-
       const isWalletPayment = paymentMethod === "2";
       const apiUrl = isWalletPayment
         ? `https://workhive.info.vn:8443/users/bookingbyworkhivewallet`
         : `https://workhive.info.vn:8443/users/bookingformobile`;
-      
+
       console.log("Using API endpoint:", apiUrl);
-      
+
       const response = await axios.post(apiUrl, {
         ...request,
       });
 
-
       if (isWalletPayment) {
-        if (response.data && response.data.notification === "Ví của bạn đã bị khóa" && response.data.isLock === 1) {
-          Alert.alert("Lỗi thanh toán", "Ví của bạn hiện đang bị khóa do thực hiện yêu cầu rút tiền");
+        if (
+          response.data &&
+          response.data.notification === "Ví của bạn đã bị khóa" &&
+          response.data.isLock === 1
+        ) {
+          Alert.alert(
+            "Lỗi thanh toán",
+            "Ví của bạn hiện đang bị khóa do thực hiện yêu cầu rút tiền"
+          );
           return;
         }
-        
+
         // Payment successful
         dispatch({ type: "CLEAR_CART" });
         navigation.navigate("SuccessPage", {
@@ -218,7 +222,10 @@ function Checkout() {
       dispatch({ type: "CLEAR_CART" });
       setCheckoutUrl(response.data.checkoutUrl);
     } catch (error) {
-      Alert.alert("Lỗi", error.response?.data?.message || "Đã xảy ra lỗi khi thanh toán");
+      Alert.alert(
+        "Lỗi",
+        error.response?.data?.message || "Đã xảy ra lỗi khi thanh toán"
+      );
     } finally {
       setLoading(false);
     }
@@ -284,7 +291,7 @@ function Checkout() {
         navigation.navigate("FailPage", {
           OrderCode: bookingInfo.orderCode,
           BookingId: bookingInfo.bookingId,
-          workspaceId: workspaceId
+          workspaceId: workspaceId,
         });
       }
     },
@@ -351,7 +358,7 @@ function Checkout() {
             navigation.navigate("FailPage", {
               OrderCode: bookingInfo.orderCode,
               BookingId: bookingInfo.bookingId,
-              workspaceId: workspaceId
+              workspaceId: workspaceId,
             });
           }
         }}
@@ -363,7 +370,7 @@ function Checkout() {
             navigation.navigate("FailPage", {
               OrderCode: bookingInfo.orderCode,
               BookingId: bookingInfo.bookingId,
-              workspaceId: workspaceId
+              workspaceId: workspaceId,
             });
             return false;
           }
@@ -376,7 +383,7 @@ function Checkout() {
             navigation.navigate("FailPage", {
               OrderCode: bookingInfo.orderCode,
               BookingId: bookingInfo.bookingId,
-              workspaceId: workspaceId
+              workspaceId: workspaceId,
             });
             return false;
           }
@@ -447,7 +454,7 @@ function Checkout() {
               navigation.navigate("FailPage", {
                 OrderCode: bookingInfo.orderCode,
                 BookingId: bookingInfo.bookingId,
-                workspaceId: workspaceId
+                workspaceId: workspaceId,
               });
             }
           } catch (error) {
@@ -469,11 +476,11 @@ function Checkout() {
             <Ionicons name="arrow-back" size={20} color="white" />
           </TouchableOpacity>
         </View>
-        
+
         <View style={styles.screenTitleContainer}>
           <Text style={styles.screenTitle}>Thanh toán</Text>
         </View>
-        
+
         {/* User information card */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
@@ -495,14 +502,14 @@ function Checkout() {
             <Text style={styles.fieldValue}>{userProfile?.email}</Text>
           </View>
         </View>
-        
+
         {/* Workspace booking details card */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <Ionicons name="calendar" size={18} color="#835101" />
             <Text style={styles.cardHeaderText}>Chi tiết đặt chỗ</Text>
           </View>
-          
+
           {/* Workspace info */}
           <View style={styles.workspaceCard}>
             <Image
@@ -530,12 +537,14 @@ function Checkout() {
                 </View>
                 <View style={styles.featureItem}>
                   <Icon name="people" size={14} color="#835101" />
-                  <Text style={styles.featureText}>{workspace?.capacity} người</Text>
+                  <Text style={styles.featureText}>
+                    {workspace?.capacity} người
+                  </Text>
                 </View>
               </View>
             </View>
           </View>
-          
+
           {/* Booking time */}
           <View style={styles.bookingTimeContainer}>
             <View style={styles.timeItem}>
@@ -553,15 +562,16 @@ function Checkout() {
               </View>
             </View>
           </View>
-          
+
           {/* Additional services */}
           {(amenityList.length > 0 || beverageList.length > 0) && (
             <View style={styles.additionalServicesContainer}>
               <View style={styles.sectionDivider} />
               <Text style={styles.additionalServicesTitle}>
-                <Ionicons name="add-circle-outline" size={16} color="#835101" /> Dịch vụ bổ sung
+                <Ionicons name="add-circle-outline" size={16} color="#835101" />{" "}
+                Dịch vụ bổ sung
               </Text>
-              
+
               {amenityList.length > 0 && (
                 <View style={styles.serviceSection}>
                   <Text style={styles.serviceSectionTitle}>Tiện ích:</Text>
@@ -573,7 +583,10 @@ function Checkout() {
                           style={styles.serviceItemImage}
                         />
                         <View>
-                          <Text style={styles.serviceItemName} numberOfLines={1}>
+                          <Text
+                            style={styles.serviceItemName}
+                            numberOfLines={1}
+                          >
                             {item.name}
                           </Text>
                           <Text style={styles.serviceItemPrice}>
@@ -582,13 +595,15 @@ function Checkout() {
                         </View>
                       </View>
                       <View style={styles.serviceItemQuantity}>
-                        <Text style={styles.quantityText}>x{item.quantity}</Text>
+                        <Text style={styles.quantityText}>
+                          x{item.quantity}
+                        </Text>
                       </View>
                     </View>
                   ))}
                 </View>
               )}
-              
+
               {beverageList.length > 0 && (
                 <View style={styles.serviceSection}>
                   <Text style={styles.serviceSectionTitle}>Đồ uống:</Text>
@@ -600,7 +615,10 @@ function Checkout() {
                           style={styles.serviceItemImage}
                         />
                         <View>
-                          <Text style={styles.serviceItemName} numberOfLines={1}>
+                          <Text
+                            style={styles.serviceItemName}
+                            numberOfLines={1}
+                          >
                             {item.name}
                           </Text>
                           <Text style={styles.serviceItemPrice}>
@@ -609,7 +627,9 @@ function Checkout() {
                         </View>
                       </View>
                       <View style={styles.serviceItemQuantity}>
-                        <Text style={styles.quantityText}>x{item.quantity}</Text>
+                        <Text style={styles.quantityText}>
+                          x{item.quantity}
+                        </Text>
                       </View>
                     </View>
                   ))}
@@ -618,14 +638,14 @@ function Checkout() {
             </View>
           )}
         </View>
-        
+
         {/* Payment summary card */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <Ionicons name="cash-outline" size={18} color="#835101" />
             <Text style={styles.cardHeaderText}>Tổng thanh toán</Text>
           </View>
-          
+
           {/* Promotion section */}
           <TouchableOpacity
             style={styles.promotionButton}
@@ -634,19 +654,21 @@ function Checkout() {
             <View style={styles.promotionButtonLeft}>
               <Ionicons name="ticket-outline" size={20} color="#835101" />
               <Text style={styles.promotionText}>
-                {promotion ? `Mã giảm giá: ${promotion.code} (-${promotion.discount}%)` : "Chọn mã khuyến mãi"}
+                {promotion
+                  ? `Mã giảm giá: ${promotion.code} (-${promotion.discount}%)`
+                  : "Chọn mã khuyến mãi"}
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#835101" />
           </TouchableOpacity>
-          
+
           {/* Price breakdown */}
           <View style={styles.priceBreakdown}>
             <View style={styles.priceRow}>
               <Text style={styles.priceLabel}>Tạm tính:</Text>
               <Text style={styles.priceValue}>{formatCurrency(total)}</Text>
             </View>
-            
+
             <View style={styles.priceRow}>
               <Text style={styles.priceLabel}>Giảm giá:</Text>
               <Text style={styles.discountValue}>
@@ -655,9 +677,9 @@ function Checkout() {
                   : "0 ₫"}
               </Text>
             </View>
-            
+
             <View style={styles.divider} />
-            
+
             <View style={styles.totalRow}>
               <Text style={styles.totalLabel}>Tổng cộng:</Text>
               <Text style={styles.totalValue}>
@@ -668,23 +690,23 @@ function Checkout() {
             </View>
           </View>
         </View>
-        
+
         {/* Payment methods card */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <Ionicons name="wallet-outline" size={18} color="#835101" />
             <Text style={styles.cardHeaderText}>Phương thức thanh toán</Text>
           </View>
-          
+
           <RadioButton.Group
             onValueChange={setPaymentMethod}
             value={paymentMethod}
           >
             {/* Bank payment */}
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[
-                styles.paymentMethodCard, 
-                paymentMethod === "1" && styles.paymentMethodCardSelected
+                styles.paymentMethodCard,
+                paymentMethod === "1" && styles.paymentMethodCardSelected,
               ]}
               onPress={() => setPaymentMethod("1")}
             >
@@ -707,12 +729,12 @@ function Checkout() {
                 </View>
               </View>
             </TouchableOpacity>
-            
+
             {/* WorkHive Wallet payment */}
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[
-                styles.paymentMethodCard, 
-                paymentMethod === "2" && styles.paymentMethodCardSelected
+                styles.paymentMethodCard,
+                paymentMethod === "2" && styles.paymentMethodCardSelected,
               ]}
               onPress={() => setPaymentMethod("2")}
             >
@@ -727,7 +749,9 @@ function Checkout() {
                       style={styles.walletMethodImage}
                       resizeMode="contain"
                     />
-                    <Text style={styles.paymentMethodText}>WorkHive Wallet</Text>
+                    <Text style={styles.paymentMethodText}>
+                      WorkHive Wallet
+                    </Text>
                   </View>
                   <Text style={styles.paymentMethodSubtext}>
                     Thanh toán bằng số dư trong tài khoản WorkHive của bạn
@@ -737,14 +761,17 @@ function Checkout() {
             </TouchableOpacity>
           </RadioButton.Group>
         </View>
-        
+
         {/* Checkout button */}
         <TouchableOpacity
           style={styles.checkoutButton}
           onPress={handleCheckout}
         >
           <Text style={styles.checkoutButtonText}>
-            Thanh toán {formatCurrency(promotion ? total - (promotion.discount / 100) * total : total)}
+            Thanh toán{" "}
+            {formatCurrency(
+              promotion ? total - (promotion.discount / 100) * total : total
+            )}
           </Text>
           <Ionicons name="arrow-forward" size={20} color="white" />
         </TouchableOpacity>
@@ -763,7 +790,7 @@ function Checkout() {
                 <Ionicons name="close" size={24} color="white" />
               </TouchableOpacity>
             </View>
-            
+
             <View style={styles.modalContent}>
               {promotionList.length > 0 ? (
                 <ScrollView style={styles.promotionList}>
@@ -772,7 +799,8 @@ function Checkout() {
                       key={item.id}
                       style={[
                         styles.promotionItem,
-                        promotion?.code === item.code && styles.promotionItemSelected,
+                        promotion?.code === item.code &&
+                          styles.promotionItemSelected,
                       ]}
                       onPress={() => {
                         setPromotion({
@@ -789,24 +817,34 @@ function Checkout() {
                               -{item.discount}%
                             </Text>
                           </View>
-                          <Text style={styles.promotionItemCode}>{item.code}</Text>
+                          <Text style={styles.promotionItemCode}>
+                            {item.code}
+                          </Text>
                         </View>
-                        
+
                         <Text style={styles.promotionItemDescription}>
                           Giảm {item.discount}% giá trị đơn hàng
                         </Text>
-                        
+
                         <View style={styles.promotionItemFooter}>
-                          <Ionicons name="time-outline" size={14} color="#666" />
+                          <Ionicons
+                            name="time-outline"
+                            size={14}
+                            color="#666"
+                          />
                           <Text style={styles.promotionItemValidity}>
                             HSD: {dayjs(item.endDate).format("DD/MM/YYYY")}
                           </Text>
                         </View>
                       </View>
-                      
+
                       {promotion?.code === item.code && (
                         <View style={styles.promotionSelectedIcon}>
-                          <Ionicons name="checkmark-circle" size={24} color="#835101" />
+                          <Ionicons
+                            name="checkmark-circle"
+                            size={24}
+                            color="#835101"
+                          />
                         </View>
                       )}
                     </TouchableOpacity>
@@ -832,22 +870,22 @@ function Checkout() {
             <View style={styles.confirmModalIcon}>
               <Ionicons name="wallet-outline" size={40} color="#835101" />
             </View>
-            
-            <Text style={styles.confirmModalTitle}>
-              Xác nhận thanh toán
-            </Text>
-            
+
+            <Text style={styles.confirmModalTitle}>Xác nhận thanh toán</Text>
+
             <Text style={styles.confirmModalDescription}>
               Bạn có chắc chắn muốn thanh toán bằng WorkHive Wallet không?
             </Text>
-            
+
             <View style={styles.confirmModalAmount}>
               <Text style={styles.confirmModalAmountLabel}>Số tiền:</Text>
               <Text style={styles.confirmModalAmountValue}>
-                {formatCurrency(promotion ? total - (promotion.discount / 100) * total : total)}
+                {formatCurrency(
+                  promotion ? total - (promotion.discount / 100) * total : total
+                )}
               </Text>
             </View>
-            
+
             <View style={styles.confirmModalActions}>
               <TouchableOpacity
                 style={styles.confirmModalCancelButton}
@@ -855,7 +893,7 @@ function Checkout() {
               >
                 <Text style={styles.confirmModalCancelText}>Hủy</Text>
               </TouchableOpacity>
-              
+
               <TouchableOpacity
                 style={styles.confirmModalConfirmButton}
                 onPress={() => {
@@ -882,14 +920,14 @@ const styles = StyleSheet.create({
   },
   header: {
     position: "absolute",
-    top: 50,
+    top: 36,
     left: 12,
     zIndex: 10,
   },
-  backButton: { 
-    backgroundColor: "#835101", 
-    padding: 10, 
-    borderRadius: 50, 
+  backButton: {
+    backgroundColor: "#835101",
+    padding: 10,
+    borderRadius: 50,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
@@ -898,13 +936,13 @@ const styles = StyleSheet.create({
   },
   screenTitleContainer: {
     alignItems: "center",
-    marginTop: 80,
-    marginBottom: 16,
+    marginTop: 40,
+    marginBottom: 24,
   },
-  screenTitle: { 
-    fontSize: 24, 
-    fontWeight: "bold", 
-    color: "#333" 
+  screenTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#333",
   },
 
   // Card shared styles
@@ -934,7 +972,7 @@ const styles = StyleSheet.create({
     color: "#835101",
     marginLeft: 8,
   },
-  
+
   // User info section
   userInfoRow: {
     flexDirection: "row",
@@ -984,7 +1022,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   locationText: {
-    flex: 1, 
+    flex: 1,
     fontSize: 12,
     color: "#666",
     marginLeft: 4,

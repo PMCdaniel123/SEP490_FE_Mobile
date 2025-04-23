@@ -457,7 +457,6 @@ const styles = StyleSheet.create({
   promotionTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 10,
     color: "#835101",
   },
   closeButton: {

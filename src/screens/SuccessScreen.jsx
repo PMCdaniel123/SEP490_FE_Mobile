@@ -1,13 +1,47 @@
 import { useRoute, useNavigation } from "@react-navigation/native";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
+import { usePushNotifications } from "../../usePushNotification";
 
 const SuccessScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const { OrderCode, BookingId } = route.params || {};
+  const { expoPushToken, notification } = usePushNotifications();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    const handleNotification = async () => {
+      const data = {
+        fcmToken: expoPushToken?.data ?? "",
+        title: "Thanh toán thành công",
+        body: "Cảm ơn bạn đã sử dụng dịch vụ của WorkHive. Chúc bạn có những trải nghiệm thật tuyệt vời!!!",
+      };
+      console.log(data);
+      try {
+        await axios.post(
+          `https://workhive.info.vn:8443/sendnotificationformobile`,
+          {
+            ...data,
+          }
+        );
+        setLoading(false);
+      } catch (error) {
+        alert(error);
+        setLoading(false);
+      }
+    };
+    handleNotification();
+  }, [expoPushToken]);
 
   const handleGoHome = () => {
     navigation.navigate("HomeMain");
@@ -16,6 +50,14 @@ const SuccessScreen = () => {
   const handleViewBooking = () => {
     navigation.navigate("Đặt chỗ", { screen: "YourBooking" });
   };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#835101" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -27,18 +69,6 @@ const SuccessScreen = () => {
           style={styles.icon}
         />
         <Text style={styles.title}>Thanh toán thành công!</Text>
-
-        <View style={styles.detailsContainer}>
-          <View style={styles.detailRow}>
-            <Text style={styles.label}>Mã đơn hàng:</Text>
-            <Text style={styles.value}>{OrderCode}</Text>
-          </View>
-
-          <View style={styles.detailRow}>
-            <Text style={styles.label}>Mã đặt chỗ:</Text>
-            <Text style={styles.value}>{BookingId}</Text>
-          </View>
-        </View>
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button} onPress={handleViewBooking}>
@@ -58,6 +88,11 @@ const SuccessScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   container: {
     flex: 1,
     justifyContent: "center",
@@ -89,28 +124,6 @@ const styles = StyleSheet.create({
     color: "#333",
     marginBottom: 24,
     textAlign: "center",
-  },
-  detailsContainer: {
-    width: "100%",
-    marginBottom: 24,
-    backgroundColor: "#f9f9f9",
-    padding: 16,
-    borderRadius: 8,
-  },
-  detailRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 12,
-  },
-  label: {
-    fontSize: 16,
-    color: "#666",
-    fontWeight: "500",
-  },
-  value: {
-    fontSize: 16,
-    color: "#333",
-    fontWeight: "bold",
   },
   buttonContainer: {
     width: "100%",

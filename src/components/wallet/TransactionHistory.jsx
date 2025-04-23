@@ -44,26 +44,24 @@ const TransactionItem = ({ item, formatCurrency }) => {
       return "Đang xử lý";
     }
     
-    // Log unhandled status for debugging
-    console.log("Processing status:", item.status);
+ 
+    // console.log("Processing status:", item.status);
     
-    // First check for Vietnamese status texts - exact match
+
     if (item.status === "Hoàn thành" || item.status === "Thất bại" || item.status === "Đang xử lý") {
       return item.status;
     }
     
-    // Convert to uppercase for case-insensitive comparison
+
     const upperStatus = item.status.toUpperCase();
-    
-    // Check for success statuses
+
     if (upperStatus === "PAID" || upperStatus === "REFUND" || upperStatus === "WITHDRAW SUCCESS" || upperStatus === "ACTIVE") {
       return "Hoàn thành";
     } 
-    // Check for failure statuses
     else if (upperStatus.includes("FAIL") || item.status.toLowerCase().includes("thất bại")) {
       return "Thất bại";
     } 
-    // Default to processing
+
     else {
       return "Đang xử lý";
     }

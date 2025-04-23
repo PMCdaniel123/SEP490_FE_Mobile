@@ -11,11 +11,24 @@ import {
   TextInput,
   RefreshControl,
   Dimensions,
+  Modal,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import Icon2 from "react-native-vector-icons/FontAwesome6";
 import { SafeAreaView } from "react-native-safe-area-context";
 import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
+import * as Location from "expo-location";
+import { BlurView } from "expo-blur";
+import { Ionicons } from "@expo/vector-icons";
+
+const spaceList = [
+  { id: "5", name: "5 km" },
+  { id: "10", name: "10 km" },
+  { id: "15", name: "15 km" },
+  { id: "20", name: "20 km" },
+  { id: "", name: "Trên 20 km" },
+];
 
 const { width } = Dimensions.get("window");
 const COLUMN_WIDTH = (width - 48) / 2; // 2 columns with padding 16 on each side and 16 spacing between columns
@@ -27,44 +40,113 @@ const formatCurrency = (value) => {
   }).format(value);
 };
 
-const AllHighRatedSpaces = () => {
-  const [highRatedSpaces, setHighRatedSpaces] = useState([]);
+const NearbyWorkspace = () => {
+  const [spacesNearYou, setSpacesNearYou] = useState([]);
   const [filteredSpaces, setFilteredSpaces] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [viewType, setViewType] = useState("grid");
   const navigation = useNavigation();
+  const [location, setLocation] = useState(null);
+  const [km, setKm] = useState(spaceList[0]);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const getLocation = async () => {
+    setLoading(true);
+    try {
+      // Request foreground location permissions
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setErrorMsg("Permission to access location was denied");
+        return null; // Return null to indicate failure
+      }
+
+      // Check if location services are enabled
+      let isLocationEnabled = await Location.hasServicesEnabledAsync();
+      if (!isLocationEnabled) {
+        Alert.alert(
+          "Location Services Disabled",
+          "Please enable location services in your device settings."
+        );
+        return null; // Return null to indicate failure
+      }
+
+      // Get the current location
+      let locationData = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+        timeInterval: 2000,
+      });
+      setLocation(locationData);
+      return locationData; // Return location data
+    } catch (error) {
+      setErrorMsg("Error fetching location: " + error.message);
+      return null; // Return null to indicate failure
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    fetchHighRatedSpaces();
-  }, []);
+    const fetchSpacesNearYou = async () => {
+      setLoading(true);
+      try {
+        const locationData = await getLocation();
+        if (!locationData) {
+          // If location is null, stop the function
+          setLoading(false);
+          return;
+        }
+        const url =
+          km.id === ""
+            ? `https://workhive.info.vn:8443/workspaces/nearby?lat=${locationData.coords.latitude}&lng=${locationData.coords.longitude}`
+            : `https://workhive.info.vn:8443/workspaces/nearby?lat=${locationData.coords.latitude}&lng=${locationData.coords.longitude}&radiusKm=${km.id}`;
+        const response = await axios.get(url);
+        const spaces = response.data.workspaces || [];
+        setSpacesNearYou(spaces);
+        setFilteredSpaces(spaces);
+      } catch (error) {
+        alert("Error fetching nearby spaces:", error);
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    };
+    fetchSpacesNearYou();
+  }, [km]);
 
   useEffect(() => {
-    // Filter spaces based on search text
     if (searchText.trim() !== "") {
-      const filtered = highRatedSpaces.filter(
+      const filtered = spacesNearYou.filter(
         (space) =>
           space.name.toLowerCase().includes(searchText.toLowerCase()) ||
           space.address.toLowerCase().includes(searchText.toLowerCase())
       );
       setFilteredSpaces(filtered);
     } else {
-      setFilteredSpaces(highRatedSpaces);
+      setFilteredSpaces(spacesNearYou);
     }
-  }, [searchText, highRatedSpaces]);
+  }, [searchText, spacesNearYou]);
 
-  const fetchHighRatedSpaces = async () => {
+  const fetchSpacesNearYou = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const response = await axios.get(
-        "https://workhive.info.vn:8443/users/searchbyrate"
-      );
+      const locationData = await getLocation();
+      if (!locationData) {
+        // If location is null, stop the function
+        setLoading(false);
+        return;
+      }
+      const url =
+        km.id === ""
+          ? `https://workhive.info.vn:8443/workspaces/nearby?lat=${locationData.coords.latitude}&lng=${locationData.coords.longitude}`
+          : `https://workhive.info.vn:8443/workspaces/nearby?lat=${locationData.coords.latitude}&lng=${locationData.coords.longitude}&radius.id=${km.id}`;
+      const response = await axios.get(url);
       const spaces = response.data.workspaces || [];
-      setHighRatedSpaces(spaces);
+      setSpacesNearYou(spaces);
       setFilteredSpaces(spaces);
     } catch (error) {
-      alert("Error fetching high-rated spaces:", error);
+      alert("Error fetching nearby spaces:", error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -73,7 +155,7 @@ const AllHighRatedSpaces = () => {
 
   const onRefresh = () => {
     setRefreshing(true);
-    fetchHighRatedSpaces();
+    fetchSpacesNearYou();
   };
 
   const toggleViewType = () => {
@@ -83,10 +165,10 @@ const AllHighRatedSpaces = () => {
   const renderHeader = () => (
     <View style={styles.header}>
       <View style={styles.headerTitleRow}>
-        <View style={{ flex: 1, paddingRight: 10 }}>
-          <Text style={styles.headerTitle}>Không gian được đánh giá cao</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.headerTitle}>Các không gian gần bạn</Text>
           <Text style={styles.headerSubtitle}>
-            Khám phá những không gian làm việc chất lượng nhất
+            Khám phá những không gian làm việc gần bạn
           </Text>
         </View>
         <TouchableOpacity
@@ -122,9 +204,9 @@ const AllHighRatedSpaces = () => {
         )}
         <View style={styles.badgeContainer}>
           <View style={styles.ratingBadge}>
-            <Icon name="star" size={12} color="#FFD700" />
-            <Text style={styles.ratingText}>
-              {Number(item.rate).toFixed(1) || 0}
+            <Icon2 name="map-location-dot" size={16} color="#fff" />
+            <Text style={styles.listItemRatingText}>
+              {Number(item.distanceKm).toFixed(2)} km
             </Text>
           </View>
         </View>
@@ -176,17 +258,14 @@ const AllHighRatedSpaces = () => {
         )}
         <View style={styles.badgeContainer}>
           <View style={styles.listItemRating}>
-            <Icon name="star" size={14} color="#FFD700" />
+            <Icon2 name="map-location-dot" size={16} color="#fff" />
             <Text style={styles.listItemRatingText}>
-              {Number(item.rate).toFixed(1) || 0}
+              {Number(item.distanceKm).toFixed(2)} km
             </Text>
           </View>
         </View>
       </View>
       <View style={styles.listItemInfo}>
-        {/* <Text style={styles.listItemLicense} numberOfLines={1}>
-          {item.licenseName || "Chưa có giấy phép"}
-        </Text> */}
         <Text style={styles.listItemName} numberOfLines={1}>
           {item.name}
         </Text>
@@ -231,7 +310,7 @@ const AllHighRatedSpaces = () => {
           >
             <Icon name="arrow-back" size={24} color="#333" />
           </TouchableOpacity>
-          <Text style={styles.navTitle}>Không gian được đánh giá cao</Text>
+          <Text style={styles.navTitle}>Các không gian gần bạn</Text>
           <View style={{ width: 40 }} />
         </View>
         <View style={styles.loadingContainer}>
@@ -252,7 +331,7 @@ const AllHighRatedSpaces = () => {
         >
           <Icon name="arrow-back" size={24} color="#333" />
         </TouchableOpacity>
-        <Text style={styles.navTitle}>Không gian được đánh giá cao</Text>
+        <Text style={styles.navTitle}>Các không gian gần bạn</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -276,6 +355,12 @@ const AllHighRatedSpaces = () => {
             </TouchableOpacity>
           )}
         </View>
+        <TouchableOpacity
+          style={styles.filterButton}
+          onPress={() => setModalVisible(true)}
+        >
+          <Ionicons name="filter" size={24} color="#835101" />
+        </TouchableOpacity>
       </View>
 
       <FlatList
@@ -297,11 +382,95 @@ const AllHighRatedSpaces = () => {
           />
         }
       />
+
+      <Modal visible={modalVisible} transparent animationType="fade">
+        <BlurView intensity={60} style={styles.blurView}>
+          <View style={styles.promotionContainer}>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={{ fontSize: 18, fontWeight: "bold", color: "#fff" }}>
+                ×
+              </Text>
+            </TouchableOpacity>
+            {spaceList.map((space) => (
+              <TouchableOpacity
+                key={space.id}
+                style={{
+                  width: "100%",
+                  padding: 12,
+                  marginVertical: 6,
+                  borderRadius: 10,
+                  backgroundColor: "#F5F5F5",
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 3,
+                  elevation: 2,
+                  borderWidth: km.id === space.id ? 1 : 0,
+                  borderColor: km.id === space.id ? "#835101" : "",
+                }}
+                onPress={() => {
+                  setKm(space);
+                  setModalVisible(false);
+                }}
+              >
+                <Text style={styles.promotionTitle}>{space.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </BlurView>
+      </Modal>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  filterButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#f5f5f5",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  blurView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.6)",
+  },
+  promotionContainer: {
+    width: 320,
+    padding: 10,
+    paddingTop: 50,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 5,
+  },
+  promotionTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 10,
+    color: "#835101",
+  },
+  closeButton: {
+    position: "absolute",
+    top: 12,
+    right: 12,
+    backgroundColor: "#835101",
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   safeArea: {
     flex: 1,
     backgroundColor: "#f8f8f8",
@@ -328,6 +497,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    gap: 20,
   },
   headerTitle: {
     fontSize: 24,
@@ -360,6 +530,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderBottomWidth: 1,
     borderBottomColor: "#f0f0f0",
+    gap: 10,
   },
   searchBar: {
     flex: 1,
@@ -518,12 +689,6 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 4,
   },
-  ratingText: {
-    marginLeft: 3,
-    fontWeight: "bold",
-    color: "#fff",
-    fontSize: 10,
-  },
   noImageContainer: {
     width: "100%",
     height: "100%",
@@ -549,4 +714,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AllHighRatedSpaces;
+export default NearbyWorkspace;

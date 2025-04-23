@@ -17,27 +17,29 @@
 // import Terms from "./src/screens/Terms";
 // import AllFeedBackScreen from "./src/screens/AllFeedBackScreen";
 
-// // Context
-// import { AuthContext, AuthProvider } from "./src/contexts/AuthContext";
-// import RegisterScreen from "./src/screens/RegisterScreen";
-// import WorkSpaces from "./src/screens/WorkSpaces";
-// import { CartProvider } from "./src/contexts/CartContext";
-// import Checkout from "./src/screens/Checkout";
-// import YourBooking from "./src/screens/YourBooking";
-// import BookingDetailScreen from "./src/screens/YourBookingDetail";
-// import ReviewScreen from "./src/screens/ReviewScreen";
-// import YourReviewScreen from "./src/screens/YourReview";
-// import AllReview from "./src/screens/AllReview";
-// import SearchScreen from "./src/screens/SearchScreen";
-// import WalletScreen from "./src/screens/WalletScreen";
-// import FeedbackScreen from "./src/screens/FeedbackScreen";
-// import AllHighRatedSpaces from "./src/screens/AllHighRatedSpaces";
-// import AllOwners from "./src/screens/AllOwners";
-// import OwnerDetail from "./src/screens/OwnerDetail";
+// Context
+import { AuthContext, AuthProvider } from "./src/contexts/AuthContext";
+import RegisterScreen from "./src/screens/RegisterScreen";
+import ForgotPasswordScreen from "./src/screens/ForgotPasswordScreen";
+import WorkSpaces from "./src/screens/WorkSpaces";
+import { CartProvider } from "./src/contexts/CartContext";
+import Checkout from "./src/screens/Checkout";
+import YourBooking from "./src/screens/YourBooking";
+import BookingDetailScreen from "./src/screens/YourBookingDetail";
+import ReviewScreen from "./src/screens/ReviewScreen";
+import YourReviewScreen from "./src/screens/YourReview";
+import AllReview from "./src/screens/AllReview";
+import SearchScreen from "./src/screens/SearchScreen";
+import WalletScreen from "./src/screens/WalletScreen";
+import FeedbackScreen from "./src/screens/FeedbackScreen";
+import AllHighRatedSpaces from "./src/screens/AllHighRatedSpaces";
+import AllOwners from "./src/screens/AllOwners";
+import OwnerDetail from "./src/screens/OwnerDetail";
 
-// import * as Linking from "expo-linking";
-// import SuccessScreen from "./src/screens/SuccessScreen";
-// import FailScreen from "./src/screens/FailScreen";
+import * as Linking from "expo-linking";
+import SuccessScreen from "./src/screens/SuccessScreen";
+import FailScreen from "./src/screens/FailScreen";
+import NearbyWorkspace from "./src/screens/NearbyWorkspace";
 
 // // Set up deep linking configuration
 // const prefix = Linking.createURL("/");
@@ -84,21 +86,22 @@
 //   </Stack.Navigator>
 // );
 
-// const HomeStack = () => (
-//   <Stack.Navigator screenOptions={{ headerShown: false }}>
-//     <Stack.Screen name="HomeMain" component={Home} />
-//     <Stack.Screen name="WorkspaceDetail" component={WorkspaceDetail} />
-//     <Stack.Screen name="AllReview" component={AllReview} />
-//     <Stack.Screen name="Notification" component={NotificationScreen} />
-//     <Stack.Screen name="WorkSpaces" component={WorkSpaces} />
-//     <Stack.Screen name="AllHighRatedSpaces" component={AllHighRatedSpaces} />
-//     <Stack.Screen name="AllOwners" component={AllOwners} />
-//     <Stack.Screen name="Checkout" component={Checkout} />
-//     <Stack.Screen name="SuccessPage" component={SuccessScreen} />
-//     <Stack.Screen name="FailPage" component={FailScreen} />
-//     <Stack.Screen name="OwnerDetail" component={OwnerDetail} />
-//   </Stack.Navigator>
-// );
+const HomeStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="HomeMain" component={Home} />
+    <Stack.Screen name="WorkspaceDetail" component={WorkspaceDetail} />
+    <Stack.Screen name="NearbyWorkspace" component={NearbyWorkspace} />
+    <Stack.Screen name="AllReview" component={AllReview} />
+    <Stack.Screen name="Notification" component={NotificationScreen} />
+    <Stack.Screen name="WorkSpaces" component={WorkSpaces} />
+    <Stack.Screen name="AllHighRatedSpaces" component={AllHighRatedSpaces} />
+    <Stack.Screen name="AllOwners" component={AllOwners} />
+    <Stack.Screen name="Checkout" component={Checkout} />
+    <Stack.Screen name="SuccessPage" component={SuccessScreen} />
+    <Stack.Screen name="FailPage" component={FailScreen} />
+    <Stack.Screen name="OwnerDetail" component={OwnerDetail} />
+  </Stack.Navigator>
+);
 
 // const SearchStack = () => (
 //   <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -122,12 +125,13 @@
 //   </Stack.Navigator>
 // );
 
-// const AuthScreens = () => (
-//   <AuthStack.Navigator screenOptions={{ headerShown: false }}>
-//     <AuthStack.Screen name="Login" component={LoginScreen} />
-//     <AuthStack.Screen name="Register" component={RegisterScreen} />
-//   </AuthStack.Navigator>
-// );
+const AuthScreens = () => (
+  <AuthStack.Navigator screenOptions={{ headerShown: false }}>
+    <AuthStack.Screen name="Login" component={LoginScreen} />
+    <AuthStack.Screen name="Register" component={RegisterScreen} />
+    <AuthStack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+  </AuthStack.Navigator>
+);
 
 // const getScreensWithHiddenTabBar = () => [
 //   // Home Stack

@@ -1,21 +1,38 @@
 import { useRoute, useNavigation } from "@react-navigation/native";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect } from "react";
 import axios from "axios";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const FailScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  const { OrderCode, BookingId } = route.params || {};
+  const { OrderCode, BookingId, source, customerWalletId, workspaceId } = route.params || {};
+  
+  console.log("FailScreen received params:", JSON.stringify(route.params));
+
+  // Check if this is a wallet-related failure or a booking failure
+  const isWalletFailure = source === 'wallet' || (route.params && !BookingId && customerWalletId);
 
   const handleGoHome = () => {
     navigation.navigate("HomeMain");
   };
 
   useEffect(() => {
-    if (OrderCode !== null && BookingId !== null) {
-      const updateWorkspaceTimeStatus = async () => {
+    const handleFailure = async () => {
+      if (isWalletFailure) {
+        // Handle wallet deposit failure
+        try {
+          // Clear any stored wallet transaction data
+          await AsyncStorage.removeItem("customerWalletId");
+          await AsyncStorage.removeItem("orderCode");
+          await AsyncStorage.removeItem("amount");
+        } catch (error) {
+          console.error("Error clearing wallet transaction data:", error);
+        }
+      } else if (OrderCode !== null && BookingId !== null) {
+        // Handle booking failure
         try {
           await axios.put(
             `https://workhive.info.vn:8443/users/booking/updatetimestatus`,
@@ -25,13 +42,13 @@ const FailScreen = () => {
             }
           );
         } catch (error) {
-          toast("Error updating workspace time status:", error);
+          console.error("Error updating workspace time status:", error);
         }
-      };
+      }
+    };
 
-      updateWorkspaceTimeStatus();
-    }
-  }, [OrderCode, BookingId]);
+    handleFailure();
+  }, [OrderCode, BookingId, isWalletFailure]);
 
   return (
     <View style={styles.container}>
@@ -43,13 +60,25 @@ const FailScreen = () => {
           style={styles.icon}
         />
         <Text style={styles.title}>Thanh toán thất bại!</Text>
+        
+        {isWalletFailure && (
+          <Text style={styles.message}>
+            Nạp tiền vào ví WorkHive không thành công. Vui lòng thử lại sau.
+          </Text>
+        )}
+        
+        {!isWalletFailure && (
+          <Text style={styles.message}>
+            Đặt chỗ không thành công. Vui lòng thử lại sau.
+          </Text>
+        )}
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity
-            style={[styles.button, styles.secondaryButton]}
+            style={[styles.button, styles.primaryButton]}
             onPress={handleGoHome}
           >
-            <Text style={styles.secondaryButtonText}>Về trang chủ</Text>
+            <Text style={styles.primaryButtonText}>Về trang chủ</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -87,8 +116,14 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     color: "#FF3B30",
-    marginBottom: 24,
+    marginBottom: 16,
     textAlign: "center",
+  },
+  message: {
+    fontSize: 16,
+    color: "#666",
+    textAlign: "center",
+    marginBottom: 24,
   },
   buttonContainer: {
     width: "100%",
@@ -102,13 +137,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
   },
-  secondaryButton: {
-    backgroundColor: "transparent",
-    borderWidth: 1,
-    borderColor: "#835101",
+  primaryButton: {
+    backgroundColor: "#835101",
   },
-  secondaryButtonText: {
-    color: "#835101",
+  primaryButtonText: {
+    color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "bold",
   },

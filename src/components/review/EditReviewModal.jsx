@@ -1,8 +1,9 @@
 import React from 'react';
-import { Modal, View, Text, TextInput, TouchableOpacity, Image, ScrollView, StyleSheet } from 'react-native';
+import { Modal, View, Text, TextInput, TouchableOpacity, Image, ScrollView, StyleSheet, Alert } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import axios from 'axios';
 
 const EditReviewModal = ({
   visible,
@@ -42,6 +43,15 @@ const EditReviewModal = ({
       return;
     }
 
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(
+        "Cần quyền truy cập",
+        "Vui lòng cho phép ứng dụng truy cập thư viện ảnh của bạn."
+      );
+      return;
+    }
+
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -50,7 +60,36 @@ const EditReviewModal = ({
     });
 
     if (!result.canceled && result.assets[0]) {
-      onImagesChange([...updatedImages, { url: result.assets[0].uri }]);
+      try {
+        const formData = new FormData();
+        formData.append("image", {
+          uri: result.assets[0].uri,
+          type: "image/jpeg",
+          name: "photo.jpg",
+        });
+
+        const response = await axios.post(
+          "https://workhive.info.vn:8443/images/upload",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        if (response.data.status === 200) {
+          onImagesChange([
+            ...updatedImages,
+            { url: response.data.data[0] },
+          ]);
+        } else {
+          Alert.alert("Lỗi", "Không thể tải lên ảnh. Vui lòng thử lại sau.");
+        }
+      } catch (error) {
+        console.error("Lỗi khi tải lên ảnh:", error);
+        Alert.alert("Lỗi", "Đã xảy ra lỗi khi tải lên ảnh");
+      }
     }
   };
 

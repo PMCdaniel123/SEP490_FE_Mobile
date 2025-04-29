@@ -52,8 +52,19 @@ const AllFeedBackScreen = () => {
           headers: {
             Authorization: `Bearer ${userToken}`,
           },
+          // Accept 404 responses as valid (will be handled as empty bookings)
+          validateStatus: function (status) {
+            return status === 200 || status === 404;
+          }
         }
       );
+
+      // If 404, set empty bookings array and return
+      if (response.status === 404) {
+        setBookings([]);
+        setLoading(false);
+        return;
+      }
 
       const data = response.data;
       const sortedData = [...data].sort(

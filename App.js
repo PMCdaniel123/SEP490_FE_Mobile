@@ -83,6 +83,7 @@ const ProfileStack = () => (
     <Stack.Screen name="Wallet" component={WalletScreen} />
     <Stack.Screen name="Terms" component={Terms} />
     <Stack.Screen name="AllFeedBackScreen" component={AllFeedBackScreen} />
+    <Stack.Screen name="Notification" component={NotificationScreen} />
   </Stack.Navigator>
 );
 
@@ -141,7 +142,7 @@ const getScreensWithHiddenTabBar = () => [
   // Booking Stack
   "BookingDetail", "ReviewScreen", "WorkspaceDetail", "Checkout", "FeedbackScreen",
   // Profile Stack
-  "ProfileDetail", "YourReview", "Wallet", "Terms", "AllFeedBackScreen",
+  "ProfileDetail", "YourReview", "Wallet", "Terms", "AllFeedBackScreen", "Notification",
 ];
 
 const TabNavigator = () => {

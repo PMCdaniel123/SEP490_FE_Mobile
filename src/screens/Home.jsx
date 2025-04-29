@@ -7,6 +7,9 @@ import {
   TouchableOpacity,
   FlatList,
   StyleSheet,
+  Linking,
+  Platform,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/MaterialIcons";
@@ -17,6 +20,7 @@ import TopBrands from "../components/TopBrands";
 import { useNavigation } from "@react-navigation/native";
 import { AuthContext } from "../contexts/AuthContext";
 import axios from "axios";
+import * as Location from "expo-location";
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -66,6 +70,34 @@ const HomeScreen = () => {
     { id: "nearYou", component: SpaceNearYou },
   ];
 
+  // Function to open location settings
+  const openLocationSettings = async () => {
+    try {
+      if (Platform.OS === 'ios') {
+        await Linking.openURL('app-settings:');
+      } else {
+        await Linking.openSettings();
+      }
+    } catch (error) {
+      Alert.alert(
+        "Không thể mở cài đặt",
+        "Không thể mở cài đặt vị trí. Vui lòng mở cài đặt vị trí của thiết bị thủ công."
+      );
+    }
+  };
+
+  // Check location permission status
+  const [locationPermission, setLocationPermission] = useState(null);
+
+  useEffect(() => {
+    const checkLocationPermission = async () => {
+      const { status } = await Location.getForegroundPermissionsAsync();
+      setLocationPermission(status);
+    };
+    
+    checkLocationPermission();
+  }, []);
+
   const renderHeader = () => (
     <>
       <View style={styles.header}>
@@ -98,9 +130,6 @@ const HomeScreen = () => {
           </View>
         </View>
         <View style={styles.headerIcons}>
-          {/* <TouchableOpacity style={styles.iconButton}>
-            <Icon name="search" size={24} color="#000" />
-          </TouchableOpacity> */}
           <TouchableOpacity
             style={styles.iconButton}
             onPress={() => navigation.navigate("Notification")}
@@ -110,7 +139,7 @@ const HomeScreen = () => {
         </View>
       </View>
 
-      <TouchableOpacity style={styles.locationBanner}>
+      <TouchableOpacity style={styles.locationBanner} onPress={openLocationSettings}>
         <Icon
           name="location-on"
           size={24}
@@ -118,7 +147,9 @@ const HomeScreen = () => {
           style={styles.locationIcon}
         />
         <Text style={styles.locationText}>
-          Bạn có thể thay đổi vị trí của mình để hiển thị các Workspace gần đây
+          {locationPermission === 'granted' 
+            ? 'Vị trí của bạn đã được bật. Nhấn để thay đổi.'
+            : 'Bạn hãy cho phép truy cập vị trí để có thể tìm kiếm địa điểm gần nhất nhé!'}
         </Text>
         <Icon name="chevron-right" size={24} color="#000" />
       </TouchableOpacity>

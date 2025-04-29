@@ -23,6 +23,7 @@
         "userFeedback",
         "ownerScreen",
         "topBrand",
-        "forgotPassword"
+        "forgotPassword",
+        "locationRender"
     ]
 }

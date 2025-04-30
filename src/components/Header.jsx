@@ -11,10 +11,10 @@ const Header = () => {
           style={styles.avatar}
         />
         <View>
-          <Text style={styles.userName}>Khanh Quang</Text>
+          <Text style={styles.userName}></Text>
           <View style={styles.locationContainer}>
             <Icon name="location-on" size={16} color="#666" />
-            <Text style={styles.location}>Thu Duc</Text>
+            <Text style={styles.location}></Text>
           </View>
         </View>
       </View>

@@ -31,16 +31,22 @@ const RegisterScreen = ({ navigation }) => {
 
     setLoading(true);
     try {
-      const response = await axios.post("http://35.78.210.59:8080/users/register", {
-        name,
-        email,
-        phone,
-        password,
-        sex,
-      });
+      const response = await axios.post(
+        "https://workhive.info.vn:8443/users/register",
+        {
+          name,
+          email,
+          phone,
+          password,
+          sex,
+        }
+      );
 
       if (response.data && response.data.token) {
-        Alert.alert("Thành công", response.data.notification || "Đăng ký tài khoản thành công!");
+        Alert.alert(
+          "Thành công",
+          response.data.notification || "Đăng ký tài khoản thành công!"
+        );
 
         const loginResult = await login(email, password);
 
@@ -48,12 +54,20 @@ const RegisterScreen = ({ navigation }) => {
           navigation.navigate("Login");
         }
       } else {
-        Alert.alert("Thông báo", response.data.notification || "Đăng ký thành công, vui lòng đăng nhập.");
+        Alert.alert(
+          "Thông báo",
+          response.data.notification ||
+            "Đăng ký thành công, vui lòng đăng nhập."
+        );
         navigation.navigate("Login");
       }
     } catch (error) {
       alert("Lỗi đăng ký:", error.response?.data || error.message);
-      Alert.alert("Đăng ký thất bại", error.response?.data?.notification || "Đã xảy ra lỗi trong quá trình đăng ký.");
+      Alert.alert(
+        "Đăng ký thất bại",
+        error.response?.data?.notification ||
+          "Đã xảy ra lỗi trong quá trình đăng ký."
+      );
     } finally {
       setLoading(false);
     }
@@ -61,10 +75,16 @@ const RegisterScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : null} style={{ flex: 1 }}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : null}
+        style={{ flex: 1 }}
+      >
         <ScrollView style={styles.scrollView}>
           <View style={styles.header}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              style={styles.backButton}
+            >
               <Icon name="arrow-left" size={20} color="#000" />
             </TouchableOpacity>
             <Text style={styles.title}>Tạo tài khoản</Text>
@@ -82,21 +102,37 @@ const RegisterScreen = ({ navigation }) => {
             validationSchema={validationSchema}
             onSubmit={(values) => handleRegister(values)}
           >
-            {({ handleChange, handleBlur, handleSubmit, values, errors, touched, setFieldValue }) => (
+            {({
+              handleChange,
+              handleBlur,
+              handleSubmit,
+              values,
+              errors,
+              touched,
+              setFieldValue,
+            }) => (
               <View style={styles.formContainer}>
                 <Text style={styles.label}>Họ và tên</Text>
                 <TextInput
-                  style={[styles.input, touched.name && errors.name && styles.inputError]}
+                  style={[
+                    styles.input,
+                    touched.name && errors.name && styles.inputError,
+                  ]}
                   placeholder="Nhập họ và tên"
                   value={values.name}
                   onChangeText={handleChange("name")}
                   onBlur={handleBlur("name")}
                 />
-                {touched.name && errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
+                {touched.name && errors.name && (
+                  <Text style={styles.errorText}>{errors.name}</Text>
+                )}
 
                 <Text style={styles.label}>Email</Text>
                 <TextInput
-                  style={[styles.input, touched.email && errors.email && styles.inputError]}
+                  style={[
+                    styles.input,
+                    touched.email && errors.email && styles.inputError,
+                  ]}
                   placeholder="Nhập email"
                   value={values.email}
                   onChangeText={handleChange("email")}
@@ -104,45 +140,71 @@ const RegisterScreen = ({ navigation }) => {
                   keyboardType="email-address"
                   autoCapitalize="none"
                 />
-                {touched.email && errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
+                {touched.email && errors.email && (
+                  <Text style={styles.errorText}>{errors.email}</Text>
+                )}
 
                 <Text style={styles.label}>Số điện thoại</Text>
                 <TextInput
-                  style={[styles.input, touched.phone && errors.phone && styles.inputError]}
+                  style={[
+                    styles.input,
+                    touched.phone && errors.phone && styles.inputError,
+                  ]}
                   placeholder="Nhập số điện thoại"
                   value={values.phone}
                   onChangeText={handleChange("phone")}
                   onBlur={handleBlur("phone")}
                   keyboardType="phone-pad"
                 />
-                {touched.phone && errors.phone && <Text style={styles.errorText}>{errors.phone}</Text>}
+                {touched.phone && errors.phone && (
+                  <Text style={styles.errorText}>{errors.phone}</Text>
+                )}
 
                 <Text style={styles.label}>Giới tính</Text>
                 <TouchableOpacity
-                  style={[styles.selectContainer, touched.sex && errors.sex && styles.inputError]}
+                  style={[
+                    styles.selectContainer,
+                    touched.sex && errors.sex && styles.inputError,
+                  ]}
                   onPress={() => setShowSexModal(true)}
                 >
-                  <Text style={values.sex ? styles.selectText : styles.selectPlaceholder}>
+                  <Text
+                    style={
+                      values.sex ? styles.selectText : styles.selectPlaceholder
+                    }
+                  >
                     {values.sex || "Chọn giới tính"}
                   </Text>
                   <Icon name="chevron-down" size={16} color="#666" />
                 </TouchableOpacity>
-                {touched.sex && errors.sex && <Text style={styles.errorText}>{errors.sex}</Text>}
+                {touched.sex && errors.sex && (
+                  <Text style={styles.errorText}>{errors.sex}</Text>
+                )}
 
                 <Text style={styles.label}>Mật khẩu</Text>
                 <TextInput
-                  style={[styles.input, touched.password && errors.password && styles.inputError]}
+                  style={[
+                    styles.input,
+                    touched.password && errors.password && styles.inputError,
+                  ]}
                   placeholder="Nhập mật khẩu"
                   value={values.password}
                   onChangeText={handleChange("password")}
                   onBlur={handleBlur("password")}
                   secureTextEntry
                 />
-                {touched.password && errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
+                {touched.password && errors.password && (
+                  <Text style={styles.errorText}>{errors.password}</Text>
+                )}
 
                 <Text style={styles.label}>Xác nhận mật khẩu</Text>
                 <TextInput
-                  style={[styles.input, touched.confirmPassword && errors.confirmPassword && styles.inputError]}
+                  style={[
+                    styles.input,
+                    touched.confirmPassword &&
+                      errors.confirmPassword &&
+                      styles.inputError,
+                  ]}
                   placeholder="Nhập lại mật khẩu"
                   value={values.confirmPassword}
                   onChangeText={handleChange("confirmPassword")}
@@ -158,12 +220,19 @@ const RegisterScreen = ({ navigation }) => {
                   onPress={handleSubmit}
                   disabled={loading}
                 >
-                  {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Tạo tài khoản</Text>}
+                  {loading ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <Text style={styles.buttonText}>Tạo tài khoản</Text>
+                  )}
                 </TouchableOpacity>
 
                 <Text style={styles.termsText}>
                   Bằng cách đăng ký, bạn đồng ý với
-                  <Text style={styles.linkText}> Điều khoản và Điều kiện Sử dụng của chúng tôi</Text>
+                  <Text style={styles.linkText}>
+                    {" "}
+                    Điều khoản và Điều kiện Sử dụng của chúng tôi
+                  </Text>
                 </Text>
 
                 {/* Modal chọn giới tính */}
@@ -177,7 +246,9 @@ const RegisterScreen = ({ navigation }) => {
                     <View style={styles.modalContent}>
                       <View style={styles.modalHeader}>
                         <Text style={styles.modalTitle}>Chọn giới tính</Text>
-                        <TouchableOpacity onPress={() => setShowSexModal(false)}>
+                        <TouchableOpacity
+                          onPress={() => setShowSexModal(false)}
+                        >
                           <Icon name="times" size={20} color="#000" />
                         </TouchableOpacity>
                       </View>
@@ -194,12 +265,15 @@ const RegisterScreen = ({ navigation }) => {
                           <Text
                             style={[
                               styles.optionText,
-                              values.sex === option && styles.selectedOptionText,
+                              values.sex === option &&
+                                styles.selectedOptionText,
                             ]}
                           >
                             {option}
                           </Text>
-                          {values.sex === option && <Icon name="check" size={16} color="#835101" />}
+                          {values.sex === option && (
+                            <Icon name="check" size={16} color="#835101" />
+                          )}
                         </TouchableOpacity>
                       ))}
                     </View>

@@ -28,7 +28,7 @@ const HighRatedSpaces = () => {
     const fetchHighRatedSpaces = async () => {
       try {
         const response = await axios.get(
-          "http://35.78.210.59:8080/users/searchbyrate"
+          "https://workhive.info.vn:8443/users/searchbyrate"
         );
         setHighRatedSpaces(response.data.workspaces || []);
       } catch (error) {
@@ -40,6 +40,10 @@ const HighRatedSpaces = () => {
 
     fetchHighRatedSpaces();
   }, []);
+
+  const handleViewAll = () => {
+    navigation.navigate("AllHighRatedSpaces");
+  };
 
   const renderSpaceItem = ({ item }) => (
     <TouchableOpacity
@@ -66,7 +70,9 @@ const HighRatedSpaces = () => {
               ? `${formatCurrency(Math.min(...item.prices.map((p) => p.price)))} - ${formatCurrency(
                   Math.max(...item.prices.map((p) => p.price))
                 )}`
-              : `${formatCurrency(item.prices[0]?.price)}`}
+              : `${formatCurrency(
+                  item.prices.find((price) => price.category === "Giờ")?.price
+                )}`}
           </Text>
           <View style={styles.ratingContainer}>
             <Icon name="star" size={16} color="#FFD700" />
@@ -89,7 +95,7 @@ const HighRatedSpaces = () => {
     <View style={styles.sectionContainer}>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Không gian được đánh giá cao</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={handleViewAll}>
           <Text style={styles.seeAllText}>Xem tất cả</Text>
         </TouchableOpacity>
       </View>

@@ -9,17 +9,24 @@ import {
   Image,
   ActivityIndicator,
   Alert,
+  Platform,
+  RefreshControl,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import { AuthContext } from "../contexts/AuthContext";
 import { useNavigation, useIsFocused } from "@react-navigation/native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 const BookingScreen = () => {
   const isFocused = useIsFocused();
+  const insets = useSafeAreaInsets();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const { userData, userToken } = useContext(AuthContext);
   const navigation = useNavigation();
   const [activeTab, setActiveTab] = useState("Success");
@@ -31,12 +38,15 @@ const BookingScreen = () => {
           display: "flex",
           elevation: 5,
           backgroundColor: "#ffffff",
-          height: 65,
+          height: Platform.OS === "ios" ? 60 + (insets.bottom || 0) : 65,
+          paddingBottom: Platform.OS === "ios" ? insets.bottom || 0 : 0,
           ...styles.shadow,
+          borderTopWidth: 1,
+          borderTopColor: "#f0f0f0",
         },
       });
     }
-  }, [isFocused, navigation]);
+  }, [isFocused, navigation, insets]);
 
   useEffect(() => {
     fetchBookingHistory();
@@ -50,7 +60,7 @@ const BookingScreen = () => {
   const fetchBookingHistory = async () => {
     try {
       const response = await axios.get(
-        `http://35.78.210.59:8080/users/booking/historybookings?UserId=${userData.sub}`,
+        `https://workhive.info.vn:8443/users/booking/historybookings?UserId=${userData.sub}`,
         {
           headers: {
             Authorization: `Bearer ${userToken}`,
@@ -75,6 +85,12 @@ const BookingScreen = () => {
     }
   };
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchBookingHistory();
+    setRefreshing(false);
+  };
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleTimeString("vi-VN", {
@@ -93,11 +109,11 @@ const BookingScreen = () => {
   const getStatusText = (status) => {
     switch (status) {
       case "Success":
-        return "Giao dịch thành công";
+        return "Đặt chỗ thành công";
       case "Pending":
         return "Đang chờ xử lý";
-      case "Fail":
-        return "Giao dịch thất bại";
+      case "Cancelled":
+        return "Đặt chỗ đã hủy";
       default:
         return "Không xác định";
     }
@@ -109,7 +125,7 @@ const BookingScreen = () => {
         return "#4CAF50";
       case "Pending":
         return "#FFC107";
-      case "Fail":
+      case "Cancelled":
         return "#F44336";
       default:
         return "#757575";
@@ -189,10 +205,22 @@ const BookingScreen = () => {
   // Filter bookings based on the active tab
   const filteredBookings =
     activeTab === "Chưa đánh giá"
-      ? bookings.filter(
-          (item) => item.booking_Status === "Success" && item.isReview === 0
-        )
-      : bookings.filter((item) => item.booking_Status === activeTab);
+      ? bookings
+          .filter(
+            (item) => item.booking_Status === "Success" && item.isReview === 0
+          )
+          .sort(
+            (a, b) =>
+              new Date(b.booking_CreatedAt).getTime() -
+              new Date(a.booking_CreatedAt).getTime()
+          )
+      : bookings
+          .filter((item) => item.booking_Status === activeTab)
+          .sort(
+            (a, b) =>
+              new Date(b.booking_CreatedAt).getTime() -
+              new Date(a.booking_CreatedAt).getTime()
+          );
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
@@ -222,17 +250,17 @@ const BookingScreen = () => {
           <TouchableOpacity
             style={[
               styles.tabButton,
-              activeTab === "Fail" && styles.activeTabButton,
+              activeTab === "Cancelled" && styles.activeTabButton,
             ]}
-            onPress={() => setActiveTab("Fail")}
+            onPress={() => setActiveTab("Cancelled")}
           >
             <Text
               style={[
                 styles.tabText,
-                activeTab === "Fail" && styles.activeTabText,
+                activeTab === "Cancelled" && styles.activeTabText,
               ]}
             >
-              Thất bại
+              Đã hủy
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -259,7 +287,7 @@ const BookingScreen = () => {
             <Text style={styles.emptyText}>
               {activeTab === "Success"
                 ? "Bạn chưa có lịch sử đặt chỗ thành công nào"
-                : activeTab === "Fail"
+                : activeTab === "Cancelled"
                   ? "Bạn chưa có lịch sử đặt chỗ thất bại nào"
                   : "Bạn đã đánh giá tất cả không gian"}
             </Text>
@@ -271,6 +299,9 @@ const BookingScreen = () => {
             keyExtractor={(item) => item.booking_Id.toString()}
             contentContainerStyle={styles.listContainer}
             showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
           />
         )}
       </View>

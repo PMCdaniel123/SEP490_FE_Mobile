@@ -7,7 +7,8 @@ const LocationBanner = () => {
     <TouchableOpacity style={styles.locationBanner}>
       <Icon name="location-on" size={24} color="#000" style={styles.locationIcon} />
       <Text style={styles.locationText}>
-        Bạn có thể thay đổi vị trí của mình để hiển thị các Workspace gần đây
+        Bạn hãy cho phép truy cập vị trị để có thể tìm kiếm địa điểm gần nhất nhé!
+        <Text style={{ fontWeight: 'bold' }}> (Bật GPS)</Text>
       </Text>
       <Icon name="chevron-right" size={24} color="#000" />
     </TouchableOpacity>

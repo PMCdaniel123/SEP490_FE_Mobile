@@ -9,15 +9,18 @@ import {
   Alert,
   ScrollView,
   ActivityIndicator,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import axios from "axios";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
+
 
 const ReviewScreen = ({ route }) => {
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
   const {
     bookingId,
     workspaceName,
@@ -32,6 +35,36 @@ const ReviewScreen = ({ route }) => {
   const [comment, setComment] = useState("");
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  // Hide bottom tab bar when this screen is focused
+  useFocusEffect(
+    React.useCallback(() => {
+      // Hide the tab bar by setting tabBarStyle to display: 'none'
+      const parent = navigation.getParent();
+      if (parent) {
+        parent.setOptions({
+          tabBarStyle: { display: 'none' }
+        });
+      }
+
+      // Restore the tab bar when leaving this screen
+      return () => {
+        if (parent) {
+          parent.setOptions({
+            tabBarStyle: {
+              elevation: 5,
+              backgroundColor: "#ffffff",
+              height: Platform.OS === "ios" ? 60 + insets.bottom : 65,
+              paddingBottom: Platform.OS === "ios" ? insets.bottom : 0,
+              display: "flex",
+              borderTopWidth: 1,
+              borderTopColor: "#f0f0f0",
+            }
+          });
+        }
+      };
+    }, [navigation, insets])
+  );
 
   const handleImageUpload = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -60,7 +93,7 @@ const ReviewScreen = ({ route }) => {
         });
 
         const response = await axios.post(
-          "http://35.78.210.59:8080/images/upload",
+          "https://workhive.info.vn:8443/images/upload",
           formData,
           {
             headers: {
@@ -94,7 +127,7 @@ const ReviewScreen = ({ route }) => {
 
     try {
       const response = await axios.post(
-        "http://35.78.210.59:8080/users/booking/rating",
+        "https://workhive.info.vn:8443/users/booking/rating",
         {
           bookingId,
           rate,

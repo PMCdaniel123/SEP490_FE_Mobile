@@ -5,17 +5,22 @@ import {
   Text,
   Image,
   TouchableOpacity,
-  ScrollView,
+  FlatList,
   StyleSheet,
+  Linking,
+  Platform,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import HighRatedSpaces from "../components/HighRatedSpaces";
 import Recommendations from "../components/Recommendations";
 import SpaceNearYou from "../components/SpaceNearYou";
+import TopBrands from "../components/TopBrands";
 import { useNavigation } from "@react-navigation/native";
 import { AuthContext } from "../contexts/AuthContext";
 import axios from "axios";
+import * as Location from "expo-location";
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -33,7 +38,7 @@ const HomeScreen = () => {
 
       try {
         const response = await axios.get(
-          `http://35.78.210.59:8080/users/${userData.sub}`,
+          `https://workhive.info.vn:8443/users/${userData.sub}`,
           {
             headers: {
               Authorization: `Bearer ${userToken}`,
@@ -57,8 +62,44 @@ const HomeScreen = () => {
     fetchUserProfile();
   }, [userData, userToken]);
 
-  return (
-    <SafeAreaView style={styles.container}>
+  // Data for our FlatList sections
+  const sections = [
+    { id: "highRated", component: HighRatedSpaces },
+    { id: "topBrands", component: TopBrands },
+    { id: "recommendations", component: Recommendations },
+    { id: "nearYou", component: SpaceNearYou },
+  ];
+
+  // Function to open location settings
+  const openLocationSettings = async () => {
+    try {
+      if (Platform.OS === 'ios') {
+        await Linking.openURL('app-settings:');
+      } else {
+        await Linking.openSettings();
+      }
+    } catch (error) {
+      Alert.alert(
+        "Không thể mở cài đặt",
+        "Không thể mở cài đặt vị trí. Vui lòng mở cài đặt vị trí của thiết bị thủ công."
+      );
+    }
+  };
+
+  // Check location permission status
+  const [locationPermission, setLocationPermission] = useState(null);
+
+  useEffect(() => {
+    const checkLocationPermission = async () => {
+      const { status } = await Location.getForegroundPermissionsAsync();
+      setLocationPermission(status);
+    };
+    
+    checkLocationPermission();
+  }, []);
+
+  const renderHeader = () => (
+    <>
       <View style={styles.header}>
         <View style={styles.userInfo}>
           <Image
@@ -89,9 +130,6 @@ const HomeScreen = () => {
           </View>
         </View>
         <View style={styles.headerIcons}>
-          <TouchableOpacity style={styles.iconButton}>
-            <Icon name="search" size={24} color="#000" />
-          </TouchableOpacity>
           <TouchableOpacity
             style={styles.iconButton}
             onPress={() => navigation.navigate("Notification")}
@@ -101,7 +139,7 @@ const HomeScreen = () => {
         </View>
       </View>
 
-      <TouchableOpacity style={styles.locationBanner}>
+      <TouchableOpacity style={styles.locationBanner} onPress={openLocationSettings}>
         <Icon
           name="location-on"
           size={24}
@@ -109,21 +147,38 @@ const HomeScreen = () => {
           style={styles.locationIcon}
         />
         <Text style={styles.locationText}>
-          Bạn có thể thay đổi vị trí của mình để hiển thị các Workspace gần đây
+          {locationPermission === 'granted' 
+            ? 'Vị trí của bạn đã được bật. Nhấn để thay đổi.'
+            : 'Bạn hãy cho phép truy cập vị trí để có thể tìm kiếm địa điểm gần nhất nhé!'}
         </Text>
         <Icon name="chevron-right" size={24} color="#000" />
       </TouchableOpacity>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* High Rated Spaces */}
-        <HighRatedSpaces />
-        {/* Recommendations */}
-        <Recommendations />
-        <SpaceNearYou />
-      </ScrollView>
+    </>
+  );
+
+  const renderSectionItem = ({ item }) => {
+    const Component = item.component;
+    return <Component />;
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <FlatList
+        ListHeaderComponent={renderHeader}
+        data={sections}
+        renderItem={renderSectionItem}
+        keyExtractor={(item) => item.id}
+        showsVerticalScrollIndicator={false}
+      />
     </SafeAreaView>
   );
 };
+
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",

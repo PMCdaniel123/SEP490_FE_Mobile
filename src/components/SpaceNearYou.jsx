@@ -1,119 +1,18 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   Image,
   StyleSheet,
-  ScrollView,
+  FlatList,
+  ActivityIndicator,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import Icon2 from "react-native-vector-icons/FontAwesome6";
 import { useNavigation } from "@react-navigation/native";
-
-const spacesNearYou = [
-  {
-    id: 1,
-    name: "Cozy Workspace",
-    address: "123 Main Street, District 1, Ho Chi Minh City, Vietnam",
-    googleMapUrl: "https://www.google.com/maps/place/COZY+WORKSPACE/",
-    description: "A cozy workspace for professionals.",
-    capacity: 8,
-    category: "Shared Space",
-    status: "Active",
-    cleanTime: 10,
-    rate: 4.8,
-    area: 15,
-    openTime: "07:00:00",
-    closeTime: "22:00:00",
-    is24h: 0,
-    prices: [
-      {
-        id: 1,
-        price: 50000,
-        category: "Giờ",
-      },
-      {
-        id: 2,
-        price: 300000,
-        category: "Ngày",
-      },
-    ],
-    images: [
-      {
-        id: 1,
-        imgUrl:
-          "https://res.cloudinary.com/dcq99dv8p/image/upload/v1741894960/IMAGES/mkjegiedszefqdwdsz64.jpg",
-      },
-    ],
-    facilities: [
-      {
-        id: 1,
-        facilityName: "Wifi tốc độ cao",
-      },
-      {
-        id: 2,
-        facilityName: "Máy lạnh",
-      },
-    ],
-    policies: [
-      {
-        id: 1,
-        policyName: "Không hút thuốc",
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: "Modern Meeting Room",
-    address: "456 Business Avenue, District 3, Ho Chi Minh City, Vietnam",
-    googleMapUrl: "https://www.google.com/maps/place/MODERN+MEETING+ROOM/",
-    description: "A modern meeting room with premium facilities.",
-    capacity: 12,
-    category: "Meeting Room",
-    status: "Active",
-    cleanTime: 15,
-    rate: 4.7,
-    area: 25,
-    openTime: "08:00:00",
-    closeTime: "20:00:00",
-    is24h: 0,
-    prices: [
-      {
-        id: 1,
-        price: 100000,
-        category: "Giờ",
-      },
-      {
-        id: 2,
-        price: 600000,
-        category: "Ngày",
-      },
-    ],
-    images: [
-      {
-        id: 1,
-        imgUrl:
-          "https://res.cloudinary.com/dcq99dv8p/image/upload/v1741894988/IMAGES/kkmmgzyvbml4bajjybgl.jpg",
-      },
-    ],
-    facilities: [
-      {
-        id: 1,
-        facilityName: "Máy chiếu",
-      },
-      {
-        id: 2,
-        facilityName: "Bảng trắng",
-      },
-    ],
-    policies: [
-      {
-        id: 1,
-        policyName: "Không gây ồn ào",
-      },
-    ],
-  },
-];
+import axios from "axios";
+import * as Location from "expo-location";
 
 const formatCurrency = (value) => {
   return new Intl.NumberFormat("vi-VN", {
@@ -124,51 +23,135 @@ const formatCurrency = (value) => {
 
 const SpaceNearYou = () => {
   const navigation = useNavigation();
+  const [spacesNearYou, setSpacesNearYou] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [location, setLocation] = useState(null);
+
+  const getLocation = async () => {
+    setLoading(true);
+    try {
+      // Request foreground location permissions
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setErrorMsg("Permission to access location was denied");
+        return null; // Return null to indicate failure
+      }
+
+      // Check if location services are enabled
+      let isLocationEnabled = await Location.hasServicesEnabledAsync();
+      if (!isLocationEnabled) {
+        Alert.alert(
+          "Location Services Disabled",
+          "Please enable location services in your device settings."
+        );
+        return null; // Return null to indicate failure
+      }
+
+      // Get the current location
+      let locationData = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+        timeInterval: 2000,
+      });
+      setLocation(locationData);
+      return locationData; // Return location data
+    } catch (error) {
+      setErrorMsg("Error fetching location: " + error.message);
+      return null; // Return null to indicate failure
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const fetchSpacesNearYou = async () => {
+      setLoading(true);
+      try {
+        const locationData = await getLocation();
+        if (!locationData) {
+          // If location is null, stop the function
+          setLoading(false);
+          return;
+        }
+        const url = `https://workhive.info.vn:8443/workspaces/nearby?lat=${locationData.coords.latitude}&lng=${locationData.coords.longitude}`;
+        const response = await axios.get(url);
+        setSpacesNearYou(response.data.workspaces || []);
+      } catch (error) {
+        alert("Error fetching nearby spaces:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSpacesNearYou();
+  }, []);
+
+  const renderSpaceItem = ({ item }) => (
+    <TouchableOpacity
+      key={item.id}
+      style={styles.listItemCard}
+      onPress={() => navigation.navigate("WorkspaceDetail", { id: item.id })}
+      activeOpacity={0.8}
+    >
+      <View style={styles.imageContainer}>
+        <Image
+          source={{ uri: item.images[0]?.imgUrl }}
+          style={styles.listItemImage}
+        />
+      </View>
+      <View style={styles.listItemInfo}>
+        <Text style={styles.listItemName} numberOfLines={1}>
+          {item.name}
+        </Text>
+        <View style={styles.listItemLocation}>
+          <Icon name="location-on" size={14} color="#666" />
+          <Text style={styles.listItemLocationText} numberOfLines={2}>
+            {item.address}
+          </Text>
+        </View>
+        <View style={styles.listItemFooter}>
+          <Text style={styles.listItemPrice}>
+            {item.prices.length > 1
+              ? `${formatCurrency(
+                  item.prices.find((price) => price.category === "Giờ")?.price
+                )} - ${formatCurrency(
+                  item.prices.find((price) => price.category === "Ngày")?.price
+                )}`
+              : `${formatCurrency(
+                  item.prices.find((price) => price.category === "Giờ")?.price
+                )}`}
+          </Text>
+          <View style={styles.listItemRating}>
+            <Icon2 name="map-location-dot" size={16} color="#835101" />
+            <Text style={styles.listItemRatingText}>
+              {Number(item.distanceKm).toFixed(2)} km
+            </Text>
+          </View>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#835101" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.sectionContainer}>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Không gian gần bạn</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("NearbyWorkspace")}>
           <Text style={styles.seeAllText}>Xem tất cả</Text>
         </TouchableOpacity>
       </View>
-      <ScrollView>
-        {spacesNearYou.map((space) => (
-          <TouchableOpacity
-            key={space.id}
-            style={styles.listItemCard}
-            onPress={() =>
-              navigation.navigate("WorkspaceDetail", { workspace: space })
-            }
-          >
-            <Image
-              source={{ uri: space.images[0]?.imgUrl }}
-              style={styles.listItemImage}
-            />
-            <View style={styles.listItemInfo}>
-              <Text style={styles.listItemName}>{space.name}</Text>
-              <View style={styles.listItemLocation}>
-                <Icon name="location-on" size={14} color="#666" />
-                <Text style={styles.listItemLocationText} numberOfLines={2}>
-                  {space.address}
-                </Text>
-              </View>
-              <View style={styles.listItemFooter}>
-                <Text style={styles.listItemPrice}>
-                  {space.prices.length > 1
-                    ? `${formatCurrency(space.prices[0].price)} - ${formatCurrency(space.prices[1].price)}`
-                    : `${formatCurrency(space.prices[0]?.price)}`}
-                </Text>
-                <View style={styles.listItemRating}>
-                  <Icon name="star" size={16} color="#FFD700" />
-                  <Text style={styles.listItemRatingText}>{space.rate}</Text>
-                </View>
-              </View>
-            </View>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+      <FlatList
+        data={spacesNearYou.slice(0, 4)}
+        renderItem={renderSpaceItem}
+        keyExtractor={(item) => item.id.toString()}
+        showsVerticalScrollIndicator={false}
+      />
     </View>
   );
 };
@@ -205,19 +188,25 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
   },
+  imageContainer: {
+    width: 110,
+    height: 120,
+  },
   listItemImage: {
-    width: 100,
-    height: 100,
+    width: "100%",
+    height: "100%",
     resizeMode: "cover",
   },
   listItemInfo: {
     flex: 1,
     padding: 12,
+    justifyContent: "space-between",
   },
   listItemName: {
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 4,
+    color: "#333",
   },
   listItemLocation: {
     flexDirection: "row",
@@ -238,6 +227,7 @@ const styles = StyleSheet.create({
   listItemPrice: {
     fontSize: 14,
     fontWeight: "bold",
+    color: "#835101",
   },
   listItemRating: {
     flexDirection: "row",
@@ -246,6 +236,11 @@ const styles = StyleSheet.create({
   listItemRatingText: {
     marginLeft: 4,
     fontWeight: "bold",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

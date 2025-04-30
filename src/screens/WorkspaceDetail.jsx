@@ -4,15 +4,21 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   ActivityIndicator,
   TouchableOpacity,
   Image,
+  Animated,
+  Linking,
+  Platform,
 } from "react-native";
 import axios from "axios";
 import ImageList from "../components/ImageList";
-import { Card } from "react-native-paper";
-import { MaterialIcons } from "@expo/vector-icons";
+import { Card, Surface } from "react-native-paper";
+import {
+  MaterialIcons,
+  AntDesign,
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import AmenityList from "../components/amenities/AmenityList";
 import { formatCurrency } from "../constants";
@@ -20,30 +26,66 @@ import BeverageList from "../components/beverages/BeverageList";
 import { useCart } from "../contexts/CartContext";
 import BookingDetail from "../components/booking/BookingDetail";
 import ReviewList from "../components/reviews/ReviewList";
+import { SafeAreaView } from "react-native-safe-area-context";
+import MapView, { Marker } from "react-native-maps";
 
 const WorkspaceDetail = ({ route }) => {
   const { id } = route.params;
   const [workspaceDetail, setWorkspaceDetail] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("details");
+  const [showAllFacilities, setShowAllFacilities] = useState(false);
+  const [mapRegion, setMapRegion] = useState(null);
   const navigation = useNavigation();
   const { state, dispatch } = useCart();
   const { amenityList, beverageList } = state;
   const [numberItems, setNumberItems] = useState(0);
+  const [reviews, setReviews] = useState([]);
+
+  const [scrollY] = useState(new Animated.Value(0));
+
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, 200],
+    outputRange: [1, 0.9],
+    extrapolate: "clamp",
+  });
 
   useEffect(() => {
     dispatch({ type: "CLEAR_CART" });
     const fetchWorkspaceDetails = async () => {
       try {
         const response = await axios.get(
-          `http://35.78.210.59:8080/workspaces/${id}`
+          `https://workhive.info.vn:8443/workspaces/${id}`
         );
-        setWorkspaceDetail(response.data.getWorkSpaceByIdResult);
+        const workspaceData = response.data.getWorkSpaceByIdResult;
+        setWorkspaceDetail(workspaceData);
+
+        if (workspaceData.googleMapUrl) {
+          const coordsMatch = workspaceData.googleMapUrl.match(
+            /@(-?\d+\.\d+),(-?\d+\.\d+)/
+          );
+          if (coordsMatch && coordsMatch.length >= 3) {
+            const latitude = parseFloat(coordsMatch[1]);
+            const longitude = parseFloat(coordsMatch[2]);
+
+            if (!isNaN(latitude) && !isNaN(longitude)) {
+              setMapRegion({
+                latitude,
+                longitude,
+                latitudeDelta: 0.005,
+                longitudeDelta: 0.005,
+              });
+            }
+          }
+        }
+
         dispatch({
           type: "SET_WORKSPACE_ID",
           payload: {
-            workspaceId: id,
-            price: response.data.getWorkSpaceByIdResult.prices[1].price,
+            workspaceId: id + "",
+            price: workspaceData.prices.find(
+              (price) => price.category === "Ngày"
+            )?.price,
             priceType: "2",
           },
         });
@@ -57,6 +99,34 @@ const WorkspaceDetail = ({ route }) => {
 
     fetchWorkspaceDetails();
   }, [id, dispatch]);
+
+  useEffect(() => {
+    if (!id) return;
+    setLoading(true);
+    const fetchReviews = async () => {
+      try {
+        const response = await axios.get(
+          `https://workhive.info.vn:8443/users/rating/getallratingbyworkspaceid/${id}`
+        );
+        const formattedReviews = response.data?.ratingByWorkspaceIdDTOs || [];
+        setReviews(formattedReviews);
+      } catch (error) {
+        alert("Error fetching reviews:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReviews();
+  }, [id]);
+
+  const averageRating =
+    reviews.length > 0
+      ? (
+          reviews.reduce((total, review) => total + review.rate, 0) /
+          reviews.length
+        ).toFixed(1)
+      : "0.0";
 
   useEffect(() => {
     setNumberItems(amenityList.length + beverageList.length);
@@ -81,188 +151,461 @@ const WorkspaceDetail = ({ route }) => {
   }
 
   const handleBackPress = () => {
-    navigation.navigate("HomeMain");
+    navigation.goBack();
+  };
+
+  const goToHome = () => {
+    const state = navigation.getState();
+
+    // Find which tab/stack we're currently in
+    const currentRoute = state.routes[0];
+    const currentRouteName = currentRoute.name;
+
+    // If we're in BookingStack, reset it before navigating away
+    if (currentRouteName === "Đặt chỗ") {
+      // Reset the BookingStack to its initial route
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "YourBooking" }],
+      });
+    }
+
+    // Navigate to home tab
+    navigation.navigate("Trang chủ", { screen: "HomeMain" });
+  };
+
+  const openGoogleMaps = (url) => {
+    if (!url) {
+      alert("Không có thông tin bản đồ cho không gian này");
+      return;
+    }
+
+    Linking.canOpenURL(url).then((supported) => {
+      if (supported) {
+        Linking.openURL(url);
+      } else {
+        alert("Không thể mở Google Maps");
+      }
+    });
+  };
+
+  const getFacilityIcon = (facilityName) => {
+    const name = facilityName.toLowerCase();
+
+    if (name.includes("máy lạnh") || name.includes("điều hòa")) {
+      return <MaterialIcons name="ac-unit" size={24} color="#835101" />;
+    } else if (name.includes("wifi") || name.includes("internet")) {
+      return <MaterialIcons name="wifi" size={24} color="#835101" />;
+    } else if (name.includes("tv") || name.includes("tivi")) {
+      return <MaterialIcons name="tv" size={24} color="#835101" />;
+    } else if (name.includes("bảo vệ") || name.includes("an ninh")) {
+      return <MaterialIcons name="security" size={24} color="#835101" />;
+    } else if (name.includes("đỗ xe") || name.includes("parking")) {
+      return <MaterialIcons name="local-parking" size={24} color="#835101" />;
+    } else if (name.includes("phòng tắm") || name.includes("toilet")) {
+      return <MaterialIcons name="bathroom" size={24} color="#835101" />;
+    } else if (name.includes("nước") || name.includes("đồ uống")) {
+      return <MaterialIcons name="local-drink" size={24} color="#835101" />;
+    } else if (name.includes("máy in") || name.includes("printer")) {
+      return <MaterialIcons name="print" size={24} color="#835101" />;
+    } else {
+      return (
+        <MaterialCommunityIcons
+          name="office-building"
+          size={24}
+          color="#835101"
+        />
+      );
+    }
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <ImageList
-        images={workspaceDetail?.images}
-        onBackPress={handleBackPress}
-      />
-
-      <View style={{ margin: 12, gap: 8 }}>
-        <View style={{ marginTop: 8 }}>
-          <Text style={styles.price}>
-            {formatCurrency(workspaceDetail?.prices[0].price)} -{" "}
-            {formatCurrency(workspaceDetail?.prices[1].price)}
-          </Text>
-        </View>
-        <Text style={styles.name}>{workspaceDetail?.name}</Text>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 4,
-            marginBottom: 8,
-          }}
-        >
-          <MaterialIcons name="location-on" size={20} color="#835101" />
-          <Text>{workspaceDetail?.address}</Text>
-        </View>
-        <View style={styles.userInfo}>
-          <Image
-            source={require("../../assets/images/workspace2.jpg")}
-            style={styles.avatar}
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
+      <Animated.ScrollView
+        style={styles.container}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: true }
+        )}
+        scrollEventThrottle={16}
+      >
+        <Animated.View style={{ transform: [{ scale: headerHeight }] }}>
+          <ImageList
+            images={workspaceDetail?.images}
+            workspaceId={id}
+            onBackPress={handleBackPress}
+            onHomePress={goToHome}
           />
-          <View>
-            <Text style={styles.licenseName}>
-              {workspaceDetail?.licenseName}
+        </Animated.View>
+
+        <Surface style={styles.contentContainer} elevation={2}>
+          <View style={styles.priceContainer}>
+            <Text style={styles.priceLabel}>Giá từ</Text>
+            <Text style={styles.price}>
+              {formatCurrency(
+                workspaceDetail?.prices.find(
+                  (price) => price.category === "Giờ"
+                )?.price
+              )}
+            </Text>
+            <Text style={styles.priceUnit}>/giờ</Text>
+          </View>
+
+          <Text style={styles.name}>{workspaceDetail?.name}</Text>
+
+          <View style={styles.ratingContainer}>
+            <AntDesign name="star" size={20} color="#FFD700" />
+            <Text style={styles.rating}>{averageRating ?? "0.0"}</Text>
+            <Text style={styles.ratingCount}>
+              ({reviews.length ?? 0} đánh giá)
             </Text>
           </View>
-        </View>
-      </View>
 
-      <View style={styles.tabContainer}>
-        <TouchableOpacity
-          onPress={() => setActiveTab("details")}
-          style={[styles.tab, activeTab === "details" && styles.activeTab]}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === "details" && styles.activeTabText,
-            ]}
-          >
-            Chi Tiết
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => setActiveTab("booking")}
-          style={[styles.tab, activeTab === "booking" && styles.activeTab]}
-        >
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === "booking" && styles.activeTabText,
-            ]}
-          >
-            Đặt chỗ ({numberItems})
-          </Text>
-        </TouchableOpacity>
-      </View>
+          <View style={styles.locationContainer}>
+            <MaterialIcons name="location-on" size={20} color="#835101" />
+            <Text style={styles.address}>{workspaceDetail?.address}</Text>
+          </View>
 
-      {activeTab === "details" ? (
-        <View style={styles.infoContainer}>
-          <View
-            style={{ flexDirection: "row", justifyContent: "space-between" }}
+          <TouchableOpacity
+            style={styles.userInfo}
+            onPress={() =>
+              navigation.navigate("OwnerDetail", {
+                ownerId: workspaceDetail?.ownerId,
+              })
+            }
           >
-            <View style={styles.detailContainer}>
-              <MaterialIcons name={"square-foot"} size={36} color="#484848" />
-              <Text style={styles.detailText}>{workspaceDetail?.area} m²</Text>
-            </View>
-            <View style={styles.detailContainer}>
-              <MaterialIcons name={"people"} size={36} color="#484848" />
-              <Text style={styles.detailText}>
-                {workspaceDetail?.capacity} người
+            <Image
+              source={require("../../assets/images/workspace2.jpg")}
+              style={styles.avatar}
+            />
+            <View style={styles.userTextContainer}>
+              <Text
+                style={styles.licenseName}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {workspaceDetail?.licenseName}
               </Text>
+              <Text style={styles.hostLabel}>Chủ không gian</Text>
             </View>
-            <View style={styles.detailContainer}>
-              <MaterialIcons name={"business"} size={36} color="#484848" />
-              <Text style={styles.detailText}>{workspaceDetail?.category}</Text>
-            </View>
+            <MaterialIcons name="chevron-right" size={24} color="#666" />
+          </TouchableOpacity>
+        </Surface>
+
+        <View style={styles.amenitiesSection}>
+          <Text style={styles.sectionHeader}>Tiện nghi</Text>
+          <View style={styles.amenitiesContainer}>
+            {(showAllFacilities
+              ? workspaceDetail?.facilities
+              : workspaceDetail?.facilities?.slice(0, 4)
+            )?.map((facility, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.amenityItem,
+                  showAllFacilities && styles.amenityItemExpanded,
+                ]}
+              >
+                <View style={styles.amenityIconContainer}>
+                  {getFacilityIcon(facility.facilityName)}
+                </View>
+                <Text
+                  style={[
+                    styles.amenityName,
+                    showAllFacilities && styles.amenityNameExpanded,
+                  ]}
+                  numberOfLines={showAllFacilities ? 0 : 2}
+                >
+                  {facility.facilityName}
+                </Text>
+              </View>
+            ))}
           </View>
-          <View
-            style={{
-              flexDirection: "column",
-              gap: 6,
-            }}
-          >
-            <Text style={styles.boldText}>Mô tả:</Text>
-            <Text>{workspaceDetail?.description}</Text>
-            <View
-              style={{ flexDirection: "row", gap: 6, alignItems: "center" }}
-            >
-              <Text>
-                Đặt theo giờ: {formatCurrency(workspaceDetail?.prices[0].price)}
-              </Text>
-              <Text style={{ color: "red", fontSize: 12, fontStyle: "italic" }}>
-                {" "}
-                (chưa hỗ trợ)
-              </Text>
-            </View>
-            <Text>
-              Đặt theo ngày: {formatCurrency(workspaceDetail?.prices[1].price)}
-            </Text>
-          </View>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-            }}
-          >
-            <Text style={styles.boldText}>Thời gian hoạt động: </Text>
-            {!workspaceDetail?.is24h ? (
-              <Text>
-                {workspaceDetail?.openTime} - {workspaceDetail?.closeTime}
-              </Text>
-            ) : (
-              <Text>Mở cửa 24h</Text>
+          {workspaceDetail?.facilities &&
+            workspaceDetail.facilities.length > 4 && (
+              <TouchableOpacity
+                style={styles.viewAllButton}
+                onPress={() => setShowAllFacilities(!showAllFacilities)}
+              >
+                <Text style={styles.viewAllText}>
+                  {showAllFacilities ? "Thu gọn" : "Xem tất cả"}
+                </Text>
+              </TouchableOpacity>
             )}
-          </View>
-          <Card style={styles.card}>
-            <Card.Content>
-              <Text style={styles.sectionTitle}>🚀 Cơ sở vật chất</Text>
-              {workspaceDetail?.facilities.map((facility) => (
-                <Text key={facility.id} style={styles.text}>
-                  ✔ {facility.facilityName}
-                </Text>
-              ))}
-            </Card.Content>
-          </Card>
-          <Card style={styles.card}>
-            <Card.Content>
-              <Text style={styles.sectionTitle}>📜 Quy định chung</Text>
-              {workspaceDetail?.policies.map((policy) => (
-                <Text key={policy.id} style={styles.text}>
-                  ⚠ {policy.policyName}
-                </Text>
-              ))}
-            </Card.Content>
-          </Card>
-
-          <View style={styles.serviceList}>
-            <AmenityList ownerId={workspaceDetail?.ownerId} />
-          </View>
-
-          <View style={styles.serviceList}>
-            <BeverageList ownerId={workspaceDetail?.ownerId} />
-          </View>
-
-          <View style={styles.serviceList}>
-            <ReviewList workspaceId={workspaceDetail?.id} />
-          </View>
         </View>
-      ) : (
-        <BookingDetail
-          openTime={workspaceDetail?.openTime}
-          closeTime={workspaceDetail?.closeTime}
-          workspaceId={id}
-        />
+
+        <View style={styles.mapSection}>
+          <View style={styles.mapHeaderContainer}>
+            <Text style={styles.sectionHeader}>Vị trí</Text>
+            <TouchableOpacity
+              onPress={() => openGoogleMaps(workspaceDetail?.googleMapUrl)}
+            >
+              <Text style={styles.viewAllText}>Hiển thị</Text>
+            </TouchableOpacity>
+          </View>
+
+          {mapRegion ? (
+            <View style={styles.mapContainer}>
+              <MapView
+                style={styles.map}
+                region={mapRegion}
+                scrollEnabled={false}
+                zoomEnabled={false}
+                rotateEnabled={false}
+                pitchEnabled={false}
+              >
+                <Marker
+                  coordinate={{
+                    latitude: mapRegion.latitude,
+                    longitude: mapRegion.longitude,
+                  }}
+                  title={workspaceDetail?.name}
+                />
+              </MapView>
+              <TouchableOpacity
+                style={styles.mapButton}
+                onPress={() => openGoogleMaps(workspaceDetail?.googleMapUrl)}
+              >
+                <MaterialIcons name="directions" size={16} color="#FFFFFF" />
+                <Text style={styles.mapButtonText}>Chỉ đường</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View style={styles.noMapContainer}>
+              <MaterialIcons name="location-off" size={40} color="#ccc" />
+              <Text style={styles.noMapText}>Không có thông tin bản đồ</Text>
+            </View>
+          )}
+        </View>
+
+        <View style={styles.tabContainer}>
+          <TouchableOpacity
+            onPress={() => setActiveTab("details")}
+            style={[styles.tab, activeTab === "details" && styles.activeTab]}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === "details" && styles.activeTabText,
+              ]}
+            >
+              Chi Tiết
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setActiveTab("booking")}
+            style={[styles.tab, activeTab === "booking" && styles.activeTab]}
+          >
+            <View style={styles.tabWithBadge}>
+              <Text
+                style={[
+                  styles.tabText,
+                  activeTab === "booking" && styles.activeTabText,
+                ]}
+              >
+                Đặt chỗ
+              </Text>
+              {numberItems > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{numberItems}</Text>
+                </View>
+              )}
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        {activeTab === "details" ? (
+          <Surface style={styles.detailsContainer} elevation={1}>
+            <View style={styles.statsContainer}>
+              <View style={styles.statItem}>
+                <MaterialIcons name="square-foot" size={32} color="#835101" />
+                <Text style={styles.statValue}>{workspaceDetail?.area} m²</Text>
+                <Text style={styles.statLabel}>Diện tích</Text>
+              </View>
+              <View style={styles.statItem}>
+                <MaterialIcons name="people" size={32} color="#835101" />
+                <Text style={styles.statValue}>
+                  {workspaceDetail?.capacity}
+                </Text>
+                <Text style={styles.statLabel}>Sức chứa</Text>
+              </View>
+              <View style={styles.statItem}>
+                <MaterialIcons name="business" size={32} color="#835101" />
+                <Text style={styles.statValue}>
+                  {workspaceDetail?.category}
+                </Text>
+                <Text style={styles.statLabel}>Loại</Text>
+              </View>
+            </View>
+
+            <View style={styles.descriptionContainer}>
+              <Text style={styles.sectionTitle}>Mô tả</Text>
+              <Text style={styles.description}>
+                {workspaceDetail?.description}
+              </Text>
+            </View>
+
+            <View style={styles.priceDetailsContainer}>
+              <Text style={styles.sectionTitle}>Chi tiết giá</Text>
+              <View style={styles.priceRow}>
+                <Text style={styles.priceType}>Theo giờ:</Text>
+                <View>
+                  <Text style={styles.priceValue}>
+                    {formatCurrency(
+                      workspaceDetail?.prices.find(
+                        (price) => price.category === "Giờ"
+                      )?.price
+                    )}
+                  </Text>
+                  <Text style={styles.priceNote}>(chưa hỗ trợ)</Text>
+                </View>
+              </View>
+              <View style={styles.priceRow}>
+                <Text style={styles.priceType}>Theo ngày:</Text>
+                <Text style={styles.priceValue}>
+                  {formatCurrency(
+                    workspaceDetail?.prices.find(
+                      (price) => price.category === "Ngày"
+                    )?.price
+                  )}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.fullSection}>
+              <Text style={styles.sectionTitle}>Quy định chung</Text>
+              <View style={styles.policiesContainer}>
+                {workspaceDetail?.policies.map((policy, index) => (
+                  <View key={index} style={styles.policyItem}>
+                    <MaterialIcons name="info" size={20} color="#835101" />
+                    <Text style={styles.policyText}>{policy.policyName}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+
+            <View style={styles.serviceList}>
+              <AmenityList ownerId={workspaceDetail?.ownerId} />
+            </View>
+
+            <View style={styles.serviceList}>
+              <BeverageList ownerId={workspaceDetail?.ownerId} />
+            </View>
+
+            <View style={styles.serviceList}>
+              <ReviewList workspaceId={workspaceDetail?.id} />
+            </View>
+          </Surface>
+        ) : (
+          <BookingDetail
+            openTime={workspaceDetail?.openTime}
+            closeTime={workspaceDetail?.closeTime}
+            workspaceId={id}
+          />
+        )}
+      </Animated.ScrollView>
+
+      {activeTab === "details" && (
+        <TouchableOpacity
+          style={styles.floatingButton}
+          onPress={() => setActiveTab("booking")}
+        >
+          <Text style={styles.floatingButtonText}>Đặt ngay</Text>
+        </TouchableOpacity>
       )}
-    </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
   container: {
     flex: 1,
+    backgroundColor: "#f5f5f5",
+  },
+  contentContainer: {
     backgroundColor: "#fff",
+    margin: 12,
+    borderRadius: 16,
+    padding: 16,
+  },
+  priceContainer: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    marginBottom: 8,
+  },
+  priceLabel: {
+    fontSize: 14,
+    color: "#666",
+    marginRight: 4,
+  },
+  price: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#835101",
+  },
+  priceUnit: {
+    fontSize: 14,
+    color: "#666",
+    marginLeft: 4,
+  },
+  name: {
+    fontSize: 22,
+    fontWeight: "bold",
+    marginBottom: 8,
+    color: "#333",
+  },
+  ratingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  rating: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginLeft: 4,
+    color: "#333",
+  },
+  ratingCount: {
+    fontSize: 14,
+    color: "#666",
+    marginLeft: 4,
+  },
+  locationContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  address: {
+    fontSize: 14,
+    color: "#444",
+    marginLeft: 4,
+    flex: 1,
+  },
+  mapButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#835101",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  mapButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "500",
+    marginLeft: 8,
   },
   userInfo: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 8,
+    backgroundColor: "#f8f8f8",
+    padding: 12,
+    borderRadius: 12,
   },
   avatar: {
     width: 40,
@@ -270,81 +613,289 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginRight: 12,
   },
-  licenseName: {
-    fontSize: 14,
+  userTextContainer: {
+    flex: 1, // allows it to take available space
+    justifyContent: "center",
   },
-  price: { fontSize: 24, fontWeight: "bold", color: "#835101" },
-  name: { fontSize: 18, fontWeight: "bold", color: "#835101" },
+  licenseName: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+  },
+  hostLabel: {
+    fontSize: 12,
+    color: "#666",
+  },
+  // chevron: {
+  //   marginLeft: "auto",
+  // },
   tabContainer: {
     flexDirection: "row",
-    backgroundColor: "#835101",
-    padding: 8,
-    justifyContent: "space-around",
+    backgroundColor: "#fff",
+    padding: 4,
+    margin: 12,
+    borderRadius: 12,
   },
   tab: {
     flex: 1,
+    paddingVertical: 12,
     alignItems: "center",
-    paddingVertical: 10,
+    borderRadius: 8,
   },
   activeTab: {
-    backgroundColor: "#fff",
-    borderRadius: 8,
+    backgroundColor: "#835101",
   },
   tabText: {
     fontSize: 16,
-    fontWeight: "bold",
-    color: "#fff",
+    color: "#666",
+    fontWeight: "500",
   },
   activeTabText: {
-    color: "#835101",
+    color: "#fff",
   },
-  infoContainer: {
-    margin: 12,
-    gap: 12,
-  },
-  text: {
-    fontSize: 14,
-    marginBottom: 6,
-  },
-  boldText: { fontWeight: "bold", fontSize: 16 },
-  detailContainer: {
-    flexDirection: "column",
-    backgroundColor: "#EFF0F2",
-    justifyContent: "center",
+  tabWithBadge: {
+    flexDirection: "row",
     alignItems: "center",
-    padding: 10,
-    borderRadius: 8,
-    minWidth: 100,
-    gap: 4,
+    justifyContent: "center",
   },
-  detailText: { color: "#484848" },
-  card: {
-    borderRadius: 8,
-    padding: 8,
+  badge: {
+    backgroundColor: "#ff4444",
+    borderRadius: 12,
+    minWidth: 24,
+    height: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 8,
+  },
+  badgeText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "bold",
+    paddingHorizontal: 6,
+  },
+  detailsContainer: {
     backgroundColor: "#fff",
-    elevation: 3,
+    margin: 12,
+    borderRadius: 16,
+    padding: 16,
+  },
+  statsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 24,
+  },
+  statItem: {
+    alignItems: "center",
+    flex: 1,
+  },
+  statValue: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#333",
+    marginTop: 8,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: "#666",
+    marginTop: 4,
+  },
+  descriptionContainer: {
+    marginBottom: 24,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
+    color: "#333",
     marginBottom: 12,
+  },
+  description: {
+    fontSize: 14,
+    color: "#444",
+    lineHeight: 20,
+  },
+  priceDetailsContainer: {
+    backgroundColor: "#f8f8f8",
+    padding: 16,
+    borderRadius: 12,
+  },
+  priceRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  priceType: {
+    fontSize: 14,
+    color: "#666",
+  },
+  priceValue: {
+    fontSize: 16,
+    fontWeight: "600",
     color: "#333",
   },
-  errorContainer: {
-    flex: 1,
-    justifyContent: "center",
+  priceNote: {
+    fontSize: 12,
+    color: "#ff4444",
+    fontStyle: "italic",
+    textAlign: "right",
+  },
+  serviceList: { marginTop: 16 },
+  amenitiesSection: {
+    backgroundColor: "#fff",
+    margin: 12,
+    borderRadius: 16,
+    padding: 16,
+  },
+  sectionHeader: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 16,
+  },
+  amenitiesContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+  amenityItem: {
+    width: "22%",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  amenityItemExpanded: {
+    width: "33.33%",
+    flexDirection: "column",
     alignItems: "center",
   },
-  errorText: {
-    fontSize: 16,
+  amenityIconContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "#F5F5F5",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  amenityName: {
+    fontSize: 12,
     color: "#666",
+    textAlign: "center",
+  },
+  amenityNameExpanded: {
+    fontSize: 13,
+  },
+  viewAllButton: {
+    alignItems: "center",
+    padding: 8,
+    marginTop: 8,
+  },
+  viewAllText: {
+    color: "#835101",
+    fontWeight: "bold",
+  },
+  fullSection: {
+    marginTop: 24,
+    marginBottom: 16,
+  },
+  policiesContainer: {
+    marginLeft: 4,
+  },
+  policyItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  policyText: {
+    fontSize: 15,
+    color: "#444",
+    marginLeft: 12,
+    flex: 1,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
-  serviceList: { marginTop: 16 },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  errorText: {
+    fontSize: 16,
+    color: "#ff4444",
+    textAlign: "center",
+  },
+  mapSection: {
+    backgroundColor: "#fff",
+    margin: 12,
+    borderRadius: 16,
+    padding: 16,
+  },
+  mapHeaderContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  mapContainer: {
+    height: 200,
+    borderRadius: 12,
+    overflow: "hidden",
+    position: "relative",
+  },
+  map: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  mapButton: {
+    position: "absolute",
+    bottom: 16,
+    right: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#835101",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+  },
+  mapButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "500",
+    marginLeft: 8,
+    fontSize: 14,
+  },
+  noMapContainer: {
+    height: 200,
+    backgroundColor: "#f5f5f5",
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  noMapText: {
+    color: "#999",
+    marginTop: 8,
+  },
+  floatingButton: {
+    position: "absolute",
+    bottom: 20,
+    right: 20,
+    backgroundColor: "#835101",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 30,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
+  },
+  floatingButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+    paddingHorizontal: 12,
+  },
 });
 
 export default WorkspaceDetail;

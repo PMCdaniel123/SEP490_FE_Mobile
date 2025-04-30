@@ -55,7 +55,7 @@ const DateRangePicker = ({ openTime, closeTime, workspaceId }) => {
     const fetchTimeList = async () => {
       try {
         const response = await axios.get(
-          `http://35.78.210.59:8080/users/booking/workspacetimes?WorkspaceId=${workspaceId}`
+          `https://workhive.info.vn:8443/users/booking/workspacetimes?WorkspaceId=${workspaceId}`
         );
         setLoading(false);
         const filterTimeList =
@@ -98,19 +98,24 @@ const DateRangePicker = ({ openTime, closeTime, workspaceId }) => {
     });
 
     setMarkedDates((prev) => ({ ...prev, ...disabledDates }));
+  }, [timeList]);
+
+  useEffect(() => {
     dispatch({ type: "CLEAR_WORKSPACE_TIME" });
     if (openTime && closeTime && startDate && endDate) {
       dispatch({
         type: "SET_WORKSPACE_TIME",
         payload: {
-          startTime: openTime + " " + dayjs(startDate).format("DD/MM/YYYY"),
-          endTime: closeTime + " " + dayjs(endDate).format("DD/MM/YYYY"),
+          startTime:
+            openTime.slice(0, 5) + " " + dayjs(startDate).format("DD/MM/YYYY"),
+          endTime:
+            closeTime.slice(0, 5) + " " + dayjs(endDate).format("DD/MM/YYYY"),
           category: "Ngày",
         },
       });
       dispatch({ type: "CALCULATE_TOTAL" });
     }
-  }, [openTime, closeTime, startDate, endDate, dispatch, timeList]);
+  }, [openTime, closeTime, startDate, endDate, dispatch]);
 
   const handleDayPress = (day) => {
     const selectedDate = day.dateString;

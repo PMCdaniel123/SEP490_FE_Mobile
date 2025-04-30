@@ -7,6 +7,7 @@ import {
   StyleSheet,
   FlatList,
   ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
@@ -23,30 +24,39 @@ const Recommendations = () => {
   const [recommendedSpaces, setRecommendedSpaces] = useState([]);
   const [categories, setCategories] = useState(["Tất cả"]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("Tất cả");
   const navigation = useNavigation();
 
+  const fetchRecommendedSpaces = async () => {
+    try {
+      const response = await axios.get(
+        "https://workhive.info.vn:8443/workspaces"
+      );
+      const workspaces = response.data.workspaces || [];
+      setRecommendedSpaces(workspaces);
+
+      const uniqueCategories = [
+        "Tất cả",
+        ...new Set(workspaces.map((space) => space.category)),
+      ];
+      setCategories(uniqueCategories);
+    } catch (error) {
+      alert("Error fetching recommended spaces:", error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchRecommendedSpaces = async () => {
-      try {
-        const response = await axios.get("http://35.78.210.59:8080/workspaces");
-        const workspaces = response.data.workspaces || [];
-        setRecommendedSpaces(workspaces);
-
-        const uniqueCategories = [
-          "Tất cả",
-          ...new Set(workspaces.map((space) => space.category)),
-        ];
-        setCategories(uniqueCategories);
-      } catch (error) {
-        alert("Error fetching recommended spaces:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchRecommendedSpaces();
   }, []);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchRecommendedSpaces();
+  };
 
   const filteredSpaces =
     selectedCategory === "Tất cả"
@@ -102,19 +112,21 @@ const Recommendations = () => {
         <View style={styles.listItemFooter}>
           <Text style={styles.listItemPrice}>
             {item.prices.length > 1
-              ? `${formatCurrency(item.prices[0].price)} - ${formatCurrency(item.prices[1].price)}`
-              : formatCurrency(item.prices[0]?.price)}
+              ? `${formatCurrency(
+                  item.prices.find((price) => price.category === "Giờ")?.price
+                )} - ${formatCurrency(
+                  item.prices.find((price) => price.category === "Ngày")?.price
+                )}`
+              : formatCurrency(
+                  item.prices.find((price) => price.category === "Giờ")?.price
+                )}
           </Text>
-          <View style={styles.listItemRating}>
-            <Icon name="star" size={16} color="#FFD700" />
-            <Text style={styles.listItemRatingText}>{item.rating || 4.0}</Text>
-          </View>
         </View>
       </View>
     </TouchableOpacity>
   );
 
-  if (loading) {
+  if (loading && !refreshing) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#835101" />
@@ -125,10 +137,10 @@ const Recommendations = () => {
   return (
     <View style={styles.sectionContainer}>
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Đề xuất dành cho bạn</Text>
+        <Text style={styles.sectionTitle}>Tất cả các không gian</Text>
         <TouchableOpacity onPress={() => navigation.navigate("WorkSpaces")}>
-  <Text style={styles.seeAllText}>Xem tất cả</Text>
-</TouchableOpacity>
+          <Text style={styles.seeAllText}>Xem tất cả</Text>
+        </TouchableOpacity>
       </View>
 
       <FlatList
@@ -146,10 +158,17 @@ const Recommendations = () => {
           renderItem={renderSpaceItem}
           keyExtractor={(item) => item.id.toString()}
           scrollEnabled={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={["#835101"]}
+            />
+          }
         />
       ) : (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>Không có không gian nào phù hợp</Text>
+          <Text style={styles.emptyText}>Không có dữ liệu</Text>
         </View>
       )}
     </View>
@@ -212,7 +231,7 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: 110,
-    height: 110,
+    height: 120,
   },
   listItemImage: {
     width: "100%",
@@ -250,19 +269,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
     color: "#835101",
-  },
-  listItemRating: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(255, 215, 0, 0.1)",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  listItemRatingText: {
-    marginLeft: 4,
-    fontWeight: "bold",
-    color: "#333",
   },
   emptyContainer: {
     height: 100,

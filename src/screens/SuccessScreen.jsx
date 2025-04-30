@@ -27,18 +27,13 @@ const SuccessScreen = () => {
           style={styles.icon}
         />
         <Text style={styles.title}>Thanh toán thành công!</Text>
+        <Text style={{ fontSize: 16, color: "#333", textAlign: "center", paddingBottom: 16 }}>
+          Cảm ơn bạn đã đặt chỗ với chúng tôi
+        </Text>
 
-        <View style={styles.detailsContainer}>
-          <View style={styles.detailRow}>
-            <Text style={styles.label}>Mã đơn hàng:</Text>
-            <Text style={styles.value}>{OrderCode}</Text>
-          </View>
 
-          <View style={styles.detailRow}>
-            <Text style={styles.label}>Mã đặt chỗ:</Text>
-            <Text style={styles.value}>{BookingId}</Text>
-          </View>
-        </View>
+
+
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button} onPress={handleViewBooking}>
@@ -89,28 +84,6 @@ const styles = StyleSheet.create({
     color: "#333",
     marginBottom: 24,
     textAlign: "center",
-  },
-  detailsContainer: {
-    width: "100%",
-    marginBottom: 24,
-    backgroundColor: "#f9f9f9",
-    padding: 16,
-    borderRadius: 8,
-  },
-  detailRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 12,
-  },
-  label: {
-    fontSize: 16,
-    color: "#666",
-    fontWeight: "500",
-  },
-  value: {
-    fontSize: 16,
-    color: "#333",
-    fontWeight: "bold",
   },
   buttonContainer: {
     width: "100%",

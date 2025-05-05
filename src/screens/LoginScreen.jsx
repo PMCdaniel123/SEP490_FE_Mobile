@@ -89,7 +89,7 @@ const LoginScreen = ({ navigation }) => {
           {!keyboardVisible && (
             <View style={styles.logoContainer}>
               <Image
-                source={require('../../assets/images/logo.png')}
+                source={require('../../assets/images/WorkHive.png')}
                 style={styles.logo}
                 resizeMode="contain"
               />

@@ -1,4 +1,3 @@
-import babelParser from '@babel/eslint-parser';
 import globals from 'globals'; // Import the globals package
 import importPlugin from 'eslint-plugin-import';
 import reactPlugin from 'eslint-plugin-react';

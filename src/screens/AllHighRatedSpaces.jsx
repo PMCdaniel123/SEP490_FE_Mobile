@@ -61,8 +61,9 @@ const AllHighRatedSpaces = () => {
         "https://workhive.info.vn:8443/users/searchbyrate"
       );
       const spaces = response.data.workspaces || [];
-      setHighRatedSpaces(spaces);
-      setFilteredSpaces(spaces);
+      const sortedSpaces = spaces.sort((a, b) => b.rate - a.rate);
+      setHighRatedSpaces(sortedSpaces);
+      setFilteredSpaces(sortedSpaces);
     } catch (error) {
       alert("Error fetching high-rated spaces:", error);
     } finally {

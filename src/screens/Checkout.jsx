@@ -10,6 +10,8 @@ import {
   View,
   Linking,
   Alert,
+  ToastAndroid,
+  Platform,
 } from "react-native";
 import { AuthContext } from "../contexts/AuthContext";
 import { useNavigation } from "@react-navigation/native";
@@ -190,6 +192,15 @@ function Checkout() {
       if (isWalletPayment) {
         if (response.data && response.data.notification === "Ví của bạn đã bị khóa" && response.data.isLock === 1) {
           Alert.alert("Lỗi thanh toán", "Ví của bạn hiện đang bị khóa do thực hiện yêu cầu rút tiền");
+          return;
+        }
+        
+        if (response.data && response.data.notification === "Số dư trong ví không đủ để thực hiện booking" && response.data.isLock === 0) {
+          if (Platform.OS === 'android') {
+            ToastAndroid.show("Số dư trong ví không đủ để thực hiện đặt chỗ", ToastAndroid.LONG);
+          } else {
+            Alert.alert("Số dư không đủ", "Số dư trong ví không đủ để thực hiện đặt chỗ, vui lòng kiểm tra lại!");
+          }
           return;
         }
         

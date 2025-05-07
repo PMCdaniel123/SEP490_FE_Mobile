@@ -30,7 +30,9 @@ const HighRatedSpaces = () => {
         const response = await axios.get(
           "https://workhive.info.vn:8443/users/searchbyrate"
         );
-        setHighRatedSpaces(response.data.workspaces || []);
+        const sortedWorkspaces = (response.data.workspaces || [])
+          .sort((a, b) => b.rate - a.rate);
+        setHighRatedSpaces(sortedWorkspaces);
       } catch (error) {
         alert("Error fetching high-rated spaces:", error);
       } finally {
@@ -54,9 +56,9 @@ const HighRatedSpaces = () => {
         source={{ uri: item.images[0]?.imgUrl }}
         style={styles.spaceImage}
       />
-      <TouchableOpacity style={styles.favoriteButton}>
+      {/* <TouchableOpacity style={styles.favoriteButton}>
         <Icon name="favorite-border" size={20} color="#FF5A5F" />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
       <View style={styles.spaceInfo}>
         <Text style={styles.spaceName} numberOfLines={1}>
           {item.name}

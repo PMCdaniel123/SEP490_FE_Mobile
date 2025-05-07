@@ -1,9 +1,9 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, ActivityIndicator, Alert } from 'react-native';
+import React, { useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, ActivityIndicator, Alert, BackHandler } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, CommonActions } from '@react-navigation/native';
 
 const PaymentWebViewModal = ({
   isVisible,
@@ -16,6 +16,20 @@ const PaymentWebViewModal = ({
   onWebViewNavigationStateChange
 }) => {
   const navigation = useNavigation();
+  const webViewRef = useRef(null);
+  
+  // Handle back button press on Android
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (isVisible) {
+        handleBackPress();
+        return true;
+      }
+      return false;
+    });
+    
+    return () => backHandler.remove();
+  }, [isVisible]);
   
   const handleBackPress = () => {
     Alert.alert(
@@ -27,14 +41,30 @@ const PaymentWebViewModal = ({
           text: 'Có', 
           onPress: () => {
             onClose();
-            navigation.navigate("Trang chủ", {
-              screen: "FailPage",
-              params: {
-                source: 'wallet',
-                customerWalletId,
-                orderCode
-              }
-            });
+            // Use CommonActions.reset to ensure clean navigation state
+            navigation.dispatch(
+              CommonActions.reset({
+                index: 0,
+                routes: [
+                  { 
+                    name: "Trang chủ",
+                    state: {
+                      routes: [
+                        { 
+                          name: "FailPage", 
+                          params: {
+                            source: 'wallet',
+                            customerWalletId,
+                            orderCode
+                          }
+                        }
+                      ],
+                      index: 0
+                    }
+                  }
+                ],
+              })
+            );
           }
         },
       ]
@@ -46,6 +76,7 @@ const PaymentWebViewModal = ({
       visible={isVisible}
       animationType="slide"
       onRequestClose={handleBackPress}
+      transparent={false}
     >
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
@@ -67,16 +98,23 @@ const PaymentWebViewModal = ({
         )}
         
         <WebView
+          ref={webViewRef}
           source={{ uri: paymentUrl }}
           onNavigationStateChange={onWebViewNavigationStateChange}
           onLoadStart={() => setLoading(true)}
           onLoad={() => setLoading(false)}
           originWhitelist={['*', 'http://*', 'https://*', 'mobile://*']}
+          javaScriptEnabled={true}
+          domStorageEnabled={true}
+          startInLoadingState={true}
+          scalesPageToFit={true}
           onShouldStartLoadWithRequest={(request) => {
-            // Handle mobile:// schemes explicitly
+            console.log("Loading URL:", request.url);
+            
             if (request.url.startsWith('mobile://')) {
-              // Specific handling for mobile://cancel
-              if (request.url.startsWith('mobile://cancel')) {
+              console.log("Mobile URL detected:", request.url);
+              
+              if (request.url.includes('mobile://cancel')) {
                 onClose();
                 navigation.navigate("Trang chủ", {
                   screen: "FailPage",
@@ -88,24 +126,48 @@ const PaymentWebViewModal = ({
                 });
                 return false;
               }
-              // Return false to prevent WebView from trying to load this URL
+              
+              if (request.url.includes('mobile://success')) {
+                console.log("Success URL detected");
+                onWebViewNavigationStateChange({ url: request.url });
+                return false;
+              }
+              
               return false;
             }
+            
+            // Allow PayOS domains
+            if (request.url.includes('payos.vn') || 
+                request.url.includes('workhive.info.vn')) {
+              return true;
+            }
+            
             // Allow all other URLs to load
             return true;
           }}
           injectedJavaScript={`
             (function() {
+              // Log navigation events for debugging
+              console.log = function(message) {
+                window.ReactNativeWebView.postMessage(JSON.stringify({
+                  type: 'console_log',
+                  message: message
+                }));
+              };
+              
               // Intercept all link clicks to handle mobile:// schemes
               document.addEventListener('click', function(e) {
                 const anchor = e.target.closest('a');
-                if (anchor && anchor.href && anchor.href.startsWith('mobile://')) {
-                  e.preventDefault();
-                  window.ReactNativeWebView.postMessage(JSON.stringify({
-                    type: 'url_scheme',
-                    url: anchor.href
-                  }));
-                  return false;
+                if (anchor && anchor.href) {
+                  console.log('Link clicked: ' + anchor.href);
+                  if (anchor.href.startsWith('mobile://')) {
+                    e.preventDefault();
+                    window.ReactNativeWebView.postMessage(JSON.stringify({
+                      type: 'url_scheme',
+                      url: anchor.href
+                    }));
+                    return false;
+                  }
                 }
               }, true);
 
@@ -113,6 +175,7 @@ const PaymentWebViewModal = ({
               (function() {
                 const originalOpen = window.open;
                 window.open = function(url) {
+                  console.log('Window.open called with: ' + url);
                   if (url && url.startsWith('mobile://')) {
                     window.ReactNativeWebView.postMessage(JSON.stringify({
                       type: 'url_scheme',
@@ -120,17 +183,126 @@ const PaymentWebViewModal = ({
                     }));
                     return true;
                   }
+                  
+                  // Check for success or cancel URLs in regular navigation
+                  if (url && (url.includes('success=true') || url.includes('status=success'))) {
+                    window.ReactNativeWebView.postMessage(JSON.stringify({
+                      type: 'payment_success'
+                    }));
+                    return true;
+                  }
+                  
+                  if (url && (url.includes('cancel=true') || url.includes('status=cancel') || url.includes('status=failed'))) {
+                    window.ReactNativeWebView.postMessage(JSON.stringify({
+                      type: 'payment_cancel'
+                    }));
+                    return true;
+                  }
+                  
                   return originalOpen.apply(this, arguments);
                 };
               })();
+              
+              // Monitor PayOS payment form state
+              function monitorPayOSForm() {
+                // Check for PayOS payment form
+                const paymentForm = document.querySelector('.payos-payment-form');
+                if (paymentForm) {
+                  console.log('PayOS payment form detected');
+                  
+                  // Look for success or cancel messages
+                  const observer = new MutationObserver(function(mutations) {
+                    // Check for success message
+                    const successMessage = document.querySelector('.payment-success');
+                    if (successMessage) {
+                      window.ReactNativeWebView.postMessage(JSON.stringify({
+                        type: 'payment_success'
+                      }));
+                    }
+                    
+                    // Check for cancel/error message
+                    const errorMessage = document.querySelector('.payment-error');
+                    if (errorMessage) {
+                      window.ReactNativeWebView.postMessage(JSON.stringify({
+                        type: 'payment_cancel'
+                      }));
+                    }
+                  });
+                  
+                  observer.observe(document.body, { 
+                    childList: true, 
+                    subtree: true,
+                    attributes: true,
+                    characterData: true
+                  });
+                }
+              }
+              
+              // Run the monitor after the page loads
+              if (document.readyState === 'complete') {
+                monitorPayOSForm();
+              } else {
+                window.addEventListener('load', monitorPayOSForm);
+              }
+              
+              // Also periodically check for the form (it might be loaded dynamically)
+              setInterval(monitorPayOSForm, 1000);
             })();
           `}
           onMessage={(event) => {
             try {
               const data = JSON.parse(event.nativeEvent.data);
+              
+              if (data.type === 'console_log') {
+                console.log('WebView log:', data.message);
+                return;
+              }
+              
               if (data.type === 'url_scheme' && data.url) {
-                // Process the URL as a deep link
+                console.log('URL scheme detected:', data.url);
                 onWebViewNavigationStateChange({ url: data.url });
+                return;
+              }
+              
+              // Handle payment success
+              if (data.type === 'payment_success') {
+                console.log('Payment success detected');
+                onClose();
+                navigation.navigate("Tài khoản", {
+                  screen: "Wallet",
+                  params: { refresh: true }
+                });
+                return;
+              }
+              
+              // Handle payment cancel
+              if (data.type === 'payment_cancel') {
+                console.log('Payment cancel detected');
+                onClose();
+                navigation.dispatch(
+                  CommonActions.reset({
+                    index: 0,
+                    routes: [
+                      { 
+                        name: "Trang chủ",
+                        state: {
+                          routes: [
+                            { 
+                              name: "FailPage", 
+                              params: {
+                                source: 'wallet',
+                                customerWalletId,
+                                orderCode
+                              }
+                            }
+                          ],
+                          index: 0
+                        }
+                      }
+                    ],
+                  })
+                );
+                return;
               }
             } catch (error) {
               console.error('WebView message parse error:', error);

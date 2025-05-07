@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, ActivityIndicator, Alert, Linking } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text, ActivityIndicator, Alert, Linking, BackHandler } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -28,11 +28,23 @@ const WebViewScreen = ({ route }) => {
 
   // Navigate to the FailScreen correctly across different stacks
   const navigateToFailScreen = (params) => {
-    // Use CommonActions to reset and navigate to ensure it works across stacks
-    navigation.navigate("Trang chủ", { 
-      screen: "FailPage",
-      params: params // Pass the parameters
-    });
+    // Use CommonActions.navigate with reset to ensure clean stack
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [
+          { 
+            name: "Trang chủ",
+            state: {
+              routes: [
+                { name: "FailPage", params: params }
+              ],
+              index: 0
+            }
+          }
+        ],
+      })
+    );
   };
 
   // Handle deep link URLs (like mobile://cancel)
@@ -94,19 +106,16 @@ const WebViewScreen = ({ route }) => {
         `Bạn đã nạp thành công ${storedAmount} vào ví WorkHive`
       );
       
-      // Reset and navigate to the Wallet screen
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 1,
-          routes: [
-            { name: 'Tài khoản' }, // Navigate to the Profile tab first
-            { 
-              name: 'Wallet', // Then navigate to Wallet screen within the Profile stack
-              params: { refresh: true }  // Pass a parameter to trigger a wallet refresh
-            }
-          ],
-        })
-      );
+      // Navigate back to the main app with a "refresh" flag for the Wallet screen
+      navigation.navigate("Tài khoản", {
+        screen: "Wallet",
+        params: { refresh: true }
+      });
+      
+      // Clear stored data
+      await AsyncStorage.removeItem("customerWalletId");
+      await AsyncStorage.removeItem("orderCode");
+      await AsyncStorage.removeItem("amount");
     } catch (error) {
       console.error("Error handling deposit success:", error);
     }
@@ -168,6 +177,42 @@ const WebViewScreen = ({ route }) => {
     return unsubscribe;
   }, [source, navigation, url, customerWalletId, orderCode, navigateToFailScreen]);
 
+  // Handle Android back button
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (url.includes('checkout') || url.includes('payment')) {
+        Alert.alert(
+          'Xác nhận hủy',
+          'Bạn có chắc chắn muốn hủy giao dịch này?',
+          [
+            {
+              text: 'Không',
+              style: 'cancel',
+            },
+            {
+              text: 'Có',
+              onPress: () => {
+                if (source === 'wallet') {
+                  navigateToFailScreen({
+                    source: 'wallet',
+                    customerWalletId,
+                    orderCode
+                  });
+                } else {
+                  navigation.goBack();
+                }
+              },
+            },
+          ]
+        );
+        return true; // Prevent default back button behavior
+      }
+      return false;
+    });
+
+    return () => backHandler.remove();
+  }, [navigation, url, source, customerWalletId, orderCode]);
+
   // Listen for WebView state changes
   const handleNavigationStateChange = async (navState) => {
     const currentUrl = navState.url.toLowerCase();
@@ -188,12 +233,31 @@ const WebViewScreen = ({ route }) => {
       currentUrl.includes('result=success') ||
       currentUrl.includes('result=paid')
     ) {
+      // Try to extract parameters from URL if present
+      const urlParts = currentUrl.split('?');
+      let orderCode = null;
+      let bookingId = null;
+      let status = 'PAID';
+      
+      if (urlParts.length > 1) {
+        const urlParams = new URLSearchParams(urlParts[1]);
+        orderCode = urlParams.get('ordercode') || urlParams.get('orderCode');
+        bookingId = urlParams.get('bookingid') || urlParams.get('bookingId');
+        status = urlParams.get('status') || 'PAID';
+      }
+      
       if (source === 'wallet') {
+        // Mark deposit as successful and trigger success flow
         await AsyncStorage.setItem("depositSuccess", "true");
         await handleDepositSuccess();
       } else {
-        // For non-wallet transactions, we can use goBack
-        navigation.goBack();
+        // For non-wallet transactions, navigate to success page
+        navigation.navigate("SuccessPage", {
+          OrderCode: orderCode,
+          BookingId: bookingId,
+          status: status,
+          cancel: false,
+        });
       }
       return;
     }
@@ -245,6 +309,28 @@ const WebViewScreen = ({ route }) => {
             [{ text: 'OK', onPress: () => navigation.goBack() }]
           );
         }
+      }
+      
+      if (data.type === 'payment_success') {
+        if (source === 'wallet') {
+          handleDepositSuccess();
+        } else {
+          // For non-wallet transactions, navigate to success page
+          navigation.navigate("SuccessPage", {
+            OrderCode: data.orderCode || orderCode,
+            BookingId: data.bookingId,
+            status: data.status || 'PAID',
+            cancel: false,
+          });
+        }
+      }
+      
+      if (data.type === 'console_log') {
+        console.log('WebView:', data.message);
+      }
+      
+      if (data.type === 'url_scheme' && data.url) {
+        handleDeepLink({ url: data.url });
       }
     } catch (error) {
       console.error('WebView message parse error:', error);
@@ -330,6 +416,10 @@ const WebViewScreen = ({ route }) => {
         onLoadStart={() => setLoading(true)}
         onLoad={() => setLoading(false)}
         originWhitelist={['*', 'http://*', 'https://*', 'mobile://*']}
+        javaScriptEnabled={true}
+        domStorageEnabled={true}
+        startInLoadingState={true}
+        scalesPageToFit={true}
         onShouldStartLoadWithRequest={(request) => {
           // Log all URLs for debugging
           console.log("Request URL detected:", request.url);
@@ -361,13 +451,26 @@ const WebViewScreen = ({ route }) => {
               return false;
             }
             
-            // Handle success from mobile://success?... response
+            // ✅ Handle success from mobile://success?... response
             if (url.includes('mobile://success')) {
               console.log("mobile://success detected, navigating to success page");
+              
+              // Extract parameters from URL if present
+              const urlParams = new URLSearchParams(url.split('?')[1]);
+              const orderCode = urlParams.get('ordercode') || orderCode;
+              const status = urlParams.get('status') || 'PAID';
+              const bookingId = urlParams.get('bookingid');
+              
               if (source === 'wallet') {
                 handleDepositSuccess();
               } else {
-                navigation.goBack();
+                // For non-wallet payments, navigate to SuccessPage
+                navigation.navigate("SuccessPage", {
+                  OrderCode: orderCode,
+                  BookingId: bookingId,
+                  status: status,
+                  cancel: false,
+                });
               }
               return false;
             }
@@ -377,15 +480,39 @@ const WebViewScreen = ({ route }) => {
             // Return false to prevent WebView from trying to load this URL
             return false;
           }
+          
+          // Allow PayOS domains and your own domain
+          if (request.url.includes('payos.vn') || 
+              request.url.includes('zalopay.vn') || 
+              request.url.includes('workhive.info.vn')) {
+            return true;
+          }
+          
           // Allow all other URLs to load
           return true;
         }}
         injectedJavaScript={`
           (function() {
+            // Log console messages to React Native
+            console.originalLog = console.log;
+            console.log = function(message) {
+              console.originalLog(message);
+              window.ReactNativeWebView.postMessage(JSON.stringify({
+                type: 'console_log',
+                message: message
+              }));
+            };
+            
             function sendCancelMessage() {
               window.ReactNativeWebView.postMessage(JSON.stringify({
                 type: 'payment_cancel',
                 reason: 'User confirmed cancel'
+              }));
+            }
+            
+            function sendSuccessMessage() {
+              window.ReactNativeWebView.postMessage(JSON.stringify({
+                type: 'payment_success'
               }));
             }
         
@@ -438,6 +565,53 @@ const WebViewScreen = ({ route }) => {
                 return originalOpen.apply(this, arguments);
               };
             })();
+            
+            // Monitor PayOS payment form
+            function monitorPayOSElements() {
+              // Check for PayOS elements that indicate payment status
+              
+              // Look for success indicators
+              const successElements = document.querySelectorAll('.transaction-success, .payment-success, .success-status');
+              if (successElements.length > 0) {
+                console.log('Payment success elements detected');
+                sendSuccessMessage();
+                return;
+              }
+              
+              // Look for failure indicators
+              const failureElements = document.querySelectorAll('.transaction-failed, .payment-error, .error-status');
+              if (failureElements.length > 0) {
+                console.log('Payment failure elements detected');
+                sendCancelMessage();
+                return;
+              }
+            }
+            
+            // Set up observers to watch for PayOS elements
+            function setupPayOSObserver() {
+              const observer = new MutationObserver(function(mutations) {
+                monitorPayOSElements();
+              });
+              
+              observer.observe(document.body, {
+                childList: true,
+                subtree: true,
+                attributes: true
+              });
+              
+              // Check immediately in case elements are already present
+              monitorPayOSElements();
+            }
+            
+            // Run when DOM is loaded
+            if (document.readyState === 'loading') {
+              document.addEventListener('DOMContentLoaded', setupPayOSObserver);
+            } else {
+              setupPayOSObserver();
+            }
+            
+            // Also periodically check for changes
+            setInterval(monitorPayOSElements, 1000);
           })();
         `}
       />
@@ -448,7 +622,7 @@ const WebViewScreen = ({ route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#ffffff',
   },
   header: {
     flexDirection: 'row',
@@ -456,9 +630,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#fff',
+    backgroundColor: '#ffffff',
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333333',
   },
   backButton: {
     width: 40,
@@ -466,11 +645,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    backgroundColor: '#f0f0f0',
   },
   loadingContainer: {
     position: 'absolute',
@@ -480,11 +655,11 @@ const styles = StyleSheet.create({
     bottom: 0,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    zIndex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    zIndex: 9999,
   },
   loadingText: {
-    marginTop: 12,
+    marginTop: 16,
     fontSize: 16,
     color: '#666',
   },

@@ -80,6 +80,28 @@ const WalletScreen = () => {
       subscription.remove();
     };
   }, [handleDeepLink]);
+  
+  // Add navigation focus listener to clean up WebViewScreen from history when returning to Wallet
+  useEffect(() => {
+    // When the wallet screen gains focus, check if we came back from WebViewScreen
+    const unsubscribe = navigation.addListener('focus', () => {
+      const navigationState = navigation.getState();
+      const routes = navigationState.routes;
+      
+      // Check if WebViewScreen is in the navigation history
+      const hasWebViewScreen = routes.some(route => route.name === 'WebViewScreen');
+      
+      if (hasWebViewScreen) {
+        // Clean up the navigation stack by resetting to current route
+        navigation.reset({
+          index: 0,
+          routes: [{ name: routes[routes.length - 1].name }],
+        });
+      }
+    });
+    
+    return unsubscribe;
+  }, [navigation]);
 
   const handleDeepLink = useCallback(async (event) => {
     const { url } = event;
@@ -299,7 +321,7 @@ const WalletScreen = () => {
         amount: rawAmount.toString()  // Ensure amount is a string
       };
 
-      console.log("Sending request with payload:", JSON.stringify(requestPayload));
+      console.log("Sending deposit request with payload:", JSON.stringify(requestPayload));
 
       const response = await axios.post(
         `https://workhive.info.vn:8443/users/wallet/userdepositformobile`,
@@ -315,15 +337,37 @@ const WalletScreen = () => {
       console.log("API response received:", JSON.stringify(response.data));
 
       if (response.data && response.data.checkoutUrl) {
+        // Store data in AsyncStorage for access in WebView components
         await AsyncStorage.setItem("customerWalletId", String(response.data.customerWalletId || ""));
         await AsyncStorage.setItem("orderCode", String(response.data.orderCode || ""));
-        await AsyncStorage.setItem("amount", String(rawAmount));
+        await AsyncStorage.setItem("amount", formatCurrency(rawAmount));
         
         // Set the state values for direct use in this component
         setCustomerWalletId(response.data.customerWalletId);
         setOrderCode(response.data.orderCode);
-        setPaymentUrl(response.data.checkoutUrl);
-        setPaymentWebViewVisible(true);
+        
+        // Check if we're dealing with a PayOS embedded form URL
+        const isPayOSEmbedded = response.data.checkoutUrl.includes('payos.vn/v2/payment-form');
+        
+        if (isPayOSEmbedded) {
+          console.log("PayOS embedded form detected");
+          // Use the WebView modal for embedded form
+          setPaymentUrl(response.data.checkoutUrl);
+          setLoading(false);
+          setTimeout(() => {
+            setPaymentWebViewVisible(true);
+          }, 300);
+        } else {
+          // For other payment URLs, including redirect URLs
+          console.log("Regular payment URL detected");
+          // Navigate to the WebView screen for complete page rendering
+          navigation.navigate("WebViewScreen", {
+            url: response.data.checkoutUrl,
+            title: "Thanh toán",
+            source: "wallet",
+          });
+          setLoading(false);
+        }
       } else {
         throw new Error("Phản hồi không hợp lệ từ máy chủ");
       }
@@ -333,7 +377,6 @@ const WalletScreen = () => {
         "Lỗi",
         "Có lỗi xảy ra khi nạp tiền. Vui lòng thử lại sau."
       );
-    } finally {
       setLoading(false);
     }
   };

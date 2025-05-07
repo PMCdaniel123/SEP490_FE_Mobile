@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, memo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -16,13 +16,51 @@ import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import { AuthContext } from '../../contexts/AuthContext';
 
+const BankItem = memo(({ item, onSelect }) => (
+  <TouchableOpacity
+    style={styles.bankItem}
+    onPress={() => onSelect(item)}
+  >
+    <View style={styles.bankItemContent}>
+      {item.logo ? (
+        <Image
+          source={{ uri: item.logo }}
+          style={styles.bankLogo}
+          defaultSource={require('../../../assets/icon.png')}
+        />
+      ) : (
+        <View style={styles.bankLogoPlaceholder}>
+          <Text style={styles.bankLogoPlaceholderText}>
+            {item.shortName?.[0] || item.name[0]}
+          </Text>
+        </View>
+      )}
+      <View style={styles.bankTextContainer}>
+        <Text style={styles.bankName} numberOfLines={1} ellipsizeMode="tail">{item.name}</Text>
+        {item.code && (
+          <Text style={styles.bankCode}>({item.code})</Text>
+        )}
+      </View>
+    </View>
+  </TouchableOpacity>
+));
+
 const BankInfoForm = ({ onBankInfoUpdated, isEditMode, setIsEditMode }) => {
   const { userData, userToken } = useContext(AuthContext);
+  // Original bank info (view mode)
   const [bankInfo, setBankInfo] = useState({
     bankName: '',
     bankNumber: '',
     bankAccountName: ''
   });
+  
+  // Editable bank info (edit mode)
+  const [editableBankInfo, setEditableBankInfo] = useState({
+    bankName: '',
+    bankNumber: '',
+    bankAccountName: ''
+  });
+  
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [banks, setBanks] = useState([]);
@@ -45,7 +83,7 @@ const BankInfoForm = ({ onBankInfoUpdated, isEditMode, setIsEditMode }) => {
       const filtered = banks.filter(
         (bank) =>
           bank.name.toLowerCase().includes(searchTerm) ||
-          bank.shortName.toLowerCase().includes(searchTerm) ||
+          bank.shortName?.toLowerCase().includes(searchTerm) ||
           (bank.code && bank.code.toLowerCase().includes(searchTerm))
       );
       setFilteredBanks(filtered);
@@ -83,11 +121,14 @@ const BankInfoForm = ({ onBankInfoUpdated, isEditMode, setIsEditMode }) => {
       );
 
       if (response.data) {
-        setBankInfo({
+        const info = {
           bankName: response.data.bankName || '',
           bankNumber: response.data.bankNumber || '',
           bankAccountName: response.data.bankAccountName || ''
-        });
+        };
+        
+        setBankInfo(info);
+        setEditableBankInfo(info);
         
         // Find selected bank in banks list
         if (response.data.bankName && banks.length > 0) {
@@ -106,26 +147,37 @@ const BankInfoForm = ({ onBankInfoUpdated, isEditMode, setIsEditMode }) => {
   };
 
   const handleInputChange = (name, value) => {
-    if (name === 'bankAccountName') {
-      setBankInfo(prev => ({
-        ...prev,
-        [name]: value.toUpperCase()
-      }));
-    } else {
-      setBankInfo(prev => ({
-        ...prev,
-        [name]: value
-      }));
-    }
+    setEditableBankInfo(prev => ({
+      ...prev,
+      [name]: name === 'bankAccountName' ? value.toUpperCase() : value
+    }));
   };
 
   const handleBankSelect = (bank) => {
     setSelectedBank(bank);
-    setBankInfo(prev => ({
+    setEditableBankInfo(prev => ({
       ...prev,
       bankName: bank.name
     }));
     setShowBankSelector(false);
+  };
+
+  const enterEditMode = () => {
+    setEditableBankInfo({
+      bankName: bankInfo.bankName,
+      bankNumber: bankInfo.bankNumber,
+      bankAccountName: bankInfo.bankAccountName,
+    });
+    setIsEditMode(true);
+  };
+
+  const cancelEdit = () => {
+    setIsEditMode(false);
+    setEditableBankInfo({
+      bankName: bankInfo.bankName,
+      bankNumber: bankInfo.bankNumber,
+      bankAccountName: bankInfo.bankAccountName,
+    });
   };
 
   const handleSubmit = async () => {
@@ -135,7 +187,7 @@ const BankInfoForm = ({ onBankInfoUpdated, isEditMode, setIsEditMode }) => {
     }
 
     // Validation
-    if (!bankInfo.bankName || !bankInfo.bankNumber || !bankInfo.bankAccountName) {
+    if (!editableBankInfo.bankName || !editableBankInfo.bankNumber || !editableBankInfo.bankAccountName) {
       Alert.alert('Lỗi', 'Vui lòng nhập đầy đủ thông tin');
       return;
     }
@@ -146,9 +198,9 @@ const BankInfoForm = ({ onBankInfoUpdated, isEditMode, setIsEditMode }) => {
         'https://workhive.info.vn:8443/users/wallet/updatecustomerwalletinformation',
         {
           customerId: userData.sub,
-          bankName: bankInfo.bankName,
-          bankNumber: bankInfo.bankNumber,
-          bankAccountName: bankInfo.bankAccountName
+          bankName: editableBankInfo.bankName,
+          bankNumber: editableBankInfo.bankNumber,
+          bankAccountName: editableBankInfo.bankAccountName
         },
         {
           headers: {
@@ -160,9 +212,14 @@ const BankInfoForm = ({ onBankInfoUpdated, isEditMode, setIsEditMode }) => {
 
       if (response.status >= 200 && response.status < 300) {
         Alert.alert('Thành công', 'Cập nhật thông tin ngân hàng thành công');
+        setBankInfo({
+          bankName: editableBankInfo.bankName,
+          bankNumber: editableBankInfo.bankNumber,
+          bankAccountName: editableBankInfo.bankAccountName,
+        });
         setIsEditMode(false);
         if (onBankInfoUpdated) {
-          onBankInfoUpdated(bankInfo);
+          onBankInfoUpdated(editableBankInfo);
         }
       } else {
         throw new Error('Failed to update bank information');
@@ -175,36 +232,9 @@ const BankInfoForm = ({ onBankInfoUpdated, isEditMode, setIsEditMode }) => {
     }
   };
 
-  const renderBankItem = ({ item }) => {
-    return (
-      <TouchableOpacity
-        style={styles.bankItem}
-        onPress={() => handleBankSelect(item)}
-      >
-        <View style={styles.bankItemContent}>
-          {item.logo ? (
-            <Image
-              source={{ uri: item.logo }}
-              style={styles.bankLogo}
-              defaultSource={require('../../../assets/icon.png')}
-            />
-          ) : (
-            <View style={styles.bankLogoPlaceholder}>
-              <Text style={styles.bankLogoPlaceholderText}>
-                {item.shortName?.charAt(0) || item.name.charAt(0)}
-              </Text>
-            </View>
-          )}
-          <View style={styles.bankTextContainer}>
-            <Text style={styles.bankName}>{item.name}</Text>
-            {item.code && (
-              <Text style={styles.bankCode}>({item.code})</Text>
-            )}
-          </View>
-        </View>
-      </TouchableOpacity>
-    );
-  };
+  const renderBankItem = useCallback(({ item }) => (
+    <BankItem item={item} onSelect={handleBankSelect} />
+  ), [handleBankSelect]);
 
   if (loading) {
     return (
@@ -226,7 +256,7 @@ const BankInfoForm = ({ onBankInfoUpdated, isEditMode, setIsEditMode }) => {
           <View style={styles.header}>
             <Text style={styles.title}>Thông tin ngân hàng</Text>
             <TouchableOpacity 
-              onPress={() => setIsEditMode(true)}
+              onPress={enterEditMode}
               style={styles.editButton}
             >
               <Text style={styles.editButtonText}>Chỉnh sửa</Text>
@@ -324,7 +354,7 @@ const BankInfoForm = ({ onBankInfoUpdated, isEditMode, setIsEditMode }) => {
           <TextInput
             style={styles.input}
             placeholder="Nhập số tài khoản"
-            value={bankInfo.bankNumber}
+            value={editableBankInfo.bankNumber}
             onChangeText={(text) => handleInputChange('bankNumber', text)}
             keyboardType="numeric"
           />
@@ -335,7 +365,7 @@ const BankInfoForm = ({ onBankInfoUpdated, isEditMode, setIsEditMode }) => {
           <TextInput
             style={styles.input}
             placeholder="Nhập tên chủ tài khoản"
-            value={bankInfo.bankAccountName}
+            value={editableBankInfo.bankAccountName}
             onChangeText={(text) => handleInputChange('bankAccountName', text)}
             autoCapitalize="characters"
           />
@@ -344,10 +374,7 @@ const BankInfoForm = ({ onBankInfoUpdated, isEditMode, setIsEditMode }) => {
         <View style={styles.buttonContainer}>
           <TouchableOpacity 
             style={styles.cancelButton} 
-            onPress={() => {
-              setIsEditMode(false);
-              fetchBankInfo();
-            }}
+            onPress={cancelEdit}
             disabled={saving}
           >
             <Text style={styles.cancelButtonText}>Hủy</Text>

@@ -35,6 +35,7 @@ import FeedbackScreen from "./src/screens/FeedbackScreen";
 import AllHighRatedSpaces from "./src/screens/AllHighRatedSpaces";
 import AllOwners from "./src/screens/AllOwners";
 import OwnerDetail from "./src/screens/OwnerDetail";
+import WebViewScreen from "./src/screens/WebViewScreen";
 
 import * as Linking from "expo-linking";
 import SuccessScreen from "./src/screens/SuccessScreen";
@@ -84,6 +85,7 @@ const ProfileStack = () => (
     <Stack.Screen name="Terms" component={Terms} />
     <Stack.Screen name="AllFeedBackScreen" component={AllFeedBackScreen} />
     <Stack.Screen name="Notification" component={NotificationScreen} />
+    <Stack.Screen name="WebViewScreen" component={WebViewScreen} />
   </Stack.Navigator>
 );
 
@@ -101,6 +103,7 @@ const HomeStack = () => (
     <Stack.Screen name="SuccessPage" component={SuccessScreen} />
     <Stack.Screen name="FailPage" component={FailScreen} />
     <Stack.Screen name="OwnerDetail" component={OwnerDetail} />
+    <Stack.Screen name="WebViewScreen" component={WebViewScreen} />
   </Stack.Navigator>
 );
 
@@ -111,6 +114,7 @@ const SearchStack = () => (
     <Stack.Screen name="AllReview" component={AllReview} />
     <Stack.Screen name="Checkout" component={Checkout} />
     <Stack.Screen name="OwnerDetail" component={OwnerDetail} />
+    <Stack.Screen name="WebViewScreen" component={WebViewScreen} />
   </Stack.Navigator>
 );
 
@@ -123,6 +127,7 @@ const BookingStack = () => (
     <Stack.Screen name="Checkout" component={Checkout} />
     <Stack.Screen name="FeedbackScreen" component={FeedbackScreen} />
     <Stack.Screen name="OwnerDetail" component={OwnerDetail} />
+    <Stack.Screen name="WebViewScreen" component={WebViewScreen} />
   </Stack.Navigator>
 );
 
@@ -136,9 +141,9 @@ const AuthScreens = () => (
 
 const getScreensWithHiddenTabBar = () => [
   // Home Stack
-  "WorkspaceDetail", "AllReview", "Notification", "WorkSpaces", "Checkout", "SuccessPage", "FailPage", "AllHighRatedSpaces", "AllOwners",
+  "WorkspaceDetail", "AllReview", "Notification", "WorkSpaces", "Checkout", "SuccessPage", "FailPage", "AllHighRatedSpaces", "AllOwners", "WebViewScreen",
   // Search Stack
-  "WorkspaceDetail", "AllReview", "Checkout", "OwnerDetail",
+  "WorkspaceDetail", "AllReview", "Checkout", "OwnerDetail", "WebViewScreen",
   // Booking Stack
   "BookingDetail", "ReviewScreen", "WorkspaceDetail", "Checkout", "FeedbackScreen",
   // Profile Stack
@@ -230,6 +235,14 @@ const TabNavigator = () => {
             <Icon name="user" size={focused ? 24 : 22} color={color} />
           ),
         }}
+        listeners={({ navigation }) => ({
+          tabPress: e => {
+            e.preventDefault();
+              navigation.navigate('Tài khoản', {
+              screen: 'ProfileMain'
+            });
+          },
+        })}
       />
     </Tab.Navigator>
   );

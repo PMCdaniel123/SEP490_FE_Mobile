@@ -54,8 +54,8 @@ const ReviewScreen = ({ route }) => {
             tabBarStyle: {
               elevation: 5,
               backgroundColor: "#ffffff",
-              height: Platform.OS === "ios" ? 60 + insets.bottom : 65,
-              paddingBottom: Platform.OS === "ios" ? insets.bottom : 0,
+              height: 60 + insets.bottom,
+              paddingBottom: insets.bottom,
               display: "flex",
               borderTopWidth: 1,
               borderTopColor: "#f0f0f0",

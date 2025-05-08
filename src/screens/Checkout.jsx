@@ -473,9 +473,7 @@ function Checkout() {
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() =>
-              navigation.navigate("WorkspaceDetail", { id: workspaceId })
-            }
+            onPress={() => navigation.goBack()}
           >
             <Ionicons name="arrow-back" size={20} color="white" />
           </TouchableOpacity>

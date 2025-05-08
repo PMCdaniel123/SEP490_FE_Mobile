@@ -111,7 +111,7 @@ const WorkspaceDetail = ({ route }) => {
         const formattedReviews = response.data?.ratingByWorkspaceIdDTOs || [];
         setReviews(formattedReviews);
       } catch (error) {
-        alert("Error fetching reviews:", error);
+
       } finally {
         setLoading(false);
       }

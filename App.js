@@ -115,6 +115,9 @@ const SearchStack = () => (
     <Stack.Screen name="Checkout" component={Checkout} />
     <Stack.Screen name="OwnerDetail" component={OwnerDetail} />
     <Stack.Screen name="WebViewScreen" component={WebViewScreen} />
+    <Stack.Screen name="SuccessPage" component={SuccessScreen} />
+    <Stack.Screen name="FailPage" component={FailScreen} />
+    <Stack.Screen name="HomeMain" component={Home} />
   </Stack.Navigator>
 );
 
@@ -128,6 +131,7 @@ const BookingStack = () => (
     <Stack.Screen name="FeedbackScreen" component={FeedbackScreen} />
     <Stack.Screen name="OwnerDetail" component={OwnerDetail} />
     <Stack.Screen name="WebViewScreen" component={WebViewScreen} />
+    <Stack.Screen name="HomeMain" component={Home} />
   </Stack.Navigator>
 );
 
@@ -174,8 +178,8 @@ const TabNavigator = () => {
           tabBarStyle: {
             elevation: 5,
             backgroundColor: "#ffffff",
-            height: Platform.OS === "ios" ? 60 + insets.bottom : 65,
-            paddingBottom: Platform.OS === "ios" ? insets.bottom : 0,
+            height: 60 + insets.bottom,
+            paddingBottom: insets.bottom,
             ...styles.shadow,
             display: isHidden ? "none" : "flex",
             borderTopWidth: 1,

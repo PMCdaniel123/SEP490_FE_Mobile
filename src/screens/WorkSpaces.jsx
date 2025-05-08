@@ -223,6 +223,7 @@ const WorkSpaces = ({ navigation }) => {
   const renderHeader = () => (
     <View style={styles.header}>
       <View style={styles.headerTitleRow}>
+     
         <View>
           <Text style={styles.headerTitle}>Không gian làm việc</Text>
           <Text style={styles.headerSubtitle}>
@@ -254,6 +255,17 @@ const WorkSpaces = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+
+      <View style={styles.navigationHeader}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Icon name="arrow-back" size={24} color="#333" />
+        </TouchableOpacity>
+        <Text style={styles.navTitle}>Không gian làm việc</Text>
+        <View style={{ width: 40 }} />
+      </View>
 
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
@@ -539,6 +551,29 @@ const styles = StyleSheet.create({
   activeFilterText: {
     color: "#fff",
     fontWeight: "500",
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f0f0f0",
+  },
+  navigationHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  navTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
   },
 });
 

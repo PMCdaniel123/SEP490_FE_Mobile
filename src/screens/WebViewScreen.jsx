@@ -101,16 +101,38 @@ const WebViewScreen = ({ route }) => {
     try {
       // Load customerWalletId and orderCode from AsyncStorage
       const storedAmount = await AsyncStorage.getItem("amount");
-      Alert.alert(
-        "Nạp tiền thành công",
-        `Bạn đã nạp thành công ${storedAmount} vào ví WorkHive`
+      
+      // Navigate to ProfileMain first, then to Wallet
+      // This ensures proper tab navigation later
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [
+            { 
+              name: 'Tài khoản',
+              params: { 
+                screen: 'ProfileMain'
+              }
+            }
+          ],
+        })
       );
       
-      // Navigate back to the main app with a "refresh" flag for the Wallet screen
-      navigation.navigate("Tài khoản", {
-        screen: "Wallet",
-        params: { refresh: true }
-      });
+      // After a short delay, navigate to the wallet screen
+      setTimeout(() => {
+        navigation.navigate('Tài khoản', {
+          screen: 'Wallet',
+          params: { refresh: true }
+        });
+        
+        // Show success alert after navigation
+        setTimeout(() => {
+          Alert.alert(
+            "Nạp tiền thành công",
+            `Bạn đã nạp thành công ${storedAmount} vào ví WorkHive`
+          );
+        }, 300);
+      }, 100);
       
       // Clear stored data
       await AsyncStorage.removeItem("customerWalletId");

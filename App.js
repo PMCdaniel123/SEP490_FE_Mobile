@@ -122,6 +122,8 @@ const HomeStack = () => (
     <Stack.Screen name="FailPage" component={FailScreen} />
     <Stack.Screen name="OwnerDetail" component={OwnerDetail} />
     <Stack.Screen name="WebViewScreen" component={WebViewScreen} />
+    <Stack.Screen name="ProfileMain" component={ProfileScreen} />
+    <Stack.Screen name="ProfileDetail" component={ProfileDetail} />
   </Stack.Navigator>
 );
 
@@ -161,9 +163,7 @@ const AuthScreens = () => (
   </AuthStack.Navigator>
 );
 
-// Helper function to determine if tab bar should be hidden for a given screen
 const getScreensWithHiddenTabBar = () => [
-  // Common screens across stacks that should hide tab bar
   "WorkspaceDetail", "AllReview", "Notification", "WorkSpaces", "Checkout", 
   "SuccessPage", "FailPage", "AllHighRatedSpaces", "AllOwners", "WebViewScreen",
   "BookingDetail", "ReviewScreen", "FeedbackScreen", "OwnerDetail",
@@ -177,10 +177,8 @@ const TabNavigator = () => {
   return (
     <Tab.Navigator
       screenOptions={({ route, navigation }) => {
-        // Get the current navigation state
         const state = navigation.getState();
         
-        // Check if there's an active route
         if (state.routes.length === 0 || state.index < 0) {
           return {};
         }
@@ -238,7 +236,6 @@ const TabNavigator = () => {
         }}
         listeners={({ navigation }) => ({
           tabPress: e => {
-            // Reset to main screen when tab is pressed
             navigation.navigate('Trang chủ', {
               screen: 'HomeMain'
             });
@@ -255,7 +252,6 @@ const TabNavigator = () => {
         }}
         listeners={({ navigation }) => ({
           tabPress: e => {
-            // Reset to main screen when tab is pressed
             navigation.navigate('Đặt chỗ', {
               screen: 'YourBooking'
             });
@@ -272,7 +268,6 @@ const TabNavigator = () => {
         }}
         listeners={({ navigation }) => ({
           tabPress: e => {
-            // Reset to main screen when tab is pressed
             navigation.navigate('Tìm kiếm', {
               screen: 'SearchMain'
             });

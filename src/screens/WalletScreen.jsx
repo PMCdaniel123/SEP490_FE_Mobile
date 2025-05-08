@@ -15,7 +15,6 @@ import { AuthContext } from '../contexts/AuthContext';
 import * as Linking from 'expo-linking';
 import { Ionicons } from "@expo/vector-icons";
 
-// Import wallet components
 import {
   WalletHeader,
   BalanceCard,
@@ -51,7 +50,6 @@ const WalletScreen = () => {
 
   const predefinedAmounts = [100000, 200000, 500000, 1000000];
 
-  // Refresh wallet when coming back to this screen with a refresh param
   useEffect(() => {
     if (route.params?.refresh) {
       const refreshData = async () => {
@@ -73,7 +71,6 @@ const WalletScreen = () => {
     loadData();
   }, [userData, userToken]);
 
-  // Handle deep links for payment callbacks
   useEffect(() => {
     const subscription = Linking.addEventListener('url', handleDeepLink);
     return () => {
@@ -81,18 +78,14 @@ const WalletScreen = () => {
     };
   }, [handleDeepLink]);
   
-  // Add navigation focus listener to clean up WebViewScreen from history when returning to Wallet
   useEffect(() => {
-    // When the wallet screen gains focus, check if we came back from WebViewScreen
     const unsubscribe = navigation.addListener('focus', () => {
       const navigationState = navigation.getState();
       const routes = navigationState.routes;
       
-      // Check if WebViewScreen is in the navigation history
       const hasWebViewScreen = routes.some(route => route.name === 'WebViewScreen');
       
       if (hasWebViewScreen) {
-        // Clean up the navigation stack by resetting to current route
         navigation.reset({
           index: 0,
           routes: [{ name: routes[routes.length - 1].name }],
@@ -118,14 +111,31 @@ const WalletScreen = () => {
         const storedAmount = await AsyncStorage.getItem("amount");
         setPaymentWebViewVisible(false);
         
-        Alert.alert(
-          "Nạp tiền thành công",
-          `Bạn đã nạp thành công ${storedAmount} vào ví WorkHive`,
-          [{ text: "OK", onPress: () => {
-            fetchBalance();
-            fetchTransactions();
-          }}]
-        );
+        navigation.reset({
+          index: 0,
+          routes: [{ 
+            name: 'Tài khoản',
+            params: { screen: 'ProfileMain' }
+          }]
+        });
+        
+        setTimeout(() => {
+          navigation.navigate('Tài khoản', {
+            screen: 'Wallet',
+            params: { refresh: true }
+          });
+          
+          setTimeout(() => {
+            Alert.alert(
+              "Nạp tiền thành công",
+              `Bạn đã nạp thành công ${storedAmount} vào ví WorkHive`,
+              [{ text: "OK", onPress: () => {
+                fetchBalance();
+                fetchTransactions();
+              }}]
+            );
+          }, 300);
+        }, 100);
         
         await AsyncStorage.removeItem("customerWalletId");
         await AsyncStorage.removeItem("orderCode");
@@ -135,24 +145,29 @@ const WalletScreen = () => {
       }
     }
     
-    // Cancel/Failure case
     if (lowerUrl.includes('mobile://cancel') || 
         lowerUrl.includes('status=cancel') || 
         lowerUrl.includes('cancel=true')) {
       
       setPaymentWebViewVisible(false);
       
-      // Navigate to fail screen with wallet parameters
-      navigation.navigate("Trang chủ", {
-        screen: "FailPage",
-        params: {
+      navigation.reset({
+        index: 0,
+        routes: [{ 
+          name: 'Tài khoản',
+          params: { screen: 'ProfileMain' }
+        }]
+      });
+      
+      setTimeout(() => {
+        navigation.navigate("FailPage", {
           source: 'wallet',
           customerWalletId,
           orderCode
-        }
-      });
+        });
+      }, 100);
     }
-  }, [navigation, customerWalletId, orderCode]);
+  }, [navigation, customerWalletId, orderCode, fetchBalance, fetchTransactions]);
 
   const fetchBalance = useCallback(async () => {
     if (!userData || !userData.sub) {

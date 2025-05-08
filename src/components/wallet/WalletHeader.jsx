@@ -1,16 +1,28 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, CommonActions } from '@react-navigation/native';
 
 const WalletHeader = ({ title }) => {
   const navigation = useNavigation();
+  
+  const handleBack = () => {
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ 
+          name: 'Tài khoản',
+          params: { screen: 'ProfileMain' }
+        }],
+      })
+    );
+  };
   
   return (
     <View style={styles.header}>
       <TouchableOpacity
         style={styles.backButton}
-        onPress={() => navigation.goBack()}
+        onPress={handleBack}
       >
         <Icon name="arrow-back" size={24} color="#000" />
       </TouchableOpacity>

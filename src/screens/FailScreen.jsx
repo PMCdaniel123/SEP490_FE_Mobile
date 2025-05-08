@@ -12,19 +12,19 @@ const FailScreen = () => {
   
   console.log("FailScreen received params:", JSON.stringify(route.params));
 
-  // Check if this is a wallet-related failure or a booking failure
   const isWalletFailure = source === 'wallet' || (route.params && !BookingId && customerWalletId);
 
   const handleGoHome = () => {
-    navigation.navigate("HomeMain");
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Trang chủ', params: { screen: 'HomeMain' } }],
+    });
   };
 
   useEffect(() => {
     const handleFailure = async () => {
       if (isWalletFailure) {
-        // Handle wallet deposit failure
         try {
-          // Clear any stored wallet transaction data
           await AsyncStorage.removeItem("customerWalletId");
           await AsyncStorage.removeItem("orderCode");
           await AsyncStorage.removeItem("amount");
@@ -32,7 +32,6 @@ const FailScreen = () => {
           console.error("Error clearing wallet transaction data:", error);
         }
       } else if (OrderCode !== null && BookingId !== null) {
-        // Handle booking failure
         try {
           await axios.put(
             `https://workhive.info.vn:8443/users/booking/updatetimestatus`,

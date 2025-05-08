@@ -287,9 +287,9 @@ const WorkSpaces = ({ navigation }) => {
             </TouchableOpacity>
           )}
         </View>
-        <TouchableOpacity style={styles.filterButton}>
+        {/* <TouchableOpacity style={styles.filterButton}>
           <Icon name="filter-list" size={24} color="#835101" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       {loading && !refreshing ? (

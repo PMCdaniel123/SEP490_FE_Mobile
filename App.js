@@ -42,13 +42,12 @@ import SuccessScreen from "./src/screens/SuccessScreen";
 import FailScreen from "./src/screens/FailScreen";
 import NearbyWorkspace from "./src/screens/NearbyWorkspace";
 
-// Set up deep linking configuration
 const prefix = Linking.createURL("/");
 const linking = {
   prefixes: [prefix, "mobile://", "https://workhive.com"],
   config: {
     screens: {
-      HomeStack: {
+      "Trang chủ": {
         screens: {
           SuccessPage: {
             path: "success",
@@ -66,6 +65,25 @@ const linking = {
               status: (status) => status,
             },
           },
+          WorkspaceDetail: "workspace/:id",
+          WebViewScreen: "webview",
+        },
+      },
+      "Đặt chỗ": {
+        screens: {
+          YourBooking: "bookings",
+          BookingDetail: "booking/:id",
+        },
+      },
+      "Tìm kiếm": {
+        screens: {
+          SearchMain: "search",
+        },
+      },
+      "Tài khoản": {
+        screens: {
+          ProfileMain: "profile",
+          Wallet: "wallet",
         },
       },
     },
@@ -143,15 +161,14 @@ const AuthScreens = () => (
   </AuthStack.Navigator>
 );
 
+// Helper function to determine if tab bar should be hidden for a given screen
 const getScreensWithHiddenTabBar = () => [
-  // Home Stack
-  "WorkspaceDetail", "AllReview", "Notification", "WorkSpaces", "Checkout", "SuccessPage", "FailPage", "AllHighRatedSpaces", "AllOwners", "WebViewScreen",
-  // Search Stack
-  "WorkspaceDetail", "AllReview", "Checkout", "OwnerDetail", "WebViewScreen",
-  // Booking Stack
-  "BookingDetail", "ReviewScreen", "WorkspaceDetail", "Checkout", "FeedbackScreen",
-  // Profile Stack
-  "ProfileDetail", "YourReview", "Wallet", "Terms", "AllFeedBackScreen", "Notification",
+  // Common screens across stacks that should hide tab bar
+  "WorkspaceDetail", "AllReview", "Notification", "WorkSpaces", "Checkout", 
+  "SuccessPage", "FailPage", "AllHighRatedSpaces", "AllOwners", "WebViewScreen",
+  "BookingDetail", "ReviewScreen", "FeedbackScreen", "OwnerDetail",
+  "ProfileDetail", "YourReview", "Wallet", "Terms", "AllFeedBackScreen",
+  "NearbyWorkspace"
 ];
 
 const TabNavigator = () => {
@@ -160,13 +177,20 @@ const TabNavigator = () => {
   return (
     <Tab.Navigator
       screenOptions={({ route, navigation }) => {
+        // Get the current navigation state
         const state = navigation.getState();
+        
+        // Check if there's an active route
+        if (state.routes.length === 0 || state.index < 0) {
+          return {};
+        }
+        
         const currentTab = state.routes[state.index];
         const currentStack = currentTab.state;
         
         // Get the current screen name in the active stack
         let currentScreenName = "";
-        if (currentStack) {
+        if (currentStack && currentStack.routes && currentStack.index >= 0) {
           const stackIndex = currentStack.index;
           const currentStackRoute = currentStack.routes[stackIndex];
           currentScreenName = currentStackRoute.name;
@@ -212,6 +236,14 @@ const TabNavigator = () => {
           ),
           tabBarBadge: null,
         }}
+        listeners={({ navigation }) => ({
+          tabPress: e => {
+            // Reset to main screen when tab is pressed
+            navigation.navigate('Trang chủ', {
+              screen: 'HomeMain'
+            });
+          },
+        })}
       />
       <Tab.Screen
         name="Đặt chỗ"
@@ -221,6 +253,14 @@ const TabNavigator = () => {
             <Icon name="calendar" size={focused ? 24 : 22} color={color} />
           ),
         }}
+        listeners={({ navigation }) => ({
+          tabPress: e => {
+            // Reset to main screen when tab is pressed
+            navigation.navigate('Đặt chỗ', {
+              screen: 'YourBooking'
+            });
+          },
+        })}
       />
       <Tab.Screen
         name="Tìm kiếm"
@@ -230,6 +270,14 @@ const TabNavigator = () => {
             <Icon name="search" size={focused ? 24 : 22} color={color} />
           ),
         }}
+        listeners={({ navigation }) => ({
+          tabPress: e => {
+            // Reset to main screen when tab is pressed
+            navigation.navigate('Tìm kiếm', {
+              screen: 'SearchMain'
+            });
+          },
+        })}
       />
       <Tab.Screen
         name="Tài khoản"
@@ -241,8 +289,8 @@ const TabNavigator = () => {
         }}
         listeners={({ navigation }) => ({
           tabPress: e => {
-            e.preventDefault();
-              navigation.navigate('Tài khoản', {
+            // Reset to main screen when tab is pressed
+            navigation.navigate('Tài khoản', {
               screen: 'ProfileMain'
             });
           },

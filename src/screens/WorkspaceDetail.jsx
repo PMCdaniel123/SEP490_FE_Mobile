@@ -91,7 +91,7 @@ const WorkspaceDetail = ({ route }) => {
         });
         dispatch({ type: "CALCULATE_TOTAL" });
       } catch (error) {
-        alert("Error fetching workspace details:", error);
+        console.error("Error fetching workspace details:", error);
       } finally {
         setLoading(false);
       }
@@ -111,7 +111,7 @@ const WorkspaceDetail = ({ route }) => {
         const formattedReviews = response.data?.ratingByWorkspaceIdDTOs || [];
         setReviews(formattedReviews);
       } catch (error) {
-
+        console.error("Error fetching reviews:", error);
       } finally {
         setLoading(false);
       }
